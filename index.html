@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NexusAI</title>
+<title>Laud</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 :root {
@@ -100,8 +100,6 @@ tr:hover td { background: var(--bg-hover); }
 .credit-card-option { background: var(--bg-input); border: 2px solid var(--border-color); border-radius: 0.75rem; padding: 1rem; cursor: pointer; transition: all 0.2s; }
 .credit-card-option:hover { border-color: rgba(124,58,237,0.4); }
 .credit-card-option.selected { border-color: #7c3aed; background: rgba(124,58,237,0.1); }
-
-/* FIXED MODAL SYSTEM */
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -263,15 +261,14 @@ const faqs = [
 ];
 
 const docs = [
-  { title: 'Getting Started', desc: 'Learn the basics of NexusAI', icon: I.sparkle },
+  { title: 'Getting Started', desc: 'Learn the basics of Laud', icon: I.sparkle },
   { title: 'Chat Guide', desc: 'Tips for better AI conversations', icon: I.chat },
   { title: 'Coder Documentation', desc: 'Master the AI coding assistant', icon: I.code },
-  { title: 'API Reference', desc: 'Integrate NexusAI into your apps', icon: I.database },
+  { title: 'API Reference', desc: 'Integrate Laud into your apps', icon: I.database },
   { title: 'Billing & Plans', desc: 'Manage subscriptions and payments', icon: I.credit },
   { title: 'Privacy & Security', desc: 'How we protect your data', icon: I.shieldCheck }
 ];
 
-// ============ MODAL RENDERING (FIXED) ============
 function renderModal(content) {
   return `<div class="modal-overlay" id="active-modal"><div class="modal-box">${content}</div></div>`;
 }
@@ -298,7 +295,6 @@ function render() {
   else if (state.currentView === 'admin-dashboard') html += renderAdminDashboard();
   else if (state.currentView === 'admin-chat') html += renderAdminChat();
   
-  // Append modals INSIDE the main app container
   if (state.showAuthModal) html += renderAuthModal();
   if (state.showUpgradeModal) html += renderUpgradeModal();
   if (state.showDeleteModal) html += renderDeleteModal();
@@ -312,7 +308,6 @@ function render() {
   attachEventListeners();
 }
 
-// Close modal helper - closes ANY open modal
 function closeModal() {
   state.showAuthModal = null;
   state.showUpgradeModal = null;
@@ -334,7 +329,7 @@ function renderNavbar() {
       <div style="display:flex;align-items:center;justify-content:space-between;height:4rem">
         <div style="display:flex;align-items:center;gap:0.75rem;cursor:pointer" onclick="navigateTo('${isAdmin ? 'admin-dashboard' : (isSignedIn ? 'user-chat' : 'landing')}')">
           <div style="width:2rem;height:2rem;border-radius:0.5rem;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;color:white">${I.brain}</div>
-          <span style="font-size:1.125rem;font-weight:bold" class="gradient-text">NexusAI</span>
+          <span style="font-size:1.125rem;font-weight:bold" class="gradient-text">Laud</span>
         </div>
         <div style="display:flex;align-items:center;gap:1rem">
           <button onclick="toggleTheme()" style="padding:0.5rem;border-radius:0.5rem;background:transparent;border:none;cursor:pointer;color:var(--text-secondary)" title="Toggle theme">${state.theme === 'dark' ? I.sun : I.moon}</button>
@@ -388,7 +383,7 @@ function renderLanding() {
     
     <section style="padding:4rem 1rem;border-top:1px solid var(--border-color)">
       <div style="max-width:64rem;margin:0 auto">
-        <h2 style="font-size:2rem;font-weight:bold;margin-bottom:2rem;text-align:center;color:var(--text-primary)">Why NexusAI?</h2>
+        <h2 style="font-size:2rem;font-weight:bold;margin-bottom:2rem;text-align:center;color:var(--text-primary)">Why Laud?</h2>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.5rem">
           <div class="card" style="padding:1.5rem">
             <div style="width:2.5rem;height:2.5rem;border-radius:0.5rem;background:rgba(124,58,237,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;color:#a78bfa">${I.sparkle}</div>
@@ -431,9 +426,9 @@ function renderLanding() {
       <div style="max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
         <div style="display:flex;align-items:center;gap:0.5rem">
           <div style="width:1.5rem;height:1.5rem;border-radius:0.375rem;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;color:white">${I.brain}</div>
-          <span style="font-weight:bold" class="gradient-text">NexusAI</span>
+          <span style="font-weight:bold" class="gradient-text">Laud</span>
         </div>
-        <p style="font-size:0.875rem;color:var(--text-subtle)">© 2026 NexusAI</p>
+        <p style="font-size:0.875rem;color:var(--text-subtle)">© 2026 Laud</p>
       </div>
     </footer>
   </main>`;
@@ -446,7 +441,7 @@ function renderAuthModal() {
     <div style="text-align:center;margin-bottom:1.5rem">
       <div style="width:3rem;height:3rem;border-radius:0.75rem;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;color:white;margin:0 auto 1rem">${I.brain}</div>
       <h2 style="font-size:1.375rem;font-weight:bold;color:var(--text-primary);margin-bottom:0.25rem">${isSignup ? 'Create your account' : 'Welcome back'}</h2>
-      <p style="font-size:0.875rem;color:var(--text-secondary)">${isSignup ? 'Start chatting with AI in seconds' : 'Sign in to continue to NexusAI'}</p>
+      <p style="font-size:0.875rem;color:var(--text-secondary)">${isSignup ? 'Start chatting with AI in seconds' : 'Sign in to continue to Laud'}</p>
     </div>
     
     <button onclick="signInWithGoogle()" class="btn-google" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;justify-content:center">
@@ -614,7 +609,7 @@ function renderRechargeSection() {
 }
 
 function renderApiDocs() {
-  return `<main style="padding-top:4rem;height:100vh;display:flex">${renderUserSidebar()}<div style="flex:1;overflow-y:auto"><div style="padding:1.5rem;max-width:56rem"><div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem"><div style="width:2.5rem;height:2.5rem;border-radius:0.5rem;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;color:white">${I.book}</div><div><h2 style="font-size:1.5rem;font-weight:bold;color:var(--text-primary)">API Documentation</h2><p style="color:var(--text-secondary);font-size:0.875rem">Integrate NexusAI into your apps</p></div></div><div class="card" style="padding:1.5rem;margin-bottom:1.5rem"><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:0.75rem">Base URL</h3><div class="code-block">https://api.nexusai.com/v1</div><p style="font-size:0.875rem;color:var(--text-secondary)">All API requests must include your API key in the Authorization header.</p><div class="code-block" style="margin-top:0.75rem">Authorization: Bearer nx_live_your_api_key_here</div></div><div class="card" style="padding:1.5rem;margin-bottom:1.5rem"><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:1rem">Authentication</h3><p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem">All endpoints require a valid API key. Keys can be created and managed from the API Keys page.</p><div class="code-block">curl -X POST https://api.nexusai.com/v1/chat/completions \\
+  return `<main style="padding-top:4rem;height:100vh;display:flex">${renderUserSidebar()}<div style="flex:1;overflow-y:auto"><div style="padding:1.5rem;max-width:56rem"><div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem"><div style="width:2.5rem;height:2.5rem;border-radius:0.5rem;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;color:white">${I.book}</div><div><h2 style="font-size:1.5rem;font-weight:bold;color:var(--text-primary)">API Documentation</h2><p style="color:var(--text-secondary);font-size:0.875rem">Integrate Laud into your apps</p></div></div><div class="card" style="padding:1.5rem;margin-bottom:1.5rem"><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:0.75rem">Base URL</h3><div class="code-block">https://api.laud.com/v1</div><p style="font-size:0.875rem;color:var(--text-secondary)">All API requests must include your API key in the Authorization header.</p><div class="code-block" style="margin-top:0.75rem">Authorization: Bearer nx_live_your_api_key_here</div></div><div class="card" style="padding:1.5rem;margin-bottom:1.5rem"><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:1rem">Authentication</h3><p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem">All endpoints require a valid API key. Keys can be created and managed from the API Keys page.</p><div class="code-block">curl -X POST https://api.laud.com/v1/chat/completions \\
   -H "Authorization: Bearer nx_live_abc123..." \\
   -H "Content-Type: application/json" \\
   -d '{"model": "gpt-4", "messages": [{"role": "user", "content": "Hello"}]}'</div></div><div class="doc-section"><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem">${I.chat} Chat Completions</h3><p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem">Create a chat completion using any supported AI model.</p><div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem"><span class="endpoint-badge method-post">POST</span><code style="font-family:monospace;font-size:0.875rem;color:var(--text-primary)">/v1/chat/completions</code></div><h4 style="font-weight:600;color:var(--text-primary);margin-bottom:0.5rem;font-size:0.9375rem">Request Body</h4><div class="code-block">{
@@ -667,7 +662,7 @@ function renderUsageSettings() { const limits = { free: { messages: 50, humanReq
 
 function renderUsageBar(label, used, total, isLimited) { const pct = isLimited ? Math.min((used / total) * 100, 100) : 0; return `<div><div style="display:flex;justify-content:space-between;margin-bottom:0.375rem"><span style="font-size:0.875rem;color:var(--text-primary)">${label}</span><span style="font-size:0.75rem;color:var(--text-secondary)">${isLimited ? `${used}/${total}` : 'Unlimited'}</span></div>${isLimited ? `<div style="height:0.5rem;background:var(--border-color);border-radius:9999px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${pct > 80 ? '#ff006e' : 'linear-gradient(90deg,#7c3aed,#00d4ff)'};border-radius:9999px"></div></div>` : `<div style="height:0.5rem;background:rgba(0,255,136,0.2);border-radius:9999px"></div>`}</div>`; }
 
-function renderAdminLogin() { return `<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem"><div class="card" style="padding:2rem;max-width:24rem;width:100%"><div style="text-align:center;margin-bottom:1.5rem"><div style="width:3rem;height:3rem;border-radius:0.75rem;background:linear-gradient(135deg,#00d4ff,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;margin:0 auto 1rem">${I.shield}</div><h2 style="font-size:1.25rem;font-weight:bold;color:var(--text-primary)">Admin Access</h2><p style="font-size:0.875rem;color:var(--text-secondary);margin-top:0.25rem">Sign in to manage users</p></div><div style="display:flex;flex-direction:column;gap:0.75rem"><input type="email" placeholder="admin@nexusai.com" value="admin@nexusai.com" class="input-field" style="padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"><input type="password" placeholder="Password" value="admin123" class="input-field" style="padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"><button onclick="loginAdmin()" class="btn-primary" style="padding:0.75rem;border-radius:0.5rem;font-weight:600">Sign In</button><button onclick="navigateTo('landing')" class="btn-secondary" style="padding:0.5rem;border-radius:0.5rem;font-size:0.875rem">← Back to home</button></div></div></main>`; }
+function renderAdminLogin() { return `<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem"><div class="card" style="padding:2rem;max-width:24rem;width:100%"><div style="text-align:center;margin-bottom:1.5rem"><div style="width:3rem;height:3rem;border-radius:0.75rem;background:linear-gradient(135deg,#00d4ff,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;margin:0 auto 1rem">${I.shield}</div><h2 style="font-size:1.25rem;font-weight:bold;color:var(--text-primary)">Admin Access</h2><p style="font-size:0.875rem;color:var(--text-secondary);margin-top:0.25rem">Sign in to manage users</p></div><div style="display:flex;flex-direction:column;gap:0.75rem"><input type="email" placeholder="admin@laud.com" value="admin@laud.com" class="input-field" style="padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"><input type="password" placeholder="Password" value="admin123" class="input-field" style="padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"><button onclick="loginAdmin()" class="btn-primary" style="padding:0.75rem;border-radius:0.5rem;font-weight:600">Sign In</button><button onclick="navigateTo('landing')" class="btn-secondary" style="padding:0.5rem;border-radius:0.5rem;font-size:0.875rem">← Back to home</button></div></div></main>`; }
 
 function renderAdminDashboard() {
   const requestedChats = mockChatSessions.filter(c => c.humanRequested && !c.humanJoined && !state.adminJoinedChats.has(c.id));
@@ -693,7 +688,6 @@ function renderStatCard(title, value, change, icon) { return `<div class="card g
 
 function renderAdminChat() { const chat = mockChatSessions.find(c => c.id === state.selectedChat) || mockChatSessions[0]; const user = mockUsers.find(u => u.id === chat.userId); const isJoined = state.adminJoinedChats.has(chat.id); return `<main style="padding-top:4rem;height:100vh;display:flex"><div style="flex:1;display:flex;flex-direction:column"><div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-bottom:1px solid var(--border-color);background:var(--bg-secondary)"><div style="display:flex;align-items:center;gap:1rem"><button onclick="navigateTo('admin-dashboard')" style="padding:0.5rem;border-radius:0.5rem;background:transparent;border:none;cursor:pointer;color:var(--text-secondary)">${I.arrowLeft}</button><div style="width:2.25rem;height:2.25rem;border-radius:9999px;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;color:var(--text-secondary)">${I.user}</div><div><h3 style="font-weight:600;color:var(--text-primary)">${chat.topic}</h3><p style="font-size:0.75rem;color:var(--text-secondary)">${user.name} • ${user.email}</p></div></div><div style="display:flex;align-items:center;gap:0.75rem">${!isJoined ? `<button onclick="joinAsHuman()" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:0.5rem;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.3);color:#00d4ff;cursor:pointer;font-size:0.875rem;font-weight:500">${I.userStar} Join as Human Expert</button>` : `<div style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:0.5rem;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);color:#00ff88;font-size:0.875rem"><span style="width:0.5rem;height:0.5rem;border-radius:9999px;background:#00ff88" class="pulse-dot"></span>Responding as Admin</div><button onclick="leaveChat('${chat.id}')" class="btn-danger action-btn">${I.logout} Leave Chat</button>`}</div></div><div style="flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1.5rem" id="admin-chat-messages">${mockMessages.map(msg => renderMessage(msg)).join('')}${isJoined ? `<div class="slide-in" style="display:flex;align-items:flex-start;gap:0.75rem"><div style="width:2rem;height:2rem;border-radius:0.5rem;background:rgba(0,212,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#00d4ff">${I.userStar}</div><div class="chat-bubble-human" style="border-radius:1rem;border-top-left-radius:0.25rem;padding:0.75rem 1rem;max-width:36rem"><div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem"><span style="font-size:0.75rem;font-weight:500;color:#00d4ff">Admin Expert</span><span style="font-size:0.625rem;padding:0.125rem 0.375rem;border-radius:0.25rem;background:rgba(0,212,255,0.1);color:#00d4ff">Human</span></div><p style="font-size:0.875rem;line-height:1.625">Hey! I've reviewed your code and the AI's suggestions. I'd recommend also looking into using a Web Worker for the data processing pipeline.</p><p style="font-size:0.625rem;color:var(--text-subtle);margin-top:0.5rem">10:40 AM</p></div></div>` : ''}</div><div style="border-top:1px solid var(--border-color);padding:1rem 1.5rem;background:var(--bg-secondary)">${isJoined ? `<div style="display:flex;align-items:center;gap:0.75rem"><div style="width:2rem;height:2rem;border-radius:0.5rem;background:rgba(0,212,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#00d4ff">${I.userStar}</div><input type="text" id="admin-message-input" value="${state.adminMessage}" placeholder="Respond as human expert..." class="input-field" style="flex:1;padding:0.75rem 1rem;border-radius:0.5rem;font-size:0.875rem" onkeydown="if(event.key==='Enter')sendAdminMessage()"><button onclick="sendAdminMessage()" style="padding:0.75rem;border-radius:0.5rem;background:#00d4ff;border:none;cursor:pointer;color:white">${I.send}</button></div><p style="font-size:0.75rem;color:rgba(0,212,255,0.6);margin-top:0.5rem;margin-left:2.75rem">Responding as Human Expert</p>` : `<div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.5rem;color:var(--text-subtle)">${I.lock}<span style="font-size:0.875rem">Join as human expert to respond in this chat</span></div>`}</div></div><aside style="width:18rem;background:var(--bg-secondary);border-left:1px solid var(--border-color);overflow-y:auto"><div style="padding:1.25rem;border-bottom:1px solid var(--border-color)"><h4 style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;margin-bottom:1rem">User Details</h4><div style="text-align:center"><div style="width:3.5rem;height:3.5rem;border-radius:9999px;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;color:var(--text-secondary);margin:0 auto 0.75rem">${I.user}</div><p style="font-weight:600;color:var(--text-primary)">${user.name}</p><p style="font-size:0.875rem;color:var(--text-secondary)">${user.email}</p><span class="plan-badge plan-${user.plan.toLowerCase()}" style="margin-top:0.5rem">${user.plan} Plan</span>${user.accountStatus !== 'active' ? `<span class="plan-badge plan-${user.accountStatus}" style="margin-top:0.25rem;margin-left:0.25rem">${user.accountStatus}</span>` : ''}</div></div><div style="padding:1.25rem;border-bottom:1px solid var(--border-color)"><h4 style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;margin-bottom:0.75rem">Session Info</h4><div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:0.5rem"><span style="color:var(--text-secondary)">Total Messages</span><span style="color:var(--text-primary)">${chat.messages}</span></div><div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:0.5rem"><span style="color:var(--text-secondary)">Status</span><span style="color:#00ff88">${chat.status}</span></div><div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:0.5rem"><span style="color:var(--text-secondary)">Last Active</span><span style="color:var(--text-primary)">${chat.lastMessage}</span></div><div style="display:flex;justify-content:space-between;font-size:0.875rem"><span style="color:var(--text-secondary)">Human Requested</span><span style="color:${chat.humanRequested ? '#ff006e' : 'var(--text-subtle)'}">${chat.humanRequested ? 'Yes' : 'No'}</span></div></div><div style="padding:1.25rem"><h4 style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;margin-bottom:0.75rem">User Stats</h4><div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:0.5rem"><span style="color:var(--text-secondary)">Total Chats</span><span style="color:var(--text-primary)">${user.totalChats}</span></div><div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:0.5rem"><span style="color:var(--text-secondary)">API Calls</span><span style="color:var(--text-primary)">${user.apiCalls.toLocaleString()}</span></div><div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:0.5rem"><span style="color:var(--text-secondary)">Human Requests</span><span style="color:var(--text-primary)">${user.humanRequests}</span></div><div style="display:flex;justify-content:space-between;font-size:0.875rem"><span style="color:var(--text-secondary)">Member Since</span><span style="color:var(--text-primary)">${user.memberSince}</span></div></div></aside></main>`; }
 
-// ============ MODAL CONTENTS (using renderModal wrapper) ============
 function renderCreateKeyModal() {
   return renderModal(`
     <button class="modal-close-x" onclick="closeModal()" title="Close">${I.x}</button>
@@ -776,7 +770,6 @@ function renderUserActionModal() {
   `);
 }
 
-// ============ ACTIONS ============
 function navigateTo(view) {
   const requiresAuth = ['user-chat', 'user-all-chats', 'user-coder', 'user-profile', 'user-plans', 'user-settings', 'user-help', 'user-api-keys', 'user-api-docs'];
   if (requiresAuth.includes(view) && state.userEmail === '') { state.showAuthModal = true; state.authMode = 'signin'; render(); return; }
