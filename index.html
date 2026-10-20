@@ -80,10 +80,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; m
 .tab-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
 .tab-btn.active { background: var(--bg-active); color: #a78bfa; }
 .faq-item { border-bottom: 1px solid var(--border-color); }
-.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.2s ease-out; }
-.modal-content { position: relative; z-index: 101; background: var(--modal-bg); border: 1px solid var(--modal-border); border-radius: 1rem; padding: 2rem; max-width: 36rem; width: 90%; color: var(--text-primary); max-height: 90vh; overflow-y: auto; }
-.modal-content button, .modal-content input, .modal-content select, .modal-content textarea { position: relative; z-index: 102; }
-.action-btn { padding: 0.375rem 0.625rem; border-radius: 0.375rem; font-size: 0.75rem; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; position: relative; z-index: 10; }
+.action-btn { padding: 0.375rem 0.625rem; border-radius: 0.375rem; font-size: 0.75rem; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; }
 table { width: 100%; border-collapse: collapse; }
 th { text-align: left; padding: 0.75rem 1rem; font-size: 0.75rem; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; border-bottom: 1px solid var(--border-color); }
 td { padding: 0.875rem 1rem; font-size: 0.875rem; border-bottom: 1px solid var(--border-color); color: var(--text-primary); }
@@ -104,13 +101,50 @@ tr:hover td { background: var(--bg-hover); }
 .credit-card-option:hover { border-color: rgba(124,58,237,0.4); }
 .credit-card-option.selected { border-color: #7c3aed; background: rgba(124,58,237,0.1); }
 
-/* Ensure all interactive elements are clickable */
-button, a, input, select, textarea { position: relative; z-index: 1; }
-button:hover, a:hover { z-index: 2; }
-
-/* Fix for modal close button */
-.modal-close-btn { position: absolute; top: 1rem; right: 1rem; background: transparent; border: none; color: var(--text-secondary); cursor: pointer; padding: 0.5rem; z-index: 103; border-radius: 0.375rem; }
-.modal-close-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+/* FIXED MODAL SYSTEM */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+.modal-box {
+  position: relative;
+  background: var(--modal-bg);
+  border: 1px solid var(--modal-border);
+  border-radius: 1rem;
+  padding: 2rem;
+  max-width: 36rem;
+  width: 90%;
+  color: var(--text-primary);
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: 1001;
+}
+.modal-close-x {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1002;
+}
+.modal-close-x:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
 </style>
 </head>
 <body>
@@ -153,7 +187,7 @@ const I = {
   database: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>`,
   trash: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
   chevron: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`,
-  x: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  x: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
   download: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
   list: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`,
   ban: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>`,
@@ -168,7 +202,7 @@ const I = {
   coins: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>`
 };
 
-const GOOGLE_SVG = `<svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>`;
+const GOOGLE_SVG = `<svg class="google-icon" viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>`;
 
 const state = {
   currentView: 'landing', currentRole: 'user', selectedChat: null, selectedUser: null,
@@ -237,6 +271,11 @@ const docs = [
   { title: 'Privacy & Security', desc: 'How we protect your data', icon: I.shieldCheck }
 ];
 
+// ============ MODAL RENDERING (FIXED) ============
+function renderModal(content) {
+  return `<div class="modal-overlay" id="active-modal"><div class="modal-box">${content}</div></div>`;
+}
+
 function render() {
   document.body.className = state.theme;
   const app = document.getElementById('app');
@@ -259,17 +298,31 @@ function render() {
   else if (state.currentView === 'admin-dashboard') html += renderAdminDashboard();
   else if (state.currentView === 'admin-chat') html += renderAdminChat();
   
+  // Append modals INSIDE the main app container
+  if (state.showAuthModal) html += renderAuthModal();
+  if (state.showUpgradeModal) html += renderUpgradeModal();
+  if (state.showDeleteModal) html += renderDeleteModal();
+  if (state.showUserActionModal) html += renderUserActionModal();
+  if (state.showCreateKeyModal) html += renderCreateKeyModal();
+  if (state.showRechargeModal) html += renderRechargeModal();
+  if (state.showKeyActionModal) html += renderKeyActionModal();
+  
   app.innerHTML = html;
   
-  if (state.showAuthModal) { const d = document.createElement('div'); d.innerHTML = renderAuthModal(); document.body.appendChild(d.firstElementChild); }
-  if (state.showUpgradeModal) { const d = document.createElement('div'); d.innerHTML = renderUpgradeModal(); document.body.appendChild(d.firstElementChild); }
-  if (state.showDeleteModal) { const d = document.createElement('div'); d.innerHTML = renderDeleteModal(); document.body.appendChild(d.firstElementChild); }
-  if (state.showUserActionModal) { const d = document.createElement('div'); d.innerHTML = renderUserActionModal(); document.body.appendChild(d.firstElementChild); }
-  if (state.showCreateKeyModal) { const d = document.createElement('div'); d.innerHTML = renderCreateKeyModal(); document.body.appendChild(d.firstElementChild); }
-  if (state.showRechargeModal) { const d = document.createElement('div'); d.innerHTML = renderRechargeModal(); document.body.appendChild(d.firstElementChild); }
-  if (state.showKeyActionModal) { const d = document.createElement('div'); d.innerHTML = renderKeyActionModal(); document.body.appendChild(d.firstElementChild); }
-  
   attachEventListeners();
+}
+
+// Close modal helper - closes ANY open modal
+function closeModal() {
+  state.showAuthModal = null;
+  state.showUpgradeModal = null;
+  state.showDeleteModal = false;
+  state.showUserActionModal = null;
+  state.showCreateKeyModal = false;
+  state.showRechargeModal = false;
+  state.showKeyActionModal = null;
+  state.selectedCreditPackage = null;
+  render();
 }
 
 function renderNavbar() {
@@ -388,60 +441,44 @@ function renderLanding() {
 
 function renderAuthModal() {
   const isSignup = state.authMode === 'signup';
-  return `
-  <div class="modal-backdrop" onclick="handleBackdropClick(event, 'auth')">
-    <div class="modal-content" style="max-width:26rem">
-      <button class="modal-close-btn" onclick="closeAuthModal(event)" title="Close">${I.x}</button>
-      <div style="text-align:center;margin-bottom:1.5rem">
-        <div style="width:3rem;height:3rem;border-radius:0.75rem;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;color:white;margin:0 auto 1rem">${I.brain}</div>
-        <h2 style="font-size:1.375rem;font-weight:bold;color:var(--text-primary);margin-bottom:0.25rem">${isSignup ? 'Create your account' : 'Welcome back'}</h2>
-        <p style="font-size:0.875rem;color:var(--text-secondary)">${isSignup ? 'Start chatting with AI in seconds' : 'Sign in to continue to NexusAI'}</p>
-      </div>
-      
-      <button onclick="signInWithGoogle()" class="btn-google" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;justify-content:center">
-        ${GOOGLE_SVG} Continue with Google
-      </button>
-      
-      <div class="divider">or</div>
-      
-      <div style="display:flex;flex-direction:column;gap:0.75rem">
-        ${isSignup ? `
-        <div>
-          <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Full Name</label>
-          <input type="text" id="auth-name" placeholder="John Doe" class="input-field" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem">
-        </div>` : ''}
-        <div>
-          <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Email</label>
-          <input type="email" id="auth-email" placeholder="you@example.com" class="input-field" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem">
-        </div>
-        <div>
-          <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Password</label>
-          <input type="password" id="auth-password" placeholder="••••••••" class="input-field" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem">
-        </div>
-        <button onclick="signInWithEmail()" class="btn-primary" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-weight:600;margin-top:0.5rem">
-          ${isSignup ? 'Create Account' : 'Sign In'}
-        </button>
-      </div>
-      
-      <p style="text-align:center;margin-top:1.25rem;font-size:0.875rem;color:var(--text-secondary)">
-        ${isSignup ? 'Already have an account?' : "Don't have an account?"}
-        <button onclick="toggleAuthMode()" style="background:transparent;border:none;color:#a78bfa;cursor:pointer;font-weight:500">${isSignup ? 'Sign In' : 'Sign Up'}</button>
-      </p>
+  return renderModal(`
+    <button class="modal-close-x" onclick="closeModal()" title="Close">${I.x}</button>
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div style="width:3rem;height:3rem;border-radius:0.75rem;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;color:white;margin:0 auto 1rem">${I.brain}</div>
+      <h2 style="font-size:1.375rem;font-weight:bold;color:var(--text-primary);margin-bottom:0.25rem">${isSignup ? 'Create your account' : 'Welcome back'}</h2>
+      <p style="font-size:0.875rem;color:var(--text-secondary)">${isSignup ? 'Start chatting with AI in seconds' : 'Sign in to continue to NexusAI'}</p>
     </div>
-  </div>`;
-}
-
-function handleBackdropClick(e, modalType) {
-  if (e.target.classList.contains('modal-backdrop')) {
-    if (modalType === 'auth') { state.showAuthModal = null; }
-    else if (modalType === 'upgrade') { state.showUpgradeModal = null; }
-    else if (modalType === 'delete') { state.showDeleteModal = false; }
-    else if (modalType === 'userAction') { state.showUserActionModal = null; }
-    else if (modalType === 'createKey') { state.showCreateKeyModal = false; }
-    else if (modalType === 'recharge') { state.showRechargeModal = false; state.selectedCreditPackage = null; }
-    else if (modalType === 'keyAction') { state.showKeyActionModal = null; }
-    render();
-  }
+    
+    <button onclick="signInWithGoogle()" class="btn-google" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;justify-content:center">
+      ${GOOGLE_SVG} Continue with Google
+    </button>
+    
+    <div class="divider">or</div>
+    
+    <div style="display:flex;flex-direction:column;gap:0.75rem">
+      ${isSignup ? `
+      <div>
+        <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Full Name</label>
+        <input type="text" id="auth-name" placeholder="John Doe" class="input-field" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem">
+      </div>` : ''}
+      <div>
+        <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Email</label>
+        <input type="email" id="auth-email" placeholder="you@example.com" class="input-field" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem">
+      </div>
+      <div>
+        <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Password</label>
+        <input type="password" id="auth-password" placeholder="••••••••" class="input-field" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem">
+      </div>
+      <button onclick="signInWithEmail()" class="btn-primary" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-weight:600;margin-top:0.5rem">
+        ${isSignup ? 'Create Account' : 'Sign In'}
+      </button>
+    </div>
+    
+    <p style="text-align:center;margin-top:1.25rem;font-size:0.875rem;color:var(--text-secondary)">
+      ${isSignup ? 'Already have an account?' : "Don't have an account?"}
+      <button onclick="toggleAuthMode()" style="background:transparent;border:none;color:#a78bfa;cursor:pointer;font-weight:500">${isSignup ? 'Sign In' : 'Sign Up'}</button>
+    </p>
+  `);
 }
 
 function renderUserSidebar() {
@@ -538,11 +575,7 @@ function renderUserPlans() {
 }
 
 function renderApiKeys() {
-  const tabs = [
-    { id: 'keys', label: 'API Keys', icon: I.key },
-    { id: 'recharge', label: 'Recharge Tokens', icon: I.wallet }
-  ];
-  
+  const tabs = [{ id: 'keys', label: 'API Keys', icon: I.key },{ id: 'recharge', label: 'Recharge Tokens', icon: I.wallet }];
   const activeKeys = state.apiKeys.filter(k => k.status === 'active').length;
   const pausedKeys = state.apiKeys.filter(k => k.status === 'paused').length;
   const blockedKeys = state.apiKeys.filter(k => k.status === 'blocked').length;
@@ -586,19 +619,14 @@ function renderApiDocs() {
   -H "Content-Type: application/json" \\
   -d '{"model": "gpt-4", "messages": [{"role": "user", "content": "Hello"}]}'</div></div><div class="doc-section"><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem">${I.chat} Chat Completions</h3><p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem">Create a chat completion using any supported AI model.</p><div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem"><span class="endpoint-badge method-post">POST</span><code style="font-family:monospace;font-size:0.875rem;color:var(--text-primary)">/v1/chat/completions</code></div><h4 style="font-weight:600;color:var(--text-primary);margin-bottom:0.5rem;font-size:0.9375rem">Request Body</h4><div class="code-block">{
   "model": "gpt-4",
-  "messages": [
-    {"role": "user", "content": "Hello"}
-  ],
+  "messages": [{"role": "user", "content": "Hello"}],
   "max_tokens": 1000,
   "temperature": 0.7,
   "stream": false
 }</div><h4 style="font-weight:600;color:var(--text-primary);margin:1rem 0 0.5rem;font-size:0.9375rem">Response</h4><div class="code-block">{
   "id": "chatcmpl-abc123",
   "model": "gpt-4",
-  "choices": [{
-    "message": {"role": "assistant", "content": "Hello! How can I help?"},
-    "finish_reason": "stop"
-  }],
+  "choices": [{"message": {"role": "assistant", "content": "Hello!"}, "finish_reason": "stop"}],
   "usage": {"prompt_tokens": 10, "completion_tokens": 8, "total_tokens": 18}
 }</div></div><div class="doc-section"><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem">${I.code} Code Generation</h3><p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem">Generate, debug, or explain code with the Coder model.</p><div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem"><span class="endpoint-badge method-post">POST</span><code style="font-family:monospace;font-size:0.875rem;color:var(--text-primary)">/v1/code/generate</code></div><div class="code-block">{
   "prompt": "Write a Python function to sort a list",
@@ -607,14 +635,11 @@ function renderApiDocs() {
 }</div></div><div class="doc-section"><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem">${I.coins} Token Balance</h3><p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem">Check your current token balance and usage.</p><div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem"><span class="endpoint-badge method-get">GET</span><code style="font-family:monospace;font-size:0.875rem;color:var(--text-primary)">/v1/balance</code></div><div class="code-block">{
   "balance": 7753,
   "currency": "credits",
-  "keys": [
-    {"id": "k1", "name": "Production", "tokens": 10000, "used": 3247}
-  ]
+  "keys": [{"id": "k1", "name": "Production", "tokens": 10000, "used": 3247}]
 }</div></div><div class="doc-section"><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem">${I.key} API Keys Management</h3><p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem">Programmatically manage your API keys.</p><div style="margin-bottom:1rem"><div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem"><span class="endpoint-badge method-post">POST</span><code style="font-family:monospace;font-size:0.875rem;color:var(--text-primary)">/v1/keys</code><span style="font-size:0.8125rem;color:var(--text-secondary);margin-left:0.5rem">Create a new key</span></div><div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem"><span class="endpoint-badge method-get">GET</span><code style="font-family:monospace;font-size:0.875rem;color:var(--text-primary)">/v1/keys</code><span style="font-size:0.8125rem;color:var(--text-secondary);margin-left:0.5rem">List all keys</span></div><div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem"><span class="endpoint-badge method-patch">PATCH</span><code style="font-family:monospace;font-size:0.875rem;color:var(--text-primary)">/v1/keys/:id</code><span style="font-size:0.8125rem;color:var(--text-secondary);margin-left:0.5rem">Update key (pause/block)</span></div><div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem"><span class="endpoint-badge method-delete">DELETE</span><code style="font-family:monospace;font-size:0.875rem;color:var(--text-primary)">/v1/keys/:id</code><span style="font-size:0.8125rem;color:var(--text-secondary);margin-left:0.5rem">Delete a key</span></div><div style="display:flex;align-items:center;gap:0.75rem"><span class="endpoint-badge method-post">POST</span><code style="font-family:monospace;font-size:0.875rem;color:var(--text-primary)">/v1/keys/:id/regenerate</code><span style="font-size:0.8125rem;color:var(--text-secondary);margin-left:0.5rem">Regenerate key</span></div></div></div><div class="doc-section"><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem">${I.wallet} Recharge Tokens</h3><p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem">Add credits to your account balance.</p><div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem"><span class="endpoint-badge method-post">POST</span><code style="font-family:monospace;font-size:0.875rem;color:var(--text-primary)">/v1/balance/recharge</code></div><div class="code-block">{
   "amount": 5000,
   "payment_method": "pm_card_visa_4242"
 }
-
 // Response
 {
   "success": true,
@@ -668,13 +693,31 @@ function renderStatCard(title, value, change, icon) { return `<div class="card g
 
 function renderAdminChat() { const chat = mockChatSessions.find(c => c.id === state.selectedChat) || mockChatSessions[0]; const user = mockUsers.find(u => u.id === chat.userId); const isJoined = state.adminJoinedChats.has(chat.id); return `<main style="padding-top:4rem;height:100vh;display:flex"><div style="flex:1;display:flex;flex-direction:column"><div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-bottom:1px solid var(--border-color);background:var(--bg-secondary)"><div style="display:flex;align-items:center;gap:1rem"><button onclick="navigateTo('admin-dashboard')" style="padding:0.5rem;border-radius:0.5rem;background:transparent;border:none;cursor:pointer;color:var(--text-secondary)">${I.arrowLeft}</button><div style="width:2.25rem;height:2.25rem;border-radius:9999px;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;color:var(--text-secondary)">${I.user}</div><div><h3 style="font-weight:600;color:var(--text-primary)">${chat.topic}</h3><p style="font-size:0.75rem;color:var(--text-secondary)">${user.name} • ${user.email}</p></div></div><div style="display:flex;align-items:center;gap:0.75rem">${!isJoined ? `<button onclick="joinAsHuman()" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:0.5rem;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.3);color:#00d4ff;cursor:pointer;font-size:0.875rem;font-weight:500">${I.userStar} Join as Human Expert</button>` : `<div style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:0.5rem;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);color:#00ff88;font-size:0.875rem"><span style="width:0.5rem;height:0.5rem;border-radius:9999px;background:#00ff88" class="pulse-dot"></span>Responding as Admin</div><button onclick="leaveChat('${chat.id}')" class="btn-danger action-btn">${I.logout} Leave Chat</button>`}</div></div><div style="flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1.5rem" id="admin-chat-messages">${mockMessages.map(msg => renderMessage(msg)).join('')}${isJoined ? `<div class="slide-in" style="display:flex;align-items:flex-start;gap:0.75rem"><div style="width:2rem;height:2rem;border-radius:0.5rem;background:rgba(0,212,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#00d4ff">${I.userStar}</div><div class="chat-bubble-human" style="border-radius:1rem;border-top-left-radius:0.25rem;padding:0.75rem 1rem;max-width:36rem"><div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem"><span style="font-size:0.75rem;font-weight:500;color:#00d4ff">Admin Expert</span><span style="font-size:0.625rem;padding:0.125rem 0.375rem;border-radius:0.25rem;background:rgba(0,212,255,0.1);color:#00d4ff">Human</span></div><p style="font-size:0.875rem;line-height:1.625">Hey! I've reviewed your code and the AI's suggestions. I'd recommend also looking into using a Web Worker for the data processing pipeline.</p><p style="font-size:0.625rem;color:var(--text-subtle);margin-top:0.5rem">10:40 AM</p></div></div>` : ''}</div><div style="border-top:1px solid var(--border-color);padding:1rem 1.5rem;background:var(--bg-secondary)">${isJoined ? `<div style="display:flex;align-items:center;gap:0.75rem"><div style="width:2rem;height:2rem;border-radius:0.5rem;background:rgba(0,212,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#00d4ff">${I.userStar}</div><input type="text" id="admin-message-input" value="${state.adminMessage}" placeholder="Respond as human expert..." class="input-field" style="flex:1;padding:0.75rem 1rem;border-radius:0.5rem;font-size:0.875rem" onkeydown="if(event.key==='Enter')sendAdminMessage()"><button onclick="sendAdminMessage()" style="padding:0.75rem;border-radius:0.5rem;background:#00d4ff;border:none;cursor:pointer;color:white">${I.send}</button></div><p style="font-size:0.75rem;color:rgba(0,212,255,0.6);margin-top:0.5rem;margin-left:2.75rem">Responding as Human Expert</p>` : `<div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.5rem;color:var(--text-subtle)">${I.lock}<span style="font-size:0.875rem">Join as human expert to respond in this chat</span></div>`}</div></div><aside style="width:18rem;background:var(--bg-secondary);border-left:1px solid var(--border-color);overflow-y:auto"><div style="padding:1.25rem;border-bottom:1px solid var(--border-color)"><h4 style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;margin-bottom:1rem">User Details</h4><div style="text-align:center"><div style="width:3.5rem;height:3.5rem;border-radius:9999px;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;color:var(--text-secondary);margin:0 auto 0.75rem">${I.user}</div><p style="font-weight:600;color:var(--text-primary)">${user.name}</p><p style="font-size:0.875rem;color:var(--text-secondary)">${user.email}</p><span class="plan-badge plan-${user.plan.toLowerCase()}" style="margin-top:0.5rem">${user.plan} Plan</span>${user.accountStatus !== 'active' ? `<span class="plan-badge plan-${user.accountStatus}" style="margin-top:0.25rem;margin-left:0.25rem">${user.accountStatus}</span>` : ''}</div></div><div style="padding:1.25rem;border-bottom:1px solid var(--border-color)"><h4 style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;margin-bottom:0.75rem">Session Info</h4><div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:0.5rem"><span style="color:var(--text-secondary)">Total Messages</span><span style="color:var(--text-primary)">${chat.messages}</span></div><div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:0.5rem"><span style="color:var(--text-secondary)">Status</span><span style="color:#00ff88">${chat.status}</span></div><div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:0.5rem"><span style="color:var(--text-secondary)">Last Active</span><span style="color:var(--text-primary)">${chat.lastMessage}</span></div><div style="display:flex;justify-content:space-between;font-size:0.875rem"><span style="color:var(--text-secondary)">Human Requested</span><span style="color:${chat.humanRequested ? '#ff006e' : 'var(--text-subtle)'}">${chat.humanRequested ? 'Yes' : 'No'}</span></div></div><div style="padding:1.25rem"><h4 style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;margin-bottom:0.75rem">User Stats</h4><div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:0.5rem"><span style="color:var(--text-secondary)">Total Chats</span><span style="color:var(--text-primary)">${user.totalChats}</span></div><div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:0.5rem"><span style="color:var(--text-secondary)">API Calls</span><span style="color:var(--text-primary)">${user.apiCalls.toLocaleString()}</span></div><div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:0.5rem"><span style="color:var(--text-secondary)">Human Requests</span><span style="color:var(--text-primary)">${user.humanRequests}</span></div><div style="display:flex;justify-content:space-between;font-size:0.875rem"><span style="color:var(--text-secondary)">Member Since</span><span style="color:var(--text-primary)">${user.memberSince}</span></div></div></aside></main>`; }
 
+// ============ MODAL CONTENTS (using renderModal wrapper) ============
 function renderCreateKeyModal() {
-  return `<div class="modal-backdrop" onclick="handleBackdropClick(event, 'createKey')"><div class="modal-content"><button class="modal-close-btn" onclick="closeCreateKeyModal(event)" title="Close">${I.x}</button><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem"><h3 style="font-weight:600;color:var(--text-primary)">Create New API Key</h3></div><div style="display:flex;flex-direction:column;gap:1rem"><div><label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Key Name</label><input type="text" id="new-key-name" placeholder="e.g., Production App" class="input-field" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"></div><div><label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Expiration</label><select id="new-key-expiry" class="input-field" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"><option value="1">1 day</option><option value="7">7 days</option><option value="14">14 days</option><option value="30" selected>30 days</option><option value="180">6 months</option><option value="300">10 months</option><option value="365">12 months</option><option value="0">No expiry</option></select></div><div><label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Initial Tokens</label><select id="new-key-tokens" class="input-field" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"><option value="500">500 credits</option><option value="1000">1,000 credits</option><option value="2000">2,000 credits</option><option value="5000" selected>5,000 credits</option><option value="10000">10,000 credits</option><option value="20000">20,000 credits</option><option value="50000">50,000 credits</option></select></div><div style="padding:1rem;background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.3);border-radius:0.5rem;font-size:0.8125rem;color:#eab308"><strong>Note:</strong> This will deduct tokens from your balance (${state.totalBalance.toLocaleString()} credits available).</div><div style="display:flex;gap:0.75rem;margin-top:0.5rem"><button onclick="closeCreateKeyModal()" class="btn-secondary" style="flex:1;padding:0.75rem;border-radius:0.5rem;font-weight:500">Cancel</button><button onclick="confirmCreateKey()" class="btn-primary" style="flex:1;padding:0.75rem;border-radius:0.5rem;font-weight:500">Create Key</button></div></div></div></div>`;
+  return renderModal(`
+    <button class="modal-close-x" onclick="closeModal()" title="Close">${I.x}</button>
+    <h3 style="font-weight:600;color:var(--text-primary);margin-bottom:1.5rem">Create New API Key</h3>
+    <div style="display:flex;flex-direction:column;gap:1rem">
+      <div><label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Key Name</label><input type="text" id="new-key-name" placeholder="e.g., Production App" class="input-field" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"></div>
+      <div><label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Expiration</label><select id="new-key-expiry" class="input-field" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"><option value="1">1 day</option><option value="7">7 days</option><option value="14">14 days</option><option value="30" selected>30 days</option><option value="180">6 months</option><option value="300">10 months</option><option value="365">12 months</option><option value="0">No expiry</option></select></div>
+      <div><label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Initial Tokens</label><select id="new-key-tokens" class="input-field" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"><option value="500">500 credits</option><option value="1000">1,000 credits</option><option value="2000">2,000 credits</option><option value="5000" selected>5,000 credits</option><option value="10000">10,000 credits</option><option value="20000">20,000 credits</option><option value="50000">50,000 credits</option></select></div>
+      <div style="padding:1rem;background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.3);border-radius:0.5rem;font-size:0.8125rem;color:#eab308"><strong>Note:</strong> This will deduct tokens from your balance (${state.totalBalance.toLocaleString()} credits available).</div>
+      <div style="display:flex;gap:0.75rem;margin-top:0.5rem"><button onclick="closeModal()" class="btn-secondary" style="flex:1;padding:0.75rem;border-radius:0.5rem;font-weight:500">Cancel</button><button onclick="confirmCreateKey()" class="btn-primary" style="flex:1;padding:0.75rem;border-radius:0.5rem;font-weight:500">Create Key</button></div>
+    </div>
+  `);
 }
 
 function renderRechargeModal() {
   const packages = [500, 1000, 2000, 5000, 10000, 20000, 50000];
-  return `<div class="modal-backdrop" onclick="handleBackdropClick(event, 'recharge')"><div class="modal-content"><button class="modal-close-btn" onclick="closeRechargeModal(event)" title="Close">${I.x}</button><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem"><h3 style="font-weight:600;color:var(--text-primary)">Recharge Tokens</h3></div><div style="padding:1rem;background:var(--stat-bg);border-radius:0.5rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between"><div><p style="font-size:0.75rem;color:var(--text-secondary)">Current Balance</p><p style="font-size:1.5rem;font-weight:bold;color:var(--text-primary)">${state.totalBalance.toLocaleString()} credits</p></div>${I.coins}</div><p style="font-size:0.875rem;color:var(--text-primary);margin-bottom:0.75rem">Select amount to add:</p><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:0.5rem;margin-bottom:1rem">${packages.map(p => `<button onclick="selectCreditPackage(${p});closeRechargeModal();setTimeout(()=>openRechargeModal(),100)" class="btn-secondary" style="padding:0.75rem;border-radius:0.5rem;font-weight:500">${p.toLocaleString()} credits<br><span style="font-size:0.75rem;color:var(--text-subtle)">$${(p*0.0015).toFixed(2)}</span></button>`).join('')}</div><div style="border-top:1px solid var(--border-color);padding-top:1rem"><p style="font-size:0.875rem;color:var(--text-primary);margin-bottom:0.5rem">Or enter custom amount:</p><div style="display:flex;gap:0.5rem"><input type="number" id="modal-custom-credits" placeholder="Amount" min="100" class="input-field" style="flex:1;padding:0.625rem 0.75rem;border-radius:0.5rem;font-size:0.875rem"><button onclick="processCustomRecharge()" class="btn-primary" style="padding:0.625rem 1rem;border-radius:0.5rem;font-weight:500">Add</button></div><p style="font-size:0.75rem;color:var(--text-subtle);margin-top:0.5rem">Minimum 100 credits. Rate: $0.0015/credit</p></div></div></div>`;
+  return renderModal(`
+    <button class="modal-close-x" onclick="closeModal()" title="Close">${I.x}</button>
+    <h3 style="font-weight:600;color:var(--text-primary);margin-bottom:1.5rem">Recharge Tokens</h3>
+    <div style="padding:1rem;background:var(--stat-bg);border-radius:0.5rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between"><div><p style="font-size:0.75rem;color:var(--text-secondary)">Current Balance</p><p style="font-size:1.5rem;font-weight:bold;color:var(--text-primary)">${state.totalBalance.toLocaleString()} credits</p></div>${I.coins}</div>
+    <p style="font-size:0.875rem;color:var(--text-primary);margin-bottom:0.75rem">Select amount to add:</p>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:0.5rem;margin-bottom:1rem">${packages.map(p => `<button onclick="selectCreditPackage(${p});closeModal();setTimeout(()=>{state.showRechargeModal=true;render();},50)" class="btn-secondary" style="padding:0.75rem;border-radius:0.5rem;font-weight:500">${p.toLocaleString()} credits<br><span style="font-size:0.75rem;color:var(--text-subtle)">$${(p*0.0015).toFixed(2)}</span></button>`).join('')}</div>
+    <div style="border-top:1px solid var(--border-color);padding-top:1rem"><p style="font-size:0.875rem;color:var(--text-primary);margin-bottom:0.5rem">Or enter custom amount:</p><div style="display:flex;gap:0.5rem"><input type="number" id="modal-custom-credits" placeholder="Amount" min="100" class="input-field" style="flex:1;padding:0.625rem 0.75rem;border-radius:0.5rem;font-size:0.875rem"><button onclick="processCustomRecharge()" class="btn-primary" style="padding:0.625rem 1rem;border-radius:0.5rem;font-weight:500">Add</button></div><p style="font-size:0.75rem;color:var(--text-subtle);margin-top:0.5rem">Minimum 100 credits. Rate: $0.0015/credit</p></div>
+  `);
 }
 
 function renderKeyActionModal() {
@@ -689,12 +732,27 @@ function renderKeyActionModal() {
     case 'regenerate': title = 'Regenerate API Key'; content = `<p style="font-size:0.875rem;color:var(--text-primary);margin-bottom:1rem">Regenerate <strong>${key.name}</strong>? The old key will stop working immediately. Make sure to update it in all your apps.</p>`; confirmText = 'Regenerate'; confirmClass = 'btn-warning'; break;
     case 'delete': title = 'Delete API Key'; content = `<p style="font-size:0.875rem;color:var(--text-primary);margin-bottom:1rem">Permanently delete <strong>${key.name}</strong>? This cannot be undone.</p>`; confirmText = 'Delete Key'; confirmClass = 'btn-danger'; break;
   }
-  return `<div class="modal-backdrop" onclick="handleBackdropClick(event, 'keyAction')"><div class="modal-content"><button class="modal-close-btn" onclick="closeKeyActionModal(event)" title="Close">${I.x}</button><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem"><h3 style="font-weight:600;color:var(--text-primary)">${title}</h3></div>${content}<div style="display:flex;gap:0.75rem"><button onclick="closeKeyActionModal()" class="btn-secondary" style="flex:1;padding:0.75rem;border-radius:0.5rem;font-weight:500">Cancel</button><button onclick="confirmKeyAction()" class="${confirmClass}" style="flex:1;padding:0.75rem;border-radius:0.5rem;font-weight:500">${confirmText}</button></div></div></div>`;
+  return renderModal(`
+    <button class="modal-close-x" onclick="closeModal()" title="Close">${I.x}</button>
+    <h3 style="font-weight:600;color:var(--text-primary);margin-bottom:1rem">${title}</h3>
+    ${content}
+    <div style="display:flex;gap:0.75rem"><button onclick="closeModal()" class="btn-secondary" style="flex:1;padding:0.75rem;border-radius:0.5rem;font-weight:500">Cancel</button><button onclick="confirmKeyAction()" class="${confirmClass}" style="flex:1;padding:0.75rem;border-radius:0.5rem;font-weight:500">${confirmText}</button></div>
+  `);
 }
 
-function renderUpgradeModal() { return `<div class="modal-backdrop" onclick="handleBackdropClick(event, 'upgrade')"><div class="modal-content"><button class="modal-close-btn" onclick="closeUpgradeModal(event)" title="Close">${I.x}</button><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem"><h3 style="font-weight:600;color:var(--text-primary)">Upgrade Required</h3></div><div style="display:flex;align-items:center;gap:1rem;padding:1rem;background:rgba(124,58,237,0.1);border-radius:0.5rem;margin-bottom:1rem"><div style="width:2.5rem;height:2.5rem;border-radius:0.5rem;background:rgba(124,58,237,0.2);display:flex;align-items:center;justify-content:center;color:#a78bfa">${I.lock}</div><div><p style="font-weight:500;font-size:0.9375rem;color:var(--text-primary)">${state.showUpgradeModal === 'coder' ? 'Coder' : 'Human Expert'} requires Pro plan</p><p style="font-size:0.875rem;color:var(--text-secondary)">Upgrade for just $2.99/month</p></div></div><div style="display:flex;flex-direction:column;gap:0.75rem"><button onclick="navigateTo('user-plans');closeUpgradeModal()" class="btn-primary" style="padding:0.75rem;border-radius:0.5rem;font-weight:500">Upgrade to Pro</button><button onclick="closeUpgradeModal()" class="btn-secondary" style="padding:0.75rem;border-radius:0.5rem;font-weight:500">Maybe Later</button></div></div></div>`; }
+function renderUpgradeModal() { return renderModal(`
+  <button class="modal-close-x" onclick="closeModal()" title="Close">${I.x}</button>
+  <h3 style="font-weight:600;color:var(--text-primary);margin-bottom:1rem">Upgrade Required</h3>
+  <div style="display:flex;align-items:center;gap:1rem;padding:1rem;background:rgba(124,58,237,0.1);border-radius:0.5rem;margin-bottom:1rem"><div style="width:2.5rem;height:2.5rem;border-radius:0.5rem;background:rgba(124,58,237,0.2);display:flex;align-items:center;justify-content:center;color:#a78bfa">${I.lock}</div><div><p style="font-weight:500;font-size:0.9375rem;color:var(--text-primary)">${state.showUpgradeModal === 'coder' ? 'Coder' : 'Human Expert'} requires Pro plan</p><p style="font-size:0.875rem;color:var(--text-secondary)">Upgrade for just $2.99/month</p></div></div>
+  <div style="display:flex;flex-direction:column;gap:0.75rem"><button onclick="navigateTo('user-plans');closeModal()" class="btn-primary" style="padding:0.75rem;border-radius:0.5rem;font-weight:500">Upgrade to Pro</button><button onclick="closeModal()" class="btn-secondary" style="padding:0.75rem;border-radius:0.5rem;font-weight:500">Maybe Later</button></div>
+`); }
 
-function renderDeleteModal() { return `<div class="modal-backdrop" onclick="handleBackdropClick(event, 'delete')"><div class="modal-content"><button class="modal-close-btn" onclick="closeDeleteModal(event)" title="Close">${I.x}</button><div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem"><div style="width:3rem;height:3rem;border-radius:0.75rem;background:rgba(255,0,110,0.1);display:flex;align-items:center;justify-content:center;color:#ff006e">${I.trash}</div><div><h3 style="font-weight:600;color:var(--text-primary)">Request Account Deletion</h3><p style="font-size:0.875rem;color:var(--text-secondary)">This action cannot be undone</p></div></div><p style="font-size:0.875rem;line-height:1.625;margin-bottom:1rem;color:var(--text-primary)">Your account and all associated data will be permanently deleted within 30 days.</p><div style="display:flex;flex-direction:column;gap:0.75rem"><button onclick="confirmDelete()" style="padding:0.75rem;border-radius:0.5rem;background:#ff006e;color:white;border:none;cursor:pointer;font-weight:500">Yes, Request Deletion</button><button onclick="closeDeleteModal()" class="btn-secondary" style="padding:0.75rem;border-radius:0.5rem;font-weight:500">Cancel</button></div></div></div>`; }
+function renderDeleteModal() { return renderModal(`
+  <button class="modal-close-x" onclick="closeModal()" title="Close">${I.x}</button>
+  <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem"><div style="width:3rem;height:3rem;border-radius:0.75rem;background:rgba(255,0,110,0.1);display:flex;align-items:center;justify-content:center;color:#ff006e">${I.trash}</div><div><h3 style="font-weight:600;color:var(--text-primary)">Request Account Deletion</h3><p style="font-size:0.875rem;color:var(--text-secondary)">This action cannot be undone</p></div></div>
+  <p style="font-size:0.875rem;line-height:1.625;margin-bottom:1rem;color:var(--text-primary)">Your account and all associated data will be permanently deleted within 30 days.</p>
+  <div style="display:flex;flex-direction:column;gap:0.75rem"><button onclick="confirmDelete()" style="padding:0.75rem;border-radius:0.5rem;background:#ff006e;color:white;border:none;cursor:pointer;font-weight:500">Yes, Request Deletion</button><button onclick="closeModal()" class="btn-secondary" style="padding:0.75rem;border-radius:0.5rem;font-weight:500">Cancel</button></div>
+`); }
 
 function renderUserActionModal() {
   const action = state.showUserActionModal; if (!action) return '';
@@ -710,7 +768,12 @@ function renderUserActionModal() {
     case 'unrestrict': title = 'Remove Restriction'; content = `<p style="font-size:0.875rem;color:var(--text-primary);margin-bottom:1rem">Remove restrictions from <strong>${user.name}</strong>?</p>`; confirmText = 'Remove Restriction'; confirmClass = 'btn-success'; break;
     case 'delete': title = 'Delete User Account'; content = `<p style="font-size:0.875rem;color:var(--text-primary);margin-bottom:1rem">Permanently delete <strong>${user.name}</strong>'s account and all data? This cannot be undone.</p>`; confirmText = 'Delete Account'; confirmClass = 'btn-danger'; break;
   }
-  return `<div class="modal-backdrop" onclick="handleBackdropClick(event, 'userAction')"><div class="modal-content"><button class="modal-close-btn" onclick="closeUserActionModal(event)" title="Close">${I.x}</button><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem"><h3 style="font-weight:600;color:var(--text-primary)">${title}</h3></div>${content}<div style="display:flex;gap:0.75rem;margin-top:1.5rem"><button onclick="closeUserActionModal()" class="btn-secondary" style="flex:1;padding:0.75rem;border-radius:0.5rem;font-weight:500">Cancel</button><button onclick="confirmUserAction()" class="${confirmClass}" style="flex:1;padding:0.75rem;border-radius:0.5rem;font-weight:500">${confirmText}</button></div></div></div>`;
+  return renderModal(`
+    <button class="modal-close-x" onclick="closeModal()" title="Close">${I.x}</button>
+    <h3 style="font-weight:600;color:var(--text-primary);margin-bottom:1rem">${title}</h3>
+    ${content}
+    <div style="display:flex;gap:0.75rem;margin-top:1.5rem"><button onclick="closeModal()" class="btn-secondary" style="flex:1;padding:0.75rem;border-radius:0.5rem;font-weight:500">Cancel</button><button onclick="confirmUserAction()" class="${confirmClass}" style="flex:1;padding:0.75rem;border-radius:0.5rem;font-weight:500">${confirmText}</button></div>
+  `);
 }
 
 // ============ ACTIONS ============
@@ -723,14 +786,13 @@ function navigateTo(view) {
 }
 
 function openAuthModal(mode) { state.authMode = mode || 'signin'; state.showAuthModal = true; render(); }
-function closeAuthModal(e) { if (e) { e.stopPropagation(); e.preventDefault(); } state.showAuthModal = null; render(); }
 function toggleAuthMode() { state.authMode = state.authMode === 'signin' ? 'signup' : 'signin'; render(); }
 
 function signInWithGoogle() {
   const mockGoogleUser = { name: 'Alex Morgan', email: 'alex.morgan@gmail.com', avatar: 'A', provider: 'Google' };
   state.userName = mockGoogleUser.name; state.userEmail = mockGoogleUser.email; state.userAvatar = mockGoogleUser.avatar; state.userProvider = mockGoogleUser.provider;
   state.memberSince = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-  state.currentPlan = 'free'; state.showAuthModal = null; state.currentView = 'user-chat';
+  state.currentPlan = 'free'; closeModal(); state.currentView = 'user-chat';
   render();
 }
 
@@ -746,7 +808,7 @@ function signInWithEmail() {
   state.userName = state.authMode === 'signup' ? (name || email.split('@')[0]) : (name || email.split('@')[0]);
   state.userEmail = email; state.userAvatar = state.userName.charAt(0).toUpperCase(); state.userProvider = 'Email';
   state.memberSince = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-  state.showAuthModal = null; state.currentView = 'user-chat'; render();
+  closeModal(); state.currentView = 'user-chat'; render();
 }
 
 function signOut() {
@@ -779,11 +841,8 @@ function setLanguage(lang) { state.language = lang; render(); }
 function toggleDataControl(key) { state.dataControls[key] = !state.dataControls[key]; render(); }
 function selectPlan(plan) { state.currentPlan = plan; render(); setTimeout(() => alert(`Successfully switched to ${plan} plan!`), 100); }
 function openDeleteModal() { state.showDeleteModal = true; render(); }
-function closeDeleteModal(e) { if (e) e.stopPropagation(); state.showDeleteModal = false; render(); }
-function confirmDelete() { state.deleteRequested = true; state.showDeleteModal = false; render(); }
-function closeUpgradeModal(e) { if (e) e.stopPropagation(); state.showUpgradeModal = null; render(); }
+function confirmDelete() { state.deleteRequested = true; closeModal(); }
 function openUserAction(userId, type) { state.showUserActionModal = { userId, type }; render(); }
-function closeUserActionModal(e) { if (e) e.stopPropagation(); state.showUserActionModal = null; render(); }
 function confirmUserAction() {
   const action = state.showUserActionModal; if (!action) return;
   const user = mockUsers.find(u => u.id === action.userId); if (!user) return;
@@ -796,11 +855,10 @@ function confirmUserAction() {
     case 'unrestrict': user.accountStatus = 'active'; user.customLimits = null; break;
     case 'delete': const idx = mockUsers.findIndex(u => u.id === user.id); if (idx > -1) mockUsers.splice(idx, 1); break;
   }
-  state.showUserActionModal = null; render();
+  closeModal();
 }
 
 function openCreateKeyModal() { state.showCreateKeyModal = true; render(); }
-function closeCreateKeyModal(e) { if (e) e.stopPropagation(); state.showCreateKeyModal = false; render(); }
 function confirmCreateKey() {
   const nameInput = document.getElementById('new-key-name');
   const expiryInput = document.getElementById('new-key-expiry');
@@ -821,13 +879,11 @@ function confirmCreateKey() {
     tokens: tokens, used: 0, status: 'active', lastUsed: 'Never'
   });
   state.totalBalance -= tokens;
-  state.showCreateKeyModal = false;
-  render();
+  closeModal();
   setTimeout(() => alert(`API key created successfully!\n\nKey: ${keyStr}\n\nSave this key — it won't be shown again.`), 100);
 }
 
 function openRechargeModal() { state.showRechargeModal = true; render(); }
-function closeRechargeModal(e) { if (e) e.stopPropagation(); state.showRechargeModal = false; state.selectedCreditPackage = null; render(); }
 function selectCreditPackage(amount) { state.selectedCreditPackage = amount; state.customCreditAmount = 0; render(); }
 function updateCustomCredits(val) { state.customCreditAmount = parseInt(val) || 0; state.selectedCreditPackage = null; render(); }
 function processRecharge() {
@@ -835,8 +891,7 @@ function processRecharge() {
   if (!amount || amount < 100) { alert('Please select at least 100 credits'); return; }
   const price = amount * 0.0015;
   state.totalBalance += amount;
-  state.selectedCreditPackage = null; state.customCreditAmount = 0;
-  render();
+  closeModal();
   setTimeout(() => alert(`Successfully added ${amount.toLocaleString()} credits!\nNew balance: ${state.totalBalance.toLocaleString()} credits\nCharged: $${price.toFixed(2)}`), 100);
 }
 function processCustomRecharge() {
@@ -844,13 +899,11 @@ function processCustomRecharge() {
   const amount = input ? parseInt(input.value) : 0;
   if (!amount || amount < 100) { alert('Minimum 100 credits'); return; }
   state.totalBalance += amount;
-  state.showRechargeModal = false;
-  render();
+  closeModal();
   setTimeout(() => alert(`Successfully added ${amount.toLocaleString()} credits!`), 100);
 }
 
 function openKeyAction(keyId, type) { state.showKeyActionModal = { keyId, type }; render(); }
-function closeKeyActionModal(e) { if (e) e.stopPropagation(); state.showKeyActionModal = null; render(); }
 function confirmKeyAction() {
   const action = state.showKeyActionModal; if (!action) return;
   const key = state.apiKeys.find(k => k.id === action.keyId); if (!key) return;
@@ -862,7 +915,7 @@ function confirmKeyAction() {
     case 'regenerate': key.key = 'nx_live_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15); key.status = 'active'; break;
     case 'delete': const idx = state.apiKeys.findIndex(k => k.id === key.id); if (idx > -1) state.apiKeys.splice(idx, 1); break;
   }
-  state.showKeyActionModal = null; render();
+  closeModal();
 }
 
 function copyKey(keyId) {
@@ -885,15 +938,7 @@ function attachEventListeners() {
 
 document.addEventListener('keydown', (e) => {
   if (e.ctrlKey && e.shiftKey && e.key === 'A') { e.preventDefault(); if (state.currentRole === 'admin') navigateTo('admin-dashboard'); else navigateTo('admin-login'); }
-  if (e.key === 'Escape') {
-    if (state.showAuthModal) closeAuthModal();
-    else if (state.showUpgradeModal) closeUpgradeModal();
-    else if (state.showDeleteModal) closeDeleteModal();
-    else if (state.showUserActionModal) closeUserActionModal();
-    else if (state.showCreateKeyModal) closeCreateKeyModal();
-    else if (state.showRechargeModal) closeRechargeModal();
-    else if (state.showKeyActionModal) closeKeyActionModal();
-  }
+  if (e.key === 'Escape') closeModal();
 });
 
 render();
