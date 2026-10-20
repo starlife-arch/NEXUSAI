@@ -1,0 +1,2060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexusAI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+:root {
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #12121a;
+  --bg-tertiary: #1a1a2e;
+  --bg-card: #12121a;
+  --bg-input: #1a1a2e;
+  --bg-hover: rgba(124,58,237,0.1);
+  --bg-active: rgba(124,58,237,0.2);
+  --text-primary: #ffffff;
+  --text-secondary: #9ca3af;
+  --text-subtle: #6b7280;
+  --border-color: rgba(255,255,255,0.05);
+  --border-subtle: rgba(255,255,255,0.08);
+  --card-border: rgba(255,255,255,0.05);
+  --glow-border: rgba(124,58,237,0.3);
+  --glow-shadow: rgba(124,58,237,0.1);
+  --scrollbar-track: #1a1a2e;
+  --scrollbar-thumb: #7c3aed;
+  --modal-bg: #12121a;
+  --modal-border: rgba(255,255,255,0.1);
+  --badge-bg: rgba(255,255,255,0.05);
+  --stat-bg: rgba(124,58,237,0.05);
+}
+
+body.light {
+  --bg-primary: #f8f9fc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f3f9;
+  --bg-card: #ffffff;
+  --bg-input: #f1f3f9;
+  --bg-hover: rgba(124,58,237,0.08);
+  --bg-active: rgba(124,58,237,0.12);
+  --text-primary: #1a1a2e;
+  --text-secondary: #6b7280;
+  --text-subtle: #9ca3af;
+  --border-color: rgba(0,0,0,0.06);
+  --border-subtle: rgba(0,0,0,0.08);
+  --card-border: rgba(0,0,0,0.08);
+  --glow-border: rgba(124,58,237,0.2);
+  --glow-shadow: rgba(124,58,237,0.05);
+  --scrollbar-track: #f1f3f9;
+  --scrollbar-thumb: #a78bfa;
+  --modal-bg: #ffffff;
+  --modal-border: rgba(0,0,0,0.1);
+  --badge-bg: rgba(0,0,0,0.04);
+  --stat-bg: rgba(124,58,237,0.05);
+}
+
+* { box-sizing: border-box; scrollbar-width: thin; scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); }
+*::-webkit-scrollbar { width: 6px; }
+*::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+*::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; background: var(--bg-primary); color: var(--text-primary); transition: background 0.3s, color 0.3s; }
+
+.gradient-text { background: linear-gradient(135deg, #7c3aed, #00d4ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.glow-border { border: 1px solid var(--glow-border); box-shadow: 0 0 15px var(--glow-shadow); }
+
+.pulse-dot { animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(1.2); } }
+@keyframes slideIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+.slide-in { animation: slideIn 0.3s ease-out; }
+
+.typing-indicator span { display:inline-block; width:6px; height:6px; border-radius:50%; background:#7c3aed; margin:0 2px; animation: typing 1.4s infinite; }
+.typing-indicator span:nth-child(2) { animation-delay:0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay:0.4s; }
+@keyframes typing { 0%,60%,100% { transform:translateY(0); opacity:0.4; } 30% { transform:translateY(-6px); opacity:1; } }
+
+.chat-bubble-user { background: linear-gradient(135deg, #7c3aed, #5b21b6); color: white; }
+.chat-bubble-ai { background: var(--bg-tertiary); border: 1px solid rgba(124,58,237,0.2); color: var(--text-primary); }
+.chat-bubble-human { background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.3); color: var(--text-primary); }
+
+.sidebar-item { transition: background 0.2s; color: var(--text-secondary); }
+.sidebar-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+.sidebar-item.active { background: var(--bg-active); border-left: 3px solid #7c3aed; color: #a78bfa; }
+
+.card { background: var(--bg-card); border: 1px solid var(--card-border); border-radius: 0.75rem; color: var(--text-primary); }
+
+.btn-primary { background: linear-gradient(135deg, #7c3aed, #00d4ff); color: white; border: none; cursor: pointer; }
+.btn-primary:hover { opacity: 0.9; }
+.btn-secondary { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer; }
+.btn-secondary:hover { background: var(--bg-hover); }
+.btn-danger { background: rgba(255,0,110,0.1); border: 1px solid rgba(255,0,110,0.3); color: #ff006e; cursor: pointer; }
+.btn-danger:hover { background: rgba(255,0,110,0.2); }
+.btn-success { background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); color: #00ff88; cursor: pointer; }
+.btn-warning { background: rgba(234,179,8,0.1); border: 1px solid rgba(234,179,8,0.3); color: #eab308; cursor: pointer; }
+
+.input-field { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-primary); outline: none; }
+.input-field:focus { border-color: #7c3aed; }
+.input-field::placeholder { color: var(--text-subtle); }
+
+.text-muted { color: var(--text-secondary); }
+.text-subtle { color: var(--text-subtle); }
+.border-subtle { border-color: var(--border-color); }
+
+.plan-badge { display: inline-flex; align-items: center; padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.625rem; font-weight: 600; text-transform: uppercase; }
+.plan-free { background: rgba(107,114,128,0.15); color: #9ca3af; }
+.plan-pro { background: rgba(124,58,237,0.15); color: #a78bfa; }
+.plan-enterprise { background: rgba(0,212,255,0.15); color: #00d4ff; }
+.plan-banned { background: rgba(255,0,110,0.15); color: #ff006e; }
+.plan-restricted { background: rgba(234,179,8,0.15); color: #eab308; }
+
+.tab-btn { padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500; cursor: pointer; background: transparent; border: none; color: var(--text-secondary); }
+.tab-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+.tab-btn.active { background: var(--bg-active); color: #a78bfa; }
+
+.faq-item { border-bottom: 1px solid var(--border-color); }
+
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; display: flex; align-items: center; justify-content: center; }
+.modal-content { background: var(--modal-bg); border: 1px solid var(--modal-border); border-radius: 1rem; padding: 2rem; max-width: 32rem; width: 90%; color: var(--text-primary); max-height: 90vh; overflow-y: auto; }
+
+.status-dot { width: 0.5rem; height: 0.5rem; border-radius: 9999px; }
+.status-online { background: #00ff88; }
+.status-idle { background: #6b7280; }
+.status-banned { background: #ff006e; }
+.status-restricted { background: #eab308; }
+
+.action-btn { padding: 0.375rem 0.625rem; border-radius: 0.375rem; font-size: 0.75rem; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem; }
+
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 0.75rem 1rem; font-size: 0.75rem; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; border-bottom: 1px solid var(--border-color); }
+td { padding: 0.875rem 1rem; font-size: 0.875rem; border-bottom: 1px solid var(--border-color); color: var(--text-primary); }
+tr:hover td { background: var(--bg-hover); }
+
+select.input-field { appearance: auto; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const I = {
+  brain: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/></svg>`,
+  chat: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
+  plus: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+  user: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+  userStar: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polygon points="17.5 11 19 15.5 23.5 15.5 20 18.5 21 23 17.5 20.5 14 23 15 18.5 11.5 15.5 16 15.5 17.5 11"/></svg>`,
+  send: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>`,
+  robot: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>`,
+  bell: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`,
+  shield: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+  dashboard: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>`,
+  users: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+  history: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>`,
+  chart: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+  settings: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
+  eye: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
+  login: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>`,
+  logout: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
+  arrowLeft: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>`,
+  lock: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
+  zap: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+  sparkle: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3z"/></svg>`,
+  shieldCheck: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>`,
+  clock: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+  check: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  code: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
+  help: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  credit: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>`,
+  sun: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
+  moon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
+  globe: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+  database: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>`,
+  trash: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
+  chevron: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`,
+  x: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  download: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+  list: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`,
+  ban: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>`,
+  restrict: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+  crown: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"/><path d="M5 17l2-10 5 4 5-4 2 10"/></svg>`,
+  limit: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>`
+};
+
+const state = {
+  currentView: 'landing',
+  currentRole: 'user',
+  selectedChat: null,
+  selectedUser: null,
+  humanRequested: false,
+  humanJoined: false,
+  adminJoinedChats: new Set(),
+  newMessage: '',
+  adminMessage: '',
+  isTyping: false,
+  notifications: 3,
+  theme: 'dark',
+  currentPlan: 'free',
+  settingsTab: 'account',
+  language: 'English',
+  dataControls: { analytics: true, personalization: false, shareData: false },
+  openFaq: null,
+  showUpgradeModal: null,
+  showDeleteModal: false,
+  showUserActionModal: null,
+  deleteRequested: false,
+  userName: 'Guest User',
+  userEmail: 'guest@nexusai.com',
+  memberSince: 'Oct 2026',
+  totalChats: 24,
+  apiCalls: 1247,
+  humanRequestsUsed: 0,
+  messagesToday: 12,
+  adminTab: 'dashboard',
+  userSearch: ''
+};
+
+const mockUsers = [
+  { id: 'u1', name: 'Sarah Chen', email: 'sarah@email.com', status: 'online', plan: 'Pro', messagesToday: 45, totalChats: 24, apiCalls: 1247, humanRequests: 3, memberSince: 'Jan 2026', accountStatus: 'active', customLimits: null },
+  { id: 'u2', name: 'Marcus Johnson', email: 'marcus@email.com', status: 'online', plan: 'Free', messagesToday: 12, totalChats: 8, apiCalls: 340, humanRequests: 0, memberSince: 'Mar 2026', accountStatus: 'active', customLimits: null },
+  { id: 'u3', name: 'Aisha Patel', email: 'aisha@email.com', status: 'idle', plan: 'Enterprise', messagesToday: 89, totalChats: 56, apiCalls: 4521, humanRequests: 12, memberSince: 'Nov 2025', accountStatus: 'active', customLimits: null },
+  { id: 'u4', name: 'Tom Wilson', email: 'tom@email.com', status: 'online', plan: 'Pro', messagesToday: 23, totalChats: 15, apiCalls: 892, humanRequests: 2, memberSince: 'Feb 2026', accountStatus: 'restricted', customLimits: { messagesPerDay: 20 } },
+  { id: 'u5', name: 'Luna Rodriguez', email: 'luna@email.com', status: 'idle', plan: 'Free', messagesToday: 5, totalChats: 3, apiCalls: 120, humanRequests: 0, memberSince: 'Aug 2026', accountStatus: 'banned', customLimits: null },
+];
+
+const mockChatSessions = [
+  { id: 'c1', userId: 'u1', topic: 'React Performance Optimization', messages: 24, lastMessage: '2 min ago', humanRequested: true, humanJoined: false, status: 'active' },
+  { id: 'c2', userId: 'u2', topic: 'Logo Design Ideas', messages: 12, lastMessage: '5 min ago', humanRequested: false, humanJoined: false, status: 'active' },
+  { id: 'c3', userId: 'u3', topic: 'Data Pipeline Architecture', messages: 45, lastMessage: '1 hr ago', humanRequested: false, humanJoined: false, status: 'active' },
+  { id: 'c4', userId: 'u4', topic: 'Business Strategy AI', messages: 8, lastMessage: 'Just now', humanRequested: true, humanJoined: false, status: 'active' },
+  { id: 'c5', userId: 'u5', topic: 'Music Generation Help', messages: 6, lastMessage: '30 min ago', humanRequested: false, humanJoined: false, status: 'idle' },
+];
+
+const mockMessages = [
+  { id: 1, role: 'user', content: "Hey, I need help optimizing my React application. It's getting really slow with large datasets.", timestamp: '10:30 AM' },
+  { id: 2, role: 'ai', content: "I'd be happy to help! There are several strategies we can use:\n\n1. Virtualization - Use react-window for large lists\n2. Memoization - React.memo, useMemo, useCallback\n3. Code splitting - Dynamic imports with React.lazy\n4. State management - Consider Zustand over Context\n\nWhich area would you like to dive deeper into?", timestamp: '10:30 AM' },
+  { id: 3, role: 'user', content: "The main issue is with rendering a table of 10,000+ rows with real-time updates.", timestamp: '10:32 AM' },
+  { id: 4, role: 'ai', content: "For real-time tables with 10k+ rows, here's my recommended approach:\n\nUse react-window for virtualization - it only renders visible rows.\n\nFor real-time updates:\n- Batch WebSocket updates (16ms intervals)\n- Use useDeferredValue for non-critical re-renders\n- Consider Web Workers for data processing\n\nWant me to create a complete implementation?", timestamp: '10:33 AM' },
+  { id: 5, role: 'user', content: "Yes please! Also, can I get a human expert to review my code after?", timestamp: '10:35 AM' },
+  { id: 6, role: 'ai', content: "Absolutely! I've noted your request for human review. An expert will join this chat shortly.\n\nHuman response requested - An admin will join this conversation soon.", timestamp: '10:35 AM' },
+];
+
+const faqs = [
+  { q: 'How do I request a human expert?', a: 'Click the "Request Human Expert" button in any chat. This feature requires a Pro or Enterprise plan. An admin will join your conversation within minutes.' },
+  { q: 'What payment methods do you accept?', a: 'We accept all major credit cards, debit cards, and PayPal. All payments are processed securely.' },
+  { q: 'Can I cancel my subscription anytime?', a: 'Yes, you can cancel anytime from your Plans page. You\'ll retain access until the end of your billing period.' },
+  { q: 'How do I delete my account?', a: 'Go to Settings > Account > Request Account Deletion. Your data will be removed within 30 days.' },
+  { q: 'Is my data private?', a: 'Yes. All conversations are encrypted. You control your data through Settings > Data Controls.' },
+  { q: 'What is the Coder feature?', a: 'Coder is an AI-powered coding assistant that can write, debug, and explain code. It requires a Pro or Enterprise plan.' },
+  { q: 'How many messages can I send?', a: 'Free plan: 50 messages/day. Pro & Enterprise: unlimited.' },
+  { q: 'Can I change my language?', a: 'Yes, go to Settings > Language to choose from 20+ supported languages.' }
+];
+
+const docs = [
+  { title: 'Getting Started', desc: 'Learn the basics of NexusAI', icon: I.sparkle },
+  { title: 'Chat Guide', desc: 'Tips for better AI conversations', icon: I.chat },
+  { title: 'Coder Documentation', desc: 'Master the AI coding assistant', icon: I.code },
+  { title: 'API Reference', desc: 'Integrate NexusAI into your apps', icon: I.database },
+  { title: 'Billing & Plans', desc: 'Manage subscriptions and payments', icon: I.credit },
+  { title: 'Privacy & Security', desc: 'How we protect your data', icon: I.shieldCheck }
+];
+
+function render() {
+  document.body.className = state.theme;
+  const app = document.getElementById('app');
+  let html = '';
+  const isAdminView = state.currentRole === 'admin' && (state.currentView === 'admin-dashboard' || state.currentView === 'admin-chat');
+  const isUserView = !isAdminView && state.currentView !== 'landing' && state.currentView !== 'admin-login';
+  
+  if (isUserView || isAdminView) html += renderNavbar();
+  if (state.currentView === 'landing') html += renderLanding();
+  else if (state.currentView === 'user-chat') html += renderUserChat();
+  else if (state.currentView === 'user-all-chats') html += renderUserAllChats();
+  else if (state.currentView === 'user-coder') html += renderUserCoder();
+  else if (state.currentView === 'user-profile') html += renderUserProfile();
+  else if (state.currentView === 'user-plans') html += renderUserPlans();
+  else if (state.currentView === 'user-help') html += renderUserHelp();
+  else if (state.currentView === 'user-settings') html += renderUserSettings();
+  else if (state.currentView === 'admin-login') html += renderAdminLogin();
+  else if (state.currentView === 'admin-dashboard') html += renderAdminDashboard();
+  else if (state.currentView === 'admin-chat') html += renderAdminChat();
+  
+  app.innerHTML = html;
+  
+  if (state.showUpgradeModal) {
+    const modalDiv = document.createElement('div');
+    modalDiv.innerHTML = renderUpgradeModal();
+    document.body.appendChild(modalDiv.firstElementChild);
+  }
+  if (state.showDeleteModal) {
+    const modalDiv = document.createElement('div');
+    modalDiv.innerHTML = renderDeleteModal();
+    document.body.appendChild(modalDiv.firstElementChild);
+  }
+  if (state.showUserActionModal) {
+    const modalDiv = document.createElement('div');
+    modalDiv.innerHTML = renderUserActionModal();
+    document.body.appendChild(modalDiv.firstElementChild);
+  }
+  
+  attachEventListeners();
+}
+
+function renderNavbar() {
+  const isAdmin = state.currentRole === 'admin' && (state.currentView === 'admin-dashboard' || state.currentView === 'admin-chat');
+  return `
+  <nav style="position:fixed;top:0;left:0;right:0;z-index:50;background:var(--bg-secondary);backdrop-filter:blur(12px);border-bottom:1px solid var(--border-color)">
+    <div style="max-width:1280px;margin:0 auto;padding:0 1.5rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;height:4rem">
+        <div style="display:flex;align-items:center;gap:0.75rem;cursor:pointer" onclick="navigateTo('${isAdmin ? 'admin-dashboard' : 'landing'}')">
+          <div style="width:2rem;height:2rem;border-radius:0.5rem;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;color:white">
+            ${I.brain}
+          </div>
+          <span style="font-size:1.125rem;font-weight:bold" class="gradient-text">NexusAI</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:1rem">
+          <button onclick="toggleTheme()" style="padding:0.5rem;border-radius:0.5rem;background:transparent;border:none;cursor:pointer;color:var(--text-secondary)" title="Toggle theme">
+            ${state.theme === 'dark' ? I.sun : I.moon}
+          </button>
+          <div style="position:relative">
+            <button style="padding:0.5rem;border-radius:0.5rem;background:transparent;border:none;cursor:pointer;color:var(--text-secondary)">
+              ${I.bell}
+              ${state.notifications > 0 ? `<span style="position:absolute;top:-2px;right:-2px;width:1rem;height:1rem;background:#ff006e;border-radius:9999px;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:bold;color:white">${state.notifications}</span>` : ''}
+            </button>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.5rem;padding:0.375rem 0.75rem;border-radius:9999px;background:var(--bg-tertiary);border:1px solid var(--border-color)">
+            <div style="width:0.5rem;height:0.5rem;border-radius:9999px;background:${isAdmin ? '#00d4ff' : '#00ff88'}"></div>
+            <span style="font-size:0.875rem;color:var(--text-primary)">${isAdmin ? 'Admin' : state.userName}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>`;
+}
+
+function renderLanding() {
+  return `
+  <main style="padding-top:4rem">
+    <section style="position:relative;min-height:calc(100vh - 4rem);display:flex;align-items:center;justify-content:center;overflow:hidden">
+      <div style="position:absolute;inset:0">
+        <div style="position:absolute;top:25%;left:25%;width:24rem;height:24rem;background:rgba(124,58,237,0.1);border-radius:9999px;filter:blur(80px)"></div>
+        <div style="position:absolute;bottom:25%;right:25%;width:24rem;height:24rem;background:rgba(0,212,255,0.1);border-radius:9999px;filter:blur(80px)"></div>
+      </div>
+      <div style="position:relative;z-index:10;max-width:48rem;margin:0 auto;padding:1rem;text-align:center">
+        <div style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:9999px;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.2);margin-bottom:2rem">
+          <span style="width:0.5rem;height:0.5rem;border-radius:9999px;background:#00ff88" class="pulse-dot"></span>
+          <span style="font-size:0.875rem;color:#a78bfa">AI-Powered Conversations</span>
+        </div>
+        <h1 style="font-size:clamp(2.5rem,5vw,4rem);font-weight:bold;margin-bottom:1.5rem;line-height:1.1;color:var(--text-primary)">
+          Chat with AI.<br><span class="gradient-text">Get Human Help.</span>
+        </h1>
+        <p style="font-size:1.125rem;color:var(--text-secondary);max-width:36rem;margin:0 auto 2.5rem">
+          Get instant answers from AI. Request a human expert anytime you need personalized assistance.
+        </p>
+        <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:1rem">
+          <button onclick="navigateTo('user-chat')" class="btn-primary" style="padding:0.875rem 1.75rem;border-radius:0.75rem;font-weight:600;box-shadow:0 10px 30px rgba(124,58,237,0.3)">
+            Start Chatting
+          </button>
+        </div>
+        <p style="font-size:0.75rem;color:var(--text-subtle);margin-top:2rem;opacity:0.5">Press Ctrl+Shift+A for admin access</p>
+      </div>
+    </section>
+    
+    <section style="padding:4rem 1rem;border-top:1px solid var(--border-color)">
+      <div style="max-width:64rem;margin:0 auto">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.5rem">
+          <div class="card" style="padding:1.5rem">
+            <div style="width:2.5rem;height:2.5rem;border-radius:0.5rem;background:rgba(124,58,237,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;color:#a78bfa">
+              ${I.sparkle}
+            </div>
+            <h3 style="font-weight:600;margin-bottom:0.5rem;color:var(--text-primary)">Multi-AI Powered</h3>
+            <p style="font-size:0.875rem;color:var(--text-secondary)">Access multiple AI models through one interface.</p>
+          </div>
+          <div class="card" style="padding:1.5rem">
+            <div style="width:2.5rem;height:2.5rem;border-radius:0.5rem;background:rgba(0,212,255,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;color:#00d4ff">
+              ${I.userStar}
+            </div>
+            <h3 style="font-weight:600;margin-bottom:0.5rem;color:var(--text-primary)">Human Expert Access</h3>
+            <p style="font-size:0.875rem;color:var(--text-secondary)">Request human assistance anytime during your chat.</p>
+          </div>
+          <div class="card" style="padding:1.5rem">
+            <div style="width:2.5rem;height:2.5rem;border-radius:0.5rem;background:rgba(0,255,136,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;color:#00ff88">
+              ${I.shieldCheck}
+            </div>
+            <h3 style="font-weight:600;margin-bottom:0.5rem;color:var(--text-primary)">Secure & Private</h3>
+            <p style="font-size:0.875rem;color:var(--text-secondary)">Encrypted conversations with full data control.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <section style="padding:4rem 1rem;border-top:1px solid var(--border-color)">
+      <div style="max-width:64rem;margin:0 auto;text-align:center">
+        <h2 style="font-size:2rem;font-weight:bold;margin-bottom:1rem;color:var(--text-primary)">Simple, Affordable Pricing</h2>
+        <p style="color:var(--text-secondary);margin-bottom:2rem">Start free. Upgrade when you're ready.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;max-width:56rem;margin:0 auto">
+          ${renderPlanCard('Free', '$0', '/mo', ['50 messages/day', 'Basic AI chat', 'Community support'], 'plan-free', false)}
+          ${renderPlanCard('Pro', '$2.99', '/mo', ['Unlimited messages', 'Coder access', 'Human expert', 'Priority support'], 'plan-pro', true)}
+          ${renderPlanCard('Enterprise', '$9.99', '/mo', ['Everything in Pro', 'API access', 'Team features', 'Dedicated support'], 'plan-enterprise', false)}
+        </div>
+      </div>
+    </section>
+    
+    <footer style="border-top:1px solid var(--border-color);padding:1.5rem">
+      <div style="max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+        <div style="display:flex;align-items:center;gap:0.5rem">
+          <div style="width:1.5rem;height:1.5rem;border-radius:0.375rem;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;color:white">
+            ${I.brain}
+          </div>
+          <span style="font-weight:bold" class="gradient-text">NexusAI</span>
+        </div>
+        <p style="font-size:0.875rem;color:var(--text-subtle)">© 2026 NexusAI</p>
+      </div>
+    </footer>
+  </main>`;
+}
+
+function renderPlanCard(name, price, period, features, badgeClass, popular) {
+  return `
+  <div class="card" style="padding:1.5rem;position:relative;${popular ? 'border-color:rgba(124,58,237,0.4)' : ''}">
+    ${popular ? `<div style="position:absolute;top:-0.75rem;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#7c3aed,#00d4ff);color:white;padding:0.25rem 0.75rem;border-radius:9999px;font-size:0.75rem;font-weight:600">Most Popular</div>` : ''}
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <h3 style="font-weight:600;color:var(--text-primary)">${name}</h3>
+      <span class="plan-badge ${badgeClass}">${name}</span>
+    </div>
+    <div style="margin-bottom:1.5rem">
+      <span style="font-size:2rem;font-weight:bold;color:var(--text-primary)">${price}</span>
+      <span style="color:var(--text-secondary)">${period}</span>
+    </div>
+    <ul style="list-style:none;padding:0;margin:0 0 1.5rem 0;display:flex;flex-direction:column;gap:0.5rem">
+      ${features.map(f => `<li style="display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;color:var(--text-primary)"><span style="color:#00ff88">${I.check}</span> ${f}</li>`).join('')}
+    </ul>
+    <button onclick="navigateTo('user-plans')" class="${popular ? 'btn-primary' : 'btn-secondary'}" style="width:100%;padding:0.625rem;border-radius:0.5rem;font-weight:500;font-size:0.875rem">
+      ${name === 'Free' ? 'Current Plan' : 'Upgrade'}
+    </button>
+  </div>`;
+}
+
+function renderUserSidebar() {
+  const isPaid = state.currentPlan !== 'free';
+  return `
+  <aside style="width:16rem;background:var(--bg-secondary);border-right:1px solid var(--border-color);display:flex;flex-direction:column">
+    <div style="padding:1rem;border-bottom:1px solid var(--border-color)">
+      <button onclick="newChat()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.625rem;border-radius:0.5rem;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.2);color:#a78bfa;cursor:pointer;font-size:0.875rem;font-weight:500">
+        ${I.plus} New Chat
+      </button>
+    </div>
+    <nav style="flex:1;overflow-y:auto;padding:0.75rem;display:flex;flex-direction:column;gap:0.125rem">
+      <div class="sidebar-item ${state.currentView === 'user-chat' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="navigateTo('user-chat')">
+        <span>${I.chat}</span>
+        <span style="font-size:0.875rem">Chat</span>
+      </div>
+      <div class="sidebar-item ${state.currentView === 'user-all-chats' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="navigateTo('user-all-chats')">
+        <span>${I.list}</span>
+        <span style="font-size:0.875rem">All Chats</span>
+      </div>
+      <div class="sidebar-item ${state.currentView === 'user-coder' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer;position:relative" onclick="handleCoderClick()">
+        <span>${I.code}</span>
+        <span style="font-size:0.875rem;flex:1">Coder</span>
+        ${!isPaid ? `<span style="font-size:0.625rem;padding:0.125rem 0.375rem;border-radius:0.25rem;background:rgba(124,58,237,0.2);color:#a78bfa">PRO</span>` : ''}
+      </div>
+      <div style="height:1px;background:var(--border-color);margin:0.5rem 0"></div>
+      <div class="sidebar-item ${state.currentView === 'user-profile' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="navigateTo('user-profile')">
+        <span>${I.user}</span>
+        <span style="font-size:0.875rem">Profile</span>
+      </div>
+      <div class="sidebar-item ${state.currentView === 'user-plans' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="navigateTo('user-plans')">
+        <span>${I.credit}</span>
+        <span style="font-size:0.875rem">Plans & Payments</span>
+      </div>
+      <div class="sidebar-item ${state.currentView === 'user-settings' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="navigateTo('user-settings')">
+        <span>${I.settings}</span>
+        <span style="font-size:0.875rem">Settings</span>
+      </div>
+      <div class="sidebar-item ${state.currentView === 'user-help' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="navigateTo('user-help')">
+        <span>${I.help}</span>
+        <span style="font-size:0.875rem">Help Center</span>
+      </div>
+    </nav>
+    <div style="padding:0.75rem;border-top:1px solid var(--border-color)">
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem">
+        <div style="width:2rem;height:2rem;border-radius:9999px;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;color:white">
+          ${I.user}
+        </div>
+        <div style="flex:1;min-width:0">
+          <p style="font-size:0.875rem;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-primary)">${state.userName}</p>
+          <span class="plan-badge plan-${state.currentPlan}">${state.currentPlan}</span>
+        </div>
+      </div>
+      <button onclick="toggleTheme()" class="btn-secondary" style="width:100%;padding:0.5rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;justify-content:center;gap:0.5rem">
+        ${state.theme === 'dark' ? I.sun : I.moon} ${state.theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+      </button>
+    </div>
+  </aside>`;
+}
+
+function renderUserChat() {
+  const isPaid = state.currentPlan !== 'free';
+  return `
+  <main style="padding-top:4rem;height:100vh;display:flex">
+    ${renderUserSidebar()}
+    <div style="flex:1;display:flex;flex-direction:column">
+      ${state.humanJoined ? `
+      <div class="slide-in" style="margin:1rem;padding:0.75rem 1rem;border-radius:0.5rem;display:flex;align-items:center;gap:0.75rem;background:linear-gradient(90deg,rgba(0,212,255,0.1),rgba(124,58,237,0.1));border:1px solid rgba(0,212,255,0.3)">
+        <div style="width:2rem;height:2rem;border-radius:9999px;background:rgba(0,212,255,0.2);display:flex;align-items:center;justify-content:center;color:#00d4ff">
+          ${I.userStar}
+        </div>
+        <div style="flex:1">
+          <p style="font-size:0.875rem;font-weight:500;color:#00d4ff">Human Expert Joined</p>
+          <p style="font-size:0.75rem;color:var(--text-secondary)">Admin is now monitoring this conversation</p>
+        </div>
+        <span style="width:0.5rem;height:0.5rem;border-radius:9999px;background:#00d4ff" class="pulse-dot"></span>
+      </div>` : ''}
+      
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-bottom:1px solid var(--border-color)">
+        <div style="display:flex;align-items:center;gap:0.75rem">
+          <div style="width:2.25rem;height:2.25rem;border-radius:0.5rem;background:linear-gradient(135deg,#7c3aed,#b14eff);display:flex;align-items:center;justify-content:center;color:white">
+            ${I.robot}
+          </div>
+          <div>
+            <h3 style="font-weight:600;font-size:0.9375rem;color:var(--text-primary)">React Performance Optimization</h3>
+            <p style="font-size:0.75rem;color:var(--text-secondary);display:flex;align-items:center;gap:0.25rem">
+              <span style="width:0.375rem;height:0.375rem;border-radius:9999px;background:#00ff88"></span>
+              AI Active
+            </p>
+          </div>
+        </div>
+        <div>
+          ${!state.humanRequested && !state.humanJoined ? `
+          <button onclick="handleHumanRequest()" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:0.5rem;background:rgba(255,0,110,0.1);border:1px solid rgba(255,0,110,0.3);color:#ff006e;cursor:pointer;font-size:0.875rem">
+            ${I.userStar} Request Human Expert ${!isPaid ? '<span style="font-size:0.625rem;padding:0.125rem 0.375rem;border-radius:0.25rem;background:rgba(124,58,237,0.3);color:#a78bfa;margin-left:0.25rem">PRO</span>' : ''}
+          </button>` : state.humanRequested && !state.humanJoined ? `
+          <div style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:0.5rem;background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.3);color:#eab308;font-size:0.875rem">
+            <span style="width:0.5rem;height:0.5rem;border-radius:9999px;background:#eab308" class="pulse-dot"></span>
+            Waiting for expert...
+          </div>` : ''}
+        </div>
+      </div>
+      
+      <div style="flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1.5rem" id="chat-messages">
+        ${mockMessages.map(msg => renderMessage(msg)).join('')}
+        ${state.isTyping ? `
+        <div class="slide-in" style="display:flex;align-items:flex-start;gap:0.75rem">
+          <div style="width:2rem;height:2rem;border-radius:0.5rem;background:rgba(124,58,237,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#a78bfa">
+            ${I.robot}
+          </div>
+          <div class="chat-bubble-ai" style="border-radius:1rem;border-top-left-radius:0.25rem;padding:0.75rem 1rem">
+            <div class="typing-indicator"><span></span><span></span><span></span></div>
+          </div>
+        </div>` : ''}
+      </div>
+      
+      <div style="border-top:1px solid var(--border-color);padding:1rem 1.5rem">
+        <div style="display:flex;align-items:center;gap:0.75rem">
+          <input type="text" id="user-message-input" value="${state.newMessage}" placeholder="Type your message..." 
+            class="input-field"
+            style="flex:1;padding:0.75rem 1rem;border-radius:0.5rem;font-size:0.875rem"
+            onkeydown="if(event.key==='Enter')sendMessage()">
+          <button onclick="sendMessage()" class="btn-primary" style="padding:0.75rem;border-radius:0.5rem">
+            ${I.send}
+          </button>
+        </div>
+        <p style="font-size:0.75rem;color:var(--text-subtle);margin-top:0.5rem;text-align:center">AI can make mistakes. Verify important information.</p>
+      </div>
+    </div>
+  </main>`;
+}
+
+function renderMessage(msg) {
+  if (msg.role === 'user') {
+    return `
+    <div class="slide-in" style="display:flex;align-items:flex-start;gap:0.75rem;justify-content:flex-end">
+      <div class="chat-bubble-user" style="border-radius:1rem;border-top-right-radius:0.25rem;padding:0.75rem 1rem;max-width:28rem">
+        <p style="font-size:0.875rem;line-height:1.625">${msg.content}</p>
+        <p style="font-size:0.625rem;color:rgba(255,255,255,0.5);margin-top:0.25rem;text-align:right">${msg.timestamp}</p>
+      </div>
+      <div style="width:2rem;height:2rem;border-radius:0.5rem;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:white">
+        ${I.user}
+      </div>
+    </div>`;
+  } else if (msg.role === 'ai') {
+    return `
+    <div class="slide-in" style="display:flex;align-items:flex-start;gap:0.75rem">
+      <div style="width:2rem;height:2rem;border-radius:0.5rem;background:rgba(124,58,237,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#a78bfa">
+        ${I.robot}
+      </div>
+      <div class="chat-bubble-ai" style="border-radius:1rem;border-top-left-radius:0.25rem;padding:0.75rem 1rem;max-width:36rem">
+        <p style="font-size:0.875rem;line-height:1.625;white-space:pre-line">${msg.content}</p>
+        <p style="font-size:0.625rem;color:var(--text-subtle);margin-top:0.5rem">${msg.timestamp}</p>
+      </div>
+    </div>`;
+  } else if (msg.role === 'human') {
+    return `
+    <div class="slide-in" style="display:flex;align-items:flex-start;gap:0.75rem">
+      <div style="width:2rem;height:2rem;border-radius:0.5rem;background:rgba(0,212,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#00d4ff">
+        ${I.userStar}
+      </div>
+      <div class="chat-bubble-human" style="border-radius:1rem;border-top-left-radius:0.25rem;padding:0.75rem 1rem;max-width:36rem">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem">
+          <span style="font-size:0.75rem;font-weight:500;color:#00d4ff">Admin Expert</span>
+          <span style="font-size:0.625rem;padding:0.125rem 0.375rem;border-radius:0.25rem;background:rgba(0,212,255,0.1);color:#00d4ff">Human</span>
+        </div>
+        <p style="font-size:0.875rem;line-height:1.625">${msg.content}</p>
+        <p style="font-size:0.625rem;color:var(--text-subtle);margin-top:0.5rem">${msg.timestamp}</p>
+      </div>
+    </div>`;
+  }
+  return '';
+}
+
+function renderUserAllChats() {
+  return `
+  <main style="padding-top:4rem;height:100vh;display:flex">
+    ${renderUserSidebar()}
+    <div style="flex:1;overflow-y:auto">
+      <div style="padding:1.5rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+          <div>
+            <h2 style="font-size:1.5rem;font-weight:bold;color:var(--text-primary)">All Chats</h2>
+            <p style="font-size:0.875rem;color:var(--text-secondary)">View and manage your conversations</p>
+          </div>
+          <button onclick="newChat()" class="btn-primary" style="padding:0.625rem 1rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem">
+            ${I.plus} New Chat
+          </button>
+        </div>
+        <input type="text" placeholder="Search chats..." class="input-field" style="width:100%;padding:0.75rem 1rem;border-radius:0.5rem;font-size:0.875rem;margin-bottom:1rem">
+        <div style="display:flex;flex-direction:column;gap:0.75rem">
+          ${mockChatSessions.map(chat => `
+          <div class="card" style="padding:1rem;display:flex;align-items:center;gap:1rem;cursor:pointer" onclick="openChat('${chat.id}')">
+            <div style="width:2.5rem;height:2.5rem;border-radius:0.5rem;background:rgba(124,58,237,0.1);display:flex;align-items:center;justify-content:center;color:#a78bfa">
+              ${I.chat}
+            </div>
+            <div style="flex:1;min-width:0">
+              <p style="font-weight:500;font-size:0.9375rem;color:var(--text-primary)">${chat.topic}</p>
+              <p style="font-size:0.75rem;color:var(--text-secondary)">${chat.messages} messages • ${chat.lastMessage}</p>
+            </div>
+            <span class="plan-badge ${chat.status === 'active' ? 'plan-pro' : 'plan-free'}">${chat.status}</span>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </main>`;
+}
+
+function renderUserCoder() {
+  const isPaid = state.currentPlan !== 'free';
+  return `
+  <main style="padding-top:4rem;height:100vh;display:flex">
+    ${renderUserSidebar()}
+    <div style="flex:1;display:flex;flex-direction:column;position:relative">
+      <div style="display:flex;align-items:center;gap:0.75rem;padding:1rem 1.5rem;border-bottom:1px solid var(--border-color)">
+        <div style="width:2.25rem;height:2.25rem;border-radius:0.5rem;background:linear-gradient(135deg,#00d4ff,#7c3aed);display:flex;align-items:center;justify-content:center;color:white">
+          ${I.code}
+        </div>
+        <div>
+          <h3 style="font-weight:600;color:var(--text-primary)">Coder</h3>
+          <p style="font-size:0.75rem;color:var(--text-secondary)">AI-powered coding assistant</p>
+        </div>
+      </div>
+      ${!isPaid ? `
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:2rem">
+        <div class="card" style="padding:2rem;max-width:24rem;text-align:center">
+          <div style="width:3rem;height:3rem;border-radius:0.75rem;background:rgba(124,58,237,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;color:#a78bfa">
+            ${I.lock}
+          </div>
+          <h3 style="font-weight:600;margin-bottom:0.5rem;color:var(--text-primary)">Coder Requires Pro Plan</h3>
+          <p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1.5rem">Upgrade to Pro ($2.99/mo) to unlock the AI coding assistant with unlimited code generation, debugging, and explanations.</p>
+          <button onclick="navigateTo('user-plans')" class="btn-primary" style="padding:0.75rem 1.5rem;border-radius:0.5rem;font-weight:500">
+            Upgrade to Pro
+          </button>
+        </div>
+      </div>` : `
+      <div style="flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1.5rem">
+        <div class="slide-in" style="display:flex;align-items:flex-start;gap:0.75rem">
+          <div style="width:2rem;height:2rem;border-radius:0.5rem;background:rgba(0,212,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#00d4ff">
+            ${I.code}
+          </div>
+          <div class="chat-bubble-ai" style="border-radius:1rem;border-top-left-radius:0.25rem;padding:0.75rem 1rem;max-width:36rem">
+            <p style="font-size:0.875rem;line-height:1.625">Hi! I'm your AI coding assistant. I can help you write, debug, and understand code in any language. What are you working on?</p>
+            <p style="font-size:0.625rem;color:var(--text-subtle);margin-top:0.5rem">Just now</p>
+          </div>
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--border-color);padding:1rem 1.5rem">
+        <div style="display:flex;align-items:center;gap:0.75rem">
+          <input type="text" placeholder="Describe your coding task..." class="input-field" style="flex:1;padding:0.75rem 1rem;border-radius:0.5rem;font-size:0.875rem">
+          <button class="btn-primary" style="padding:0.75rem;border-radius:0.5rem">${I.send}</button>
+        </div>
+      </div>`}
+    </div>
+  </main>`;
+}
+
+function renderUserProfile() {
+  return `
+  <main style="padding-top:4rem;height:100vh;display:flex">
+    ${renderUserSidebar()}
+    <div style="flex:1;overflow-y:auto">
+      <div style="padding:1.5rem;max-width:48rem">
+        <h2 style="font-size:1.5rem;font-weight:bold;margin-bottom:1.5rem;color:var(--text-primary)">Profile</h2>
+        <div class="card" style="padding:2rem;margin-bottom:1.5rem">
+          <div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:2rem">
+            <div style="width:5rem;height:5rem;border-radius:9999px;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;color:white">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div>
+              <h3 style="font-size:1.25rem;font-weight:bold;color:var(--text-primary)">${state.userName}</h3>
+              <p style="font-size:0.875rem;color:var(--text-secondary)">${state.userEmail}</p>
+              <span class="plan-badge plan-${state.currentPlan}" style="margin-top:0.5rem">${state.currentPlan}</span>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem">
+            ${renderProfileStat('Member Since', state.memberSince, I.clock)}
+            ${renderProfileStat('Total Chats', state.totalChats, I.chat)}
+            ${renderProfileStat('API Calls', state.apiCalls.toLocaleString(), I.zap)}
+            ${renderProfileStat('Human Requests', state.humanRequestsUsed, I.userStar)}
+          </div>
+        </div>
+        <div class="card" style="padding:1.5rem">
+          <h4 style="font-weight:600;margin-bottom:1rem;color:var(--text-primary)">Account Info</h4>
+          <div style="display:flex;flex-direction:column;gap:0.75rem">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem">
+              <span style="font-size:0.875rem;color:var(--text-secondary)">Email</span>
+              <span style="font-size:0.875rem;color:var(--text-primary)">${state.userEmail}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem">
+              <span style="font-size:0.875rem;color:var(--text-secondary)">Plan</span>
+              <span class="plan-badge plan-${state.currentPlan}">${state.currentPlan}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem">
+              <span style="font-size:0.875rem;color:var(--text-secondary)">Language</span>
+              <span style="font-size:0.875rem;color:var(--text-primary)">${state.language}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem">
+              <span style="font-size:0.875rem;color:var(--text-secondary)">Theme</span>
+              <span style="font-size:0.875rem;color:var(--text-primary);display:flex;align-items:center;gap:0.5rem">${state.theme === 'dark' ? I.moon : I.sun} ${state.theme === 'dark' ? 'Dark' : 'Light'}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>`;
+}
+
+function renderProfileStat(label, value, icon) {
+  return `
+  <div style="padding:1rem;background:var(--stat-bg);border-radius:0.5rem">
+    <div style="display:flex;align-items:center;gap:0.5rem;color:#a78bfa;margin-bottom:0.5rem">${icon}<span style="font-size:0.75rem">${label}</span></div>
+    <p style="font-size:1.25rem;font-weight:bold;color:var(--text-primary)">${value}</p>
+  </div>`;
+}
+
+function renderUserPlans() {
+  const plans = [
+    { name: 'Free', price: 0, period: '/mo', features: ['50 messages/day', 'Basic AI chat', 'Community support', '1 chat history'], current: state.currentPlan === 'free' },
+    { name: 'Pro', price: 2.99, period: '/mo', features: ['Unlimited messages', 'Coder access', 'Human expert requests', 'Priority support', 'Unlimited chat history', 'All AI models'], current: state.currentPlan === 'pro', popular: true },
+    { name: 'Enterprise', price: 9.99, period: '/mo', features: ['Everything in Pro', 'API access', 'Team features (up to 10)', 'Dedicated support', 'Custom integrations', 'SLA guarantee'], current: state.currentPlan === 'enterprise' }
+  ];
+  return `
+  <main style="padding-top:4rem;height:100vh;display:flex">
+    ${renderUserSidebar()}
+    <div style="flex:1;overflow-y:auto">
+      <div style="padding:1.5rem;max-width:64rem">
+        <h2 style="font-size:1.5rem;font-weight:bold;margin-bottom:0.5rem;color:var(--text-primary)">Plans & Payments</h2>
+        <p style="color:var(--text-secondary);margin-bottom:2rem">Choose the plan that fits your needs</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:2rem">
+          ${plans.map(p => `
+          <div class="card" style="padding:1.5rem;position:relative;${p.popular ? 'border-color:rgba(124,58,237,0.4)' : ''}">
+            ${p.popular ? `<div style="position:absolute;top:-0.75rem;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#7c3aed,#00d4ff);color:white;padding:0.25rem 0.75rem;border-radius:9999px;font-size:0.75rem;font-weight:600">Most Popular</div>` : ''}
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+              <h3 style="font-weight:600;color:var(--text-primary)">${p.name}</h3>
+              <span class="plan-badge plan-${p.name.toLowerCase()}">${p.name}</span>
+            </div>
+            <div style="margin-bottom:1.5rem">
+              <span style="font-size:2rem;font-weight:bold;color:var(--text-primary)">$${p.price}</span>
+              <span style="color:var(--text-secondary)">${p.period}</span>
+            </div>
+            <ul style="list-style:none;padding:0;margin:0 0 1.5rem 0;display:flex;flex-direction:column;gap:0.5rem">
+              ${p.features.map(f => `<li style="display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;color:var(--text-primary)"><span style="color:#00ff88">${I.check}</span> ${f}</li>`).join('')}
+            </ul>
+            ${p.current ? `
+            <button class="btn-secondary" style="width:100%;padding:0.625rem;border-radius:0.5rem;font-weight:500;font-size:0.875rem" disabled>Current Plan</button>
+            ` : `
+            <button onclick="selectPlan('${p.name.toLowerCase()}')" class="${p.popular ? 'btn-primary' : 'btn-secondary'}" style="width:100%;padding:0.625rem;border-radius:0.5rem;font-weight:500;font-size:0.875rem">
+              ${p.name === 'Free' ? 'Downgrade' : 'Upgrade'}
+            </button>`}
+          </div>`).join('')}
+        </div>
+        
+        <div class="card" style="padding:1.5rem;margin-bottom:1rem">
+          <h4 style="font-weight:600;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;color:var(--text-primary)">${I.credit} Payment Methods</h4>
+          <div style="display:flex;flex-direction:column;gap:0.75rem">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem;background:var(--stat-bg);border-radius:0.5rem">
+              <div style="display:flex;align-items:center;gap:1rem">
+                <div style="width:2.5rem;height:1.75rem;background:linear-gradient(135deg,#1a1f71,#4b56d2);border-radius:0.25rem;display:flex;align-items:center;justify-content:center;color:white;font-size:0.625rem;font-weight:bold">VISA</div>
+                <div>
+                  <p style="font-size:0.875rem;font-weight:500;color:var(--text-primary)">•••• •••• •••• 4242</p>
+                  <p style="font-size:0.75rem;color:var(--text-subtle)">Expires 12/2028</p>
+                </div>
+              </div>
+              <span class="plan-badge plan-pro">Default</span>
+            </div>
+            <button class="btn-secondary" style="padding:0.625rem 1rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem;justify-content:center">
+              ${I.plus} Add Payment Method
+            </button>
+          </div>
+        </div>
+        
+        <div class="card" style="padding:1.5rem">
+          <h4 style="font-weight:600;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;color:var(--text-primary)">${I.history} Billing History</h4>
+          <div style="display:flex;flex-direction:column;gap:0.5rem">
+            ${[
+              { date: 'Oct 1, 2026', amount: '$2.99', plan: 'Pro', status: 'Paid' },
+              { date: 'Sep 1, 2026', amount: '$2.99', plan: 'Pro', status: 'Paid' },
+              { date: 'Aug 1, 2026', amount: '$0.00', plan: 'Free', status: 'Free' }
+            ].map(b => `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem">
+              <div>
+                <p style="font-size:0.875rem;font-weight:500;color:var(--text-primary)">${b.plan} Plan</p>
+                <p style="font-size:0.75rem;color:var(--text-subtle)">${b.date}</p>
+              </div>
+              <div style="text-align:right">
+                <p style="font-size:0.875rem;font-weight:500;color:var(--text-primary)">${b.amount}</p>
+                <span class="plan-badge ${b.status === 'Paid' ? 'plan-pro' : 'plan-free'}">${b.status}</span>
+              </div>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>`;
+}
+
+function renderUserHelp() {
+  return `
+  <main style="padding-top:4rem;height:100vh;display:flex">
+    ${renderUserSidebar()}
+    <div style="flex:1;overflow-y:auto">
+      <div style="padding:1.5rem;max-width:48rem">
+        <h2 style="font-size:1.5rem;font-weight:bold;margin-bottom:0.5rem;color:var(--text-primary)">Help Center</h2>
+        <p style="color:var(--text-secondary);margin-bottom:2rem">Find answers, documentation, and support</p>
+        
+        <input type="text" placeholder="Search help articles..." class="input-field" style="width:100%;padding:0.75rem 1rem;border-radius:0.5rem;font-size:0.875rem;margin-bottom:2rem">
+        
+        <h3 style="font-weight:600;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;color:var(--text-primary)">${I.database} Documentation</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem;margin-bottom:2rem">
+          ${docs.map(d => `
+          <div class="card" style="padding:1rem;cursor:pointer;display:flex;align-items:center;gap:0.75rem">
+            <div style="width:2rem;height:2rem;border-radius:0.5rem;background:rgba(124,58,237,0.1);display:flex;align-items:center;justify-content:center;color:#a78bfa;flex-shrink:0">
+              ${d.icon}
+            </div>
+            <div>
+              <p style="font-size:0.875rem;font-weight:500;color:var(--text-primary)">${d.title}</p>
+              <p style="font-size:0.75rem;color:var(--text-subtle)">${d.desc}</p>
+            </div>
+          </div>`).join('')}
+        </div>
+        
+        <h3 style="font-weight:600;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;color:var(--text-primary)">${I.help} Frequently Asked Questions</h3>
+        <div class="card" style="overflow:hidden">
+          ${faqs.map((f, i) => `
+          <div class="faq-item" style="padding:1rem">
+            <button onclick="toggleFaq(${i})" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:transparent;border:none;color:var(--text-primary);cursor:pointer;text-align:left">
+              <span style="font-weight:500;font-size:0.9375rem">${f.q}</span>
+              <span style="transform:${state.openFaq === i ? 'rotate(180deg)' : ''};transition:transform 0.2s;color:var(--text-secondary)">${I.chevron}</span>
+            </button>
+            ${state.openFaq === i ? `<p style="font-size:0.875rem;color:var(--text-secondary);margin-top:0.75rem;line-height:1.625">${f.a}</p>` : ''}
+          </div>`).join('')}
+        </div>
+        
+        <div class="card" style="padding:1.5rem;margin-top:1.5rem;text-align:center">
+          <h4 style="font-weight:600;margin-bottom:0.5rem;color:var(--text-primary)">Still need help?</h4>
+          <p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem">Our support team is here to assist you</p>
+          <button class="btn-primary" style="padding:0.625rem 1.25rem;border-radius:0.5rem;font-size:0.875rem">Contact Support</button>
+        </div>
+      </div>
+    </div>
+  </main>`;
+}
+
+function renderUserSettings() {
+  const tabs = [
+    { id: 'account', label: 'Account', icon: I.user },
+    { id: 'language', label: 'Language', icon: I.globe },
+    { id: 'data', label: 'Data Controls', icon: I.database },
+    { id: 'usage', label: 'Usage & Limits', icon: I.chart }
+  ];
+  return `
+  <main style="padding-top:4rem;height:100vh;display:flex">
+    ${renderUserSidebar()}
+    <div style="flex:1;overflow-y:auto">
+      <div style="padding:1.5rem;max-width:48rem">
+        <h2 style="font-size:1.5rem;font-weight:bold;margin-bottom:1.5rem;color:var(--text-primary)">Settings</h2>
+        <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap">
+          ${tabs.map(t => `
+          <button onclick="setSettingsTab('${t.id}')" class="tab-btn ${state.settingsTab === t.id ? 'active' : ''}" style="display:flex;align-items:center;gap:0.5rem">
+            ${t.icon} ${t.label}
+          </button>`).join('')}
+        </div>
+        
+        ${state.settingsTab === 'account' ? renderAccountSettings() : ''}
+        ${state.settingsTab === 'language' ? renderLanguageSettings() : ''}
+        ${state.settingsTab === 'data' ? renderDataSettings() : ''}
+        ${state.settingsTab === 'usage' ? renderUsageSettings() : ''}
+      </div>
+    </div>
+  </main>`;
+}
+
+function renderAccountSettings() {
+  return `
+  <div class="card" style="padding:1.5rem;margin-bottom:1rem">
+    <h4 style="font-weight:600;margin-bottom:1rem;color:var(--text-primary)">Profile Information</h4>
+    <div style="display:flex;flex-direction:column;gap:1rem">
+      <div>
+        <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Name</label>
+        <input type="text" value="${state.userName}" class="input-field" style="width:100%;padding:0.625rem 0.75rem;border-radius:0.5rem;font-size:0.875rem">
+      </div>
+      <div>
+        <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Email</label>
+        <input type="email" value="${state.userEmail}" class="input-field" style="width:100%;padding:0.625rem 0.75rem;border-radius:0.5rem;font-size:0.875rem">
+      </div>
+      <button class="btn-primary" style="padding:0.625rem 1rem;border-radius:0.5rem;font-size:0.875rem;align-self:flex-start">Save Changes</button>
+    </div>
+  </div>
+  
+  <div class="card" style="padding:1.5rem;margin-bottom:1rem">
+    <h4 style="font-weight:600;margin-bottom:0.5rem;color:var(--text-primary)">Theme</h4>
+    <p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem">Choose your preferred appearance</p>
+    <div style="display:flex;gap:0.75rem">
+      <button onclick="setTheme('dark')" style="flex:1;padding:1rem;border-radius:0.5rem;background:#0a0a0f;border:2px solid ${state.theme === 'dark' ? '#7c3aed' : 'rgba(255,255,255,0.1)'};color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem">
+        ${I.moon} Dark
+      </button>
+      <button onclick="setTheme('light')" style="flex:1;padding:1rem;border-radius:0.5rem;background:#f8f9fc;border:2px solid ${state.theme === 'light' ? '#7c3aed' : 'rgba(0,0,0,0.1)'};color:#1a1a2e;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.5rem">
+        ${I.sun} Light
+      </button>
+    </div>
+  </div>
+  
+  <div class="card" style="padding:1.5rem;border-color:rgba(255,0,110,0.3)">
+    <h4 style="font-weight:600;margin-bottom:0.5rem;color:#ff006e">Danger Zone</h4>
+    <p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem">Permanently delete your account and all associated data</p>
+    <button onclick="openDeleteModal()" class="btn-danger" style="padding:0.625rem 1rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem">
+      ${I.trash} Request Account Deletion
+    </button>
+    ${state.deleteRequested ? `<p style="font-size:0.875rem;color:#00ff88;margin-top:0.75rem;display:flex;align-items:center;gap:0.5rem">${I.check} Deletion request submitted. Your account will be removed within 30 days.</p>` : ''}
+  </div>`;
+}
+
+function renderLanguageSettings() {
+  const languages = ['English', 'Spanish', 'French', 'German', 'Portuguese', 'Chinese', 'Japanese', 'Korean', 'Arabic', 'Hindi', 'Russian', 'Italian', 'Dutch', 'Turkish', 'Polish', 'Swedish', 'Indonesian', 'Vietnamese', 'Thai', 'Greek'];
+  return `
+  <div class="card" style="padding:1.5rem">
+    <h4 style="font-weight:600;margin-bottom:0.5rem;color:var(--text-primary)">Language</h4>
+    <p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1.5rem">Select your preferred language for the interface and AI responses</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.5rem">
+      ${languages.map(l => `
+      <button onclick="setLanguage('${l}')" style="padding:0.625rem;border-radius:0.5rem;background:${state.language === l ? 'rgba(124,58,237,0.2)' : 'var(--stat-bg)'};border:1px solid ${state.language === l ? '#7c3aed' : 'var(--border-color)'};color:${state.language === l ? '#a78bfa' : 'var(--text-primary)'};cursor:pointer;font-size:0.875rem;text-align:left">
+        ${state.language === l ? `<span style="color:#a78bfa">${I.check}</span> ` : ''}${l}
+      </button>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderDataSettings() {
+  const dc = state.dataControls;
+  return `
+  <div class="card" style="padding:1.5rem;margin-bottom:1rem">
+    <h4 style="font-weight:600;margin-bottom:0.5rem;color:var(--text-primary)">Data Controls</h4>
+    <p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1.5rem">Control how your data is used</p>
+    <div style="display:flex;flex-direction:column;gap:1rem">
+      ${renderToggle('Allow analytics collection', 'Help us improve by collecting anonymous usage data', dc.analytics, 'analytics')}
+      ${renderToggle('Personalized recommendations', 'Use your chat history to improve AI responses', dc.personalization, 'personalization')}
+      ${renderToggle('Share data with partners', 'Allow anonymized data to be shared with research partners', dc.shareData, 'shareData')}
+    </div>
+  </div>
+  
+  <div class="card" style="padding:1.5rem">
+    <h4 style="font-weight:600;margin-bottom:1rem;color:var(--text-primary)">Your Data</h4>
+    <div style="display:flex;flex-direction:column;gap:0.75rem">
+      <button class="btn-secondary" style="padding:0.75rem 1rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem;justify-content:center">
+        ${I.download} Export All My Data
+      </button>
+      <button class="btn-secondary" style="padding:0.75rem 1rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem;justify-content:center">
+        ${I.trash} Clear Chat History
+      </button>
+    </div>
+  </div>`;
+}
+
+function renderToggle(label, desc, value, key) {
+  return `
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem;background:var(--stat-bg);border-radius:0.5rem">
+    <div style="flex:1">
+      <p style="font-size:0.875rem;font-weight:500;color:var(--text-primary)">${label}</p>
+      <p style="font-size:0.75rem;color:var(--text-subtle)">${desc}</p>
+    </div>
+    <button onclick="toggleDataControl('${key}')" style="width:2.75rem;height:1.5rem;border-radius:9999px;background:${value ? '#7c3aed' : 'var(--border-color)'};border:none;cursor:pointer;position:relative;transition:background 0.2s">
+      <div style="width:1.125rem;height:1.125rem;border-radius:9999px;background:white;position:absolute;top:0.1875rem;${value ? 'right:0.1875rem' : 'left:0.1875rem'};transition:left 0.2s,right 0.2s"></div>
+    </button>
+  </div>`;
+}
+
+function renderUsageSettings() {
+  const limits = {
+    free: { messages: 50, humanRequests: 0, coder: false, api: false },
+    pro: { messages: 'Unlimited', humanRequests: 'Unlimited', coder: true, api: false },
+    enterprise: { messages: 'Unlimited', humanRequests: 'Unlimited', coder: true, api: true }
+  };
+  const current = limits[state.currentPlan];
+  return `
+  <div class="card" style="padding:1.5rem;margin-bottom:1rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <h4 style="font-weight:600;color:var(--text-primary)">Current Usage</h4>
+      <span class="plan-badge plan-${state.currentPlan}">${state.currentPlan}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:1rem">
+      ${renderUsageBar('Messages Today', state.messagesToday, 50, state.currentPlan === 'free')}
+      ${renderUsageBar('Human Requests', state.humanRequestsUsed, 5, state.currentPlan === 'free')}
+    </div>
+  </div>
+  
+  <div class="card" style="padding:1.5rem">
+    <h4 style="font-weight:600;margin-bottom:1rem;color:var(--text-primary)">Plan Limits</h4>
+    <div style="display:flex;flex-direction:column;gap:0.75rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem">
+        <span style="font-size:0.875rem;color:var(--text-primary)">Daily Messages</span>
+        <span style="font-size:0.875rem;font-weight:500;color:var(--text-primary)">${current.messages}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem">
+        <span style="font-size:0.875rem;color:var(--text-primary)">Human Expert Requests</span>
+        <span style="font-size:0.875rem;font-weight:500;color:var(--text-primary)">${current.humanRequests}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem">
+        <span style="font-size:0.875rem;color:var(--text-primary)">Coder Access</span>
+        <span style="font-size:0.875rem;font-weight:500;color:${current.coder ? '#00ff88' : '#ff006e'}">${current.coder ? 'Included' : 'Not Available'}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem">
+        <span style="font-size:0.875rem;color:var(--text-primary)">API Access</span>
+        <span style="font-size:0.875rem;font-weight:500;color:${current.api ? '#00ff88' : '#ff006e'}">${current.api ? 'Included' : 'Not Available'}</span>
+      </div>
+    </div>
+    ${state.currentPlan !== 'pro' && state.currentPlan !== 'enterprise' ? `
+    <button onclick="navigateTo('user-plans')" class="btn-primary" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-weight:500;margin-top:1rem">Upgrade for Higher Limits</button>
+    ` : ''}
+  </div>`;
+}
+
+function renderUsageBar(label, used, total, isLimited) {
+  const pct = isLimited ? Math.min((used / total) * 100, 100) : 0;
+  return `
+  <div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:0.375rem">
+      <span style="font-size:0.875rem;color:var(--text-primary)">${label}</span>
+      <span style="font-size:0.75rem;color:var(--text-secondary)">${isLimited ? `${used}/${total}` : 'Unlimited'}</span>
+    </div>
+    ${isLimited ? `
+    <div style="height:0.5rem;background:var(--border-color);border-radius:9999px;overflow:hidden">
+      <div style="height:100%;width:${pct}%;background:${pct > 80 ? '#ff006e' : 'linear-gradient(90deg,#7c3aed,#00d4ff)'};border-radius:9999px"></div>
+    </div>` : `
+    <div style="height:0.5rem;background:rgba(0,255,136,0.2);border-radius:9999px"></div>`}
+  </div>`;
+}
+
+function renderAdminLogin() {
+  return `
+  <main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem">
+    <div class="card" style="padding:2rem;max-width:24rem;width:100%">
+      <div style="text-align:center;margin-bottom:1.5rem">
+        <div style="width:3rem;height:3rem;border-radius:0.75rem;background:linear-gradient(135deg,#00d4ff,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;margin:0 auto 1rem">
+          ${I.shield}
+        </div>
+        <h2 style="font-size:1.25rem;font-weight:bold;color:var(--text-primary)">Admin Access</h2>
+        <p style="font-size:0.875rem;color:var(--text-secondary);margin-top:0.25rem">Sign in to manage users</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0.75rem">
+        <input type="email" placeholder="admin@nexusai.com" value="admin@nexusai.com" class="input-field" style="padding:0.75rem;border-radius:0.5rem;font-size:0.875rem">
+        <input type="password" placeholder="Password" value="admin123" class="input-field" style="padding:0.75rem;border-radius:0.5rem;font-size:0.875rem">
+        <button onclick="loginAdmin()" class="btn-primary" style="padding:0.75rem;border-radius:0.5rem;font-weight:600">Sign In</button>
+        <button onclick="navigateTo('landing')" class="btn-secondary" style="padding:0.5rem;border-radius:0.5rem;font-size:0.875rem">← Back to home</button>
+      </div>
+    </div>
+  </main>`;
+}
+
+function renderAdminDashboard() {
+  const requestedChats = mockChatSessions.filter(c => c.humanRequested && !c.humanJoined && !state.adminJoinedChats.has(c.id));
+  const joinedChats = mockChatSessions.filter(c => state.adminJoinedChats.has(c.id));
+  const bannedUsers = mockUsers.filter(u => u.accountStatus === 'banned').length;
+  const restrictedUsers = mockUsers.filter(u => u.accountStatus === 'restricted').length;
+  
+  return `
+  <main style="padding-top:4rem;min-height:100vh;display:flex">
+    <aside style="width:16rem;background:var(--bg-secondary);border-right:1px solid var(--border-color);display:flex;flex-direction:column">
+      <div style="padding:1rem;border-bottom:1px solid var(--border-color)">
+        <div style="display:flex;align-items:center;gap:0.75rem">
+          <div style="width:2.25rem;height:2.25rem;border-radius:0.5rem;background:linear-gradient(135deg,#00d4ff,#7c3aed);display:flex;align-items:center;justify-content:center;color:white">
+            ${I.shield}
+          </div>
+          <div>
+            <p style="font-weight:600;font-size:0.875rem;color:var(--text-primary)">Admin Panel</p>
+            <p style="font-size:0.75rem;color:var(--text-subtle)">Full Access</p>
+          </div>
+        </div>
+      </div>
+      <nav style="flex:1;padding:0.75rem;display:flex;flex-direction:column;gap:0.25rem">
+        <div class="sidebar-item ${state.adminTab === 'dashboard' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('dashboard')">
+          <span style="color:#a78bfa">${I.dashboard}</span>
+          <span style="font-size:0.875rem">Dashboard</span>
+        </div>
+        <div class="sidebar-item ${state.adminTab === 'users' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('users')">
+          <span style="color:#9ca3af">${I.users}</span>
+          <span style="font-size:0.875rem">Users</span>
+          <span style="margin-left:auto;font-size:0.75rem;padding:0.125rem 0.5rem;border-radius:9999px;background:rgba(124,58,237,0.2);color:#a78bfa">${mockUsers.length}</span>
+        </div>
+        <div class="sidebar-item ${state.adminTab === 'chats' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('chats')">
+          <span style="color:#9ca3af">${I.history}</span>
+          <span style="font-size:0.875rem">All Chats</span>
+        </div>
+        <div class="sidebar-item ${state.adminTab === 'requests' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('requests')">
+          <span style="color:#ff006e">${I.userStar}</span>
+          <span style="font-size:0.875rem">Human Requests</span>
+          ${requestedChats.length > 0 ? `<span style="margin-left:auto;width:1.25rem;height:1.25rem;border-radius:9999px;background:#ff006e;display:flex;align-items:center;justify-content:center;font-size:0.625rem;font-weight:bold;color:white" class="pulse-dot">${requestedChats.length}</span>` : ''}
+        </div>
+        <div class="sidebar-item ${state.adminTab === 'analytics' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('analytics')">
+          <span style="color:#9ca3af">${I.chart}</span>
+          <span style="font-size:0.875rem">Analytics</span>
+        </div>
+        <div class="sidebar-item ${state.adminTab === 'settings' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('settings')">
+          <span style="color:#9ca3af">${I.settings}</span>
+          <span style="font-size:0.875rem">Settings</span>
+        </div>
+      </nav>
+      <div style="padding:0.75rem;border-top:1px solid var(--border-color)">
+        <button onclick="logoutAdmin()" class="btn-secondary" style="width:100%;padding:0.5rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;justify-content:center;gap:0.5rem">
+          ${I.logout} Sign Out
+        </button>
+      </div>
+    </aside>
+    
+    <div style="flex:1;overflow-y:auto">
+      <div style="padding:1.5rem">
+        ${state.adminTab === 'dashboard' ? renderAdminDashboardContent(requestedChats, joinedChats, bannedUsers, restrictedUsers) : ''}
+        ${state.adminTab === 'users' ? renderAdminUsersManagement() : ''}
+        ${state.adminTab === 'chats' ? renderAdminAllChats() : ''}
+        ${state.adminTab === 'requests' ? renderAdminRequests(requestedChats) : ''}
+        ${state.adminTab === 'analytics' ? renderAdminAnalytics() : ''}
+        ${state.adminTab === 'settings' ? renderAdminSettings() : ''}
+      </div>
+    </div>
+  </main>`;
+}
+
+function renderAdminDashboardContent(requestedChats, joinedChats, bannedUsers, restrictedUsers) {
+  return `
+  <h2 style="font-size:1.5rem;font-weight:bold;margin-bottom:1.5rem;color:var(--text-primary)">Dashboard Overview</h2>
+  
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem">
+    ${renderStatCard('Total Users', '2,847', '+12%', I.users)}
+    ${renderStatCard('Active Chats', '342', '+8%', I.chat)}
+    ${renderStatCard('Human Requests', String(requestedChats.length), 'Pending', I.userStar)}
+    ${renderStatCard('API Calls Today', '12.4K', '+23%', I.zap)}
+    ${renderStatCard('Banned Users', String(bannedUsers), 'Actioned', I.ban)}
+    ${renderStatCard('Restricted', String(restrictedUsers), 'Limited', I.restrict)}
+  </div>
+  
+  ${joinedChats.length > 0 ? `
+  <div class="card glow-border" style="margin-bottom:2rem;border-color:rgba(0,212,255,0.3)">
+    <div style="padding:1.25rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;gap:0.75rem">
+      <div style="width:2.25rem;height:2.25rem;border-radius:0.5rem;background:rgba(0,212,255,0.1);display:flex;align-items:center;justify-content:center;color:#00d4ff">
+        ${I.userStar}
+      </div>
+      <div>
+        <h3 style="font-weight:600;color:var(--text-primary)">Your Active Sessions</h3>
+        <p style="font-size:0.75rem;color:var(--text-secondary)">Chats you're currently responding to</p>
+      </div>
+    </div>
+    <div>
+      ${joinedChats.map(chat => {
+        const user = mockUsers.find(u => u.id === chat.userId);
+        return `
+        <div style="display:flex;align-items:center;gap:1rem;padding:1rem;border-bottom:1px solid var(--border-color)">
+          <div style="width:2.25rem;height:2.25rem;border-radius:9999px;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;color:var(--text-secondary)">${I.user}</div>
+          <div style="flex:1;min-width:0">
+            <p style="font-weight:500;font-size:0.875rem;color:var(--text-primary)">${user.name}</p>
+            <p style="font-size:0.75rem;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${chat.topic}</p>
+          </div>
+          <span style="display:inline-flex;align-items:center;gap:0.25rem;font-size:0.75rem;color:#00d4ff">
+            <span style="width:0.375rem;height:0.375rem;border-radius:9999px;background:#00d4ff" class="pulse-dot"></span>
+            Active
+          </span>
+          <button onclick="viewChat('${chat.id}')" class="btn-secondary action-btn">
+            ${I.eye} View
+          </button>
+          <button onclick="leaveChat('${chat.id}')" class="btn-danger action-btn">
+            ${I.logout} Leave
+          </button>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>` : ''}
+  
+  <div class="card glow-border" style="margin-bottom:2rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem;border-bottom:1px solid var(--border-color)">
+      <div style="display:flex;align-items:center;gap:0.75rem">
+        <div style="width:2.25rem;height:2.25rem;border-radius:0.5rem;background:rgba(255,0,110,0.1);display:flex;align-items:center;justify-content:center;color:#ff006e">
+          ${I.userStar}
+        </div>
+        <div>
+          <h3 style="font-weight:600;color:var(--text-primary)">Human Response Queue</h3>
+          <p style="font-size:0.75rem;color:var(--text-secondary)">Users requesting human assistance</p>
+        </div>
+      </div>
+      ${requestedChats.length > 0 ? `<span style="padding:0.25rem 0.75rem;border-radius:9999px;background:rgba(255,0,110,0.1);color:#ff006e;font-size:0.875rem;font-weight:500">${requestedChats.length} pending</span>` : ''}
+    </div>
+    <div>
+      ${requestedChats.length > 0 ? requestedChats.map(chat => {
+        const user = mockUsers.find(u => u.id === chat.userId);
+        return `
+        <div style="display:flex;align-items:center;gap:1rem;padding:1rem;border-bottom:1px solid var(--border-color)">
+          <div style="width:2.25rem;height:2.25rem;border-radius:9999px;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;color:var(--text-secondary)">${I.user}</div>
+          <div style="flex:1;min-width:0">
+            <p style="font-weight:500;font-size:0.875rem;color:var(--text-primary)">${user.name}</p>
+            <p style="font-size:0.75rem;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${chat.topic} • ${chat.messages} messages</p>
+          </div>
+          <div style="text-align:right">
+            <p style="font-size:0.75rem;color:var(--text-subtle)">${chat.lastMessage}</p>
+            <span style="display:inline-flex;align-items:center;gap:0.25rem;font-size:0.75rem;color:#ff006e;margin-top:0.25rem">
+              <span style="width:0.375rem;height:0.375rem;border-radius:9999px;background:#ff006e" class="pulse-dot"></span>
+              Waiting
+            </span>
+          </div>
+          <button onclick="joinChat('${chat.id}')" style="padding:0.5rem 1rem;border-radius:0.5rem;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.3);color:#00d4ff;cursor:pointer;font-size:0.875rem;font-weight:500;display:flex;align-items:center;gap:0.25rem">
+            ${I.login} Join Chat
+          </button>
+        </div>`;
+      }).join('') : `
+      <div style="padding:2rem;text-align:center;color:var(--text-subtle)">
+        <p>No pending human requests</p>
+      </div>`}
+    </div>
+  </div>
+  
+  <div class="card glow-border">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem;border-bottom:1px solid var(--border-color)">
+      <div style="display:flex;align-items:center;gap:0.75rem">
+        <div style="width:2.25rem;height:2.25rem;border-radius:0.5rem;background:rgba(124,58,237,0.1);display:flex;align-items:center;justify-content:center;color:#a78bfa">
+          ${I.history}
+        </div>
+        <div>
+          <h3 style="font-weight:600;color:var(--text-primary)">All Chat Sessions</h3>
+          <p style="font-size:0.75rem;color:var(--text-secondary)">Monitor all user conversations</p>
+        </div>
+      </div>
+      <input type="text" placeholder="Search..." class="input-field" style="padding:0.375rem 0.75rem;border-radius:0.5rem;font-size:0.875rem;width:12rem">
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Topic</th>
+            <th>Messages</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${mockChatSessions.map(chat => {
+            const user = mockUsers.find(u => u.id === chat.userId);
+            const isJoined = state.adminJoinedChats.has(chat.id);
+            let statusHtml = '';
+            if (isJoined) {
+              statusHtml = `<span style="display:inline-flex;align-items:center;gap:0.25rem;padding:0.25rem 0.5rem;border-radius:9999px;background:rgba(0,212,255,0.1);color:#00d4ff;font-size:0.75rem"><span style="width:0.375rem;height:0.375rem;border-radius:9999px;background:#00d4ff" class="pulse-dot"></span>You're in</span>`;
+            } else if (chat.humanRequested && !chat.humanJoined) {
+              statusHtml = `<span style="display:inline-flex;align-items:center;gap:0.25rem;padding:0.25rem 0.5rem;border-radius:9999px;background:rgba(255,0,110,0.1);color:#ff006e;font-size:0.75rem"><span style="width:0.375rem;height:0.375rem;border-radius:9999px;background:#ff006e" class="pulse-dot"></span>Human Requested</span>`;
+            } else if (chat.status === 'active') {
+              statusHtml = `<span style="display:inline-flex;align-items:center;gap:0.25rem;padding:0.25rem 0.5rem;border-radius:9999px;background:rgba(0,255,136,0.1);color:#00ff88;font-size:0.75rem"><span style="width:0.375rem;height:0.375rem;border-radius:9999px;background:#00ff88"></span>Active</span>`;
+            } else {
+              statusHtml = `<span style="display:inline-flex;align-items:center;gap:0.25rem;padding:0.25rem 0.5rem;border-radius:9999px;background:var(--badge-bg);color:var(--text-secondary);font-size:0.75rem"><span style="width:0.375rem;height:0.375rem;border-radius:9999px;background:#6b7280"></span>Idle</span>`;
+            }
+            return `
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:0.75rem">
+                  <div style="width:1.75rem;height:1.75rem;border-radius:9999px;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;color:var(--text-secondary)">${I.user}</div>
+                  <div>
+                    <p style="font-size:0.875rem;font-weight:500;color:var(--text-primary)">${user.name}</p>
+                    <p style="font-size:0.75rem;color:var(--text-subtle)">${user.plan}</p>
+                  </div>
+                </div>
+              </td>
+              <td style="color:var(--text-primary)">${chat.topic}</td>
+              <td style="color:var(--text-secondary)">${chat.messages}</td>
+              <td>${statusHtml}</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:0.5rem">
+                  <button onclick="viewChat('${chat.id}')" style="padding:0.375rem;border-radius:0.375rem;background:transparent;border:none;cursor:pointer;color:var(--text-secondary)" title="View">
+                    ${I.eye}
+                  </button>
+                  ${chat.humanRequested && !chat.humanJoined && !isJoined ? `
+                  <button onclick="joinChat('${chat.id}')" style="padding:0.375rem;border-radius:0.375rem;background:transparent;border:none;cursor:pointer;color:#00d4ff" title="Join as Human">
+                    ${I.userStar}
+                  </button>` : ''}
+                  ${isJoined ? `
+                  <button onclick="leaveChat('${chat.id}')" style="padding:0.375rem;border-radius:0.375rem;background:transparent;border:none;cursor:pointer;color:#ff006e" title="Leave chat">
+                    ${I.logout}
+                  </button>` : ''}
+                </div>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderAdminUsersManagement() {
+  const filtered = mockUsers.filter(u => 
+    !state.userSearch || 
+    u.name.toLowerCase().includes(state.userSearch.toLowerCase()) ||
+    u.email.toLowerCase().includes(state.userSearch.toLowerCase())
+  );
+  
+  return `
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+    <div>
+      <h2 style="font-size:1.5rem;font-weight:bold;color:var(--text-primary)">User Management</h2>
+      <p style="color:var(--text-secondary);font-size:0.875rem">Ban, restrict, delete users and override plans</p>
+    </div>
+    <input type="text" placeholder="Search users..." value="${state.userSearch}" oninput="state.userSearch=this.value;render()" class="input-field" style="padding:0.625rem 1rem;border-radius:0.5rem;font-size:0.875rem;width:200px">
+  </div>
+  
+  <div class="card glow-border" style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Email</th>
+          <th>Plan</th>
+          <th>Status</th>
+          <th>Usage</th>
+          <th>Member Since</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${filtered.map(u => {
+          let statusBadge = '';
+          if (u.accountStatus === 'banned') statusBadge = `<span class="plan-badge plan-banned">Banned</span>`;
+          else if (u.accountStatus === 'restricted') statusBadge = `<span class="plan-badge plan-restricted">Restricted</span>`;
+          else statusBadge = `<span class="plan-badge plan-pro" style="background:rgba(0,255,136,0.1);color:#00ff88">Active</span>`;
+          
+          const planBadge = `<span class="plan-badge plan-${u.plan.toLowerCase()}">${u.plan}</span>`;
+          const customLimit = u.customLimits ? `<span style="font-size:0.625rem;color:#eab308"> (${u.customLimits.messagesPerDay}/day)</span>` : '';
+          
+          return `
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:0.75rem">
+                <div style="width:2rem;height:2rem;border-radius:9999px;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;color:var(--text-secondary)">${I.user}</div>
+                <span style="font-weight:500;color:var(--text-primary)">${u.name}</span>
+              </div>
+            </td>
+            <td style="color:var(--text-secondary)">${u.email}</td>
+            <td>${planBadge}${customLimit}</td>
+            <td>${statusBadge}</td>
+            <td style="color:var(--text-secondary)">
+              <div style="font-size:0.75rem">${u.messagesToday} msgs today</div>
+              <div style="font-size:0.75rem">${u.totalChats} chats</div>
+            </td>
+            <td style="color:var(--text-subtle);font-size:0.75rem">${u.memberSince}</td>
+            <td>
+              <div style="display:flex;gap:0.375rem;flex-wrap:wrap">
+                <button onclick="openUserAction('${u.id}','view')" class="btn-secondary action-btn" title="View details">${I.eye}</button>
+                <button onclick="openUserAction('${u.id}','plan')" class="btn-secondary action-btn" title="Override plan" style="color:#a78bfa">${I.crown}</button>
+                <button onclick="openUserAction('${u.id}','limit')" class="btn-secondary action-btn" title="Set limits" style="color:#00d4ff">${I.limit}</button>
+                ${u.accountStatus !== 'restricted' ? `<button onclick="openUserAction('${u.id}','restrict')" class="btn-warning action-btn" title="Restrict">${I.restrict}</button>` : `<button onclick="openUserAction('${u.id}','unrestrict')" class="btn-success action-btn" title="Unrestrict">${I.check}</button>`}
+                ${u.accountStatus !== 'banned' ? `<button onclick="openUserAction('${u.id}','ban')" class="btn-danger action-btn" title="Ban">${I.ban}</button>` : `<button onclick="openUserAction('${u.id}','unban')" class="btn-success action-btn" title="Unban">${I.check}</button>`}
+                <button onclick="openUserAction('${u.id}','delete')" class="btn-danger action-btn" title="Delete account" style="color:#ff006e">${I.trash}</button>
+              </div>
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>
+  
+  <div style="margin-top:1.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem">
+    <div class="card" style="padding:1rem">
+      <p style="font-size:0.75rem;color:var(--text-secondary)">Total Users</p>
+      <p style="font-size:1.5rem;font-weight:bold;color:var(--text-primary)">${mockUsers.length}</p>
+    </div>
+    <div class="card" style="padding:1rem">
+      <p style="font-size:0.75rem;color:var(--text-secondary)">Active</p>
+      <p style="font-size:1.5rem;font-weight:bold;color:#00ff88">${mockUsers.filter(u => u.accountStatus === 'active').length}</p>
+    </div>
+    <div class="card" style="padding:1rem">
+      <p style="font-size:0.75rem;color:var(--text-secondary)">Restricted</p>
+      <p style="font-size:1.5rem;font-weight:bold;color:#eab308">${mockUsers.filter(u => u.accountStatus === 'restricted').length}</p>
+    </div>
+    <div class="card" style="padding:1rem">
+      <p style="font-size:0.75rem;color:var(--text-secondary)">Banned</p>
+      <p style="font-size:1.5rem;font-weight:bold;color:#ff006e">${mockUsers.filter(u => u.accountStatus === 'banned').length}</p>
+    </div>
+  </div>`;
+}
+
+function renderAdminAllChats() {
+  return `
+  <h2 style="font-size:1.5rem;font-weight:bold;margin-bottom:1.5rem;color:var(--text-primary)">All Chat Sessions</h2>
+  <div class="card glow-border" style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Topic</th>
+          <th>Messages</th>
+          <th>Status</th>
+          <th>Last Active</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${mockChatSessions.map(chat => {
+          const user = mockUsers.find(u => u.id === chat.userId);
+          return `
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:0.75rem">
+                <div style="width:1.75rem;height:1.75rem;border-radius:9999px;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;color:var(--text-secondary)">${I.user}</div>
+                <div>
+                  <p style="font-size:0.875rem;font-weight:500;color:var(--text-primary)">${user.name}</p>
+                  <p style="font-size:0.75rem;color:var(--text-subtle)">${user.plan}</p>
+                </div>
+              </div>
+            </td>
+            <td style="color:var(--text-primary)">${chat.topic}</td>
+            <td style="color:var(--text-secondary)">${chat.messages}</td>
+            <td><span class="plan-badge ${chat.status === 'active' ? 'plan-pro' : 'plan-free'}">${chat.status}</span></td>
+            <td style="color:var(--text-subtle)">${chat.lastMessage}</td>
+            <td>
+              <div style="display:flex;gap:0.375rem">
+                <button onclick="viewChat('${chat.id}')" class="btn-secondary action-btn">${I.eye} View</button>
+                ${chat.humanRequested ? `<button onclick="joinChat('${chat.id}')" class="btn-secondary action-btn" style="color:#00d4ff">${I.userStar} Join</button>` : ''}
+              </div>
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function renderAdminRequests(requestedChats) {
+  return `
+  <h2 style="font-size:1.5rem;font-weight:bold;margin-bottom:1.5rem;color:var(--text-primary)">Human Response Requests</h2>
+  <div class="card glow-border">
+    ${requestedChats.length > 0 ? requestedChats.map(chat => {
+      const user = mockUsers.find(u => u.id === chat.userId);
+      return `
+      <div style="display:flex;align-items:center;gap:1rem;padding:1rem;border-bottom:1px solid var(--border-color)">
+        <div style="width:2.5rem;height:2.5rem;border-radius:9999px;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;color:var(--text-secondary)">${I.user}</div>
+        <div style="flex:1;min-width:0">
+          <p style="font-weight:500;font-size:0.9375rem;color:var(--text-primary)">${user.name}</p>
+          <p style="font-size:0.75rem;color:var(--text-secondary)">${chat.topic} • ${chat.messages} messages</p>
+          <p style="font-size:0.75rem;color:var(--text-subtle)">Plan: ${user.plan} • Waiting since ${chat.lastMessage}</p>
+        </div>
+        <button onclick="joinChat('${chat.id}')" style="padding:0.625rem 1rem;border-radius:0.5rem;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.3);color:#00d4ff;cursor:pointer;font-size:0.875rem;font-weight:500;display:flex;align-items:center;gap:0.25rem">
+          ${I.login} Join Chat
+        </button>
+      </div>`;
+    }).join('') : `
+    <div style="padding:3rem;text-align:center">
+      <div style="width:3rem;height:3rem;border-radius:0.75rem;background:rgba(0,255,136,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;color:#00ff88">
+        ${I.check}
+      </div>
+      <p style="color:var(--text-secondary)">No pending human requests</p>
+    </div>`}
+  </div>`;
+}
+
+function renderAdminAnalytics() {
+  return `
+  <h2 style="font-size:1.5rem;font-weight:bold;margin-bottom:1.5rem;color:var(--text-primary)">Analytics</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem">
+    ${renderStatCard('Total Messages', '45.2K', '+18%', I.chat)}
+    ${renderStatCard('Active Users', '1,247', '+5%', I.users)}
+    ${renderStatCard('Avg Session', '12 min', '+2%', I.clock)}
+    ${renderStatCard('Human Joins', '342', '+15%', I.userStar)}
+  </div>
+  <div class="card" style="padding:1.5rem">
+    <h4 style="font-weight:600;margin-bottom:1rem;color:var(--text-primary)">Plan Distribution</h4>
+    <div style="display:flex;flex-direction:column;gap:0.75rem">
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.375rem"><span style="font-size:0.875rem;color:var(--text-primary)">Free</span><span style="font-size:0.875rem;color:var(--text-secondary)">60%</span></div>
+        <div style="height:0.5rem;background:var(--border-color);border-radius:9999px"><div style="height:100%;width:60%;background:#9ca3af;border-radius:9999px"></div></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.375rem"><span style="font-size:0.875rem;color:var(--text-primary)">Pro</span><span style="font-size:0.875rem;color:var(--text-secondary)">30%</span></div>
+        <div style="height:0.5rem;background:var(--border-color);border-radius:9999px"><div style="height:100%;width:30%;background:#7c3aed;border-radius:9999px"></div></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.375rem"><span style="font-size:0.875rem;color:var(--text-primary)">Enterprise</span><span style="font-size:0.875rem;color:var(--text-secondary)">10%</span></div>
+        <div style="height:0.5rem;background:var(--border-color);border-radius:9999px"><div style="height:100%;width:10%;background:#00d4ff;border-radius:9999px"></div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderAdminSettings() {
+  return `
+  <h2 style="font-size:1.5rem;font-weight:bold;margin-bottom:1.5rem;color:var(--text-primary)">Admin Settings</h2>
+  <div class="card" style="padding:1.5rem;margin-bottom:1rem">
+    <h4 style="font-weight:600;margin-bottom:1rem;color:var(--text-primary)">Default Limits</h4>
+    <div style="display:flex;flex-direction:column;gap:1rem">
+      <div>
+        <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Free Plan - Daily Messages</label>
+        <input type="number" value="50" class="input-field" style="width:100%;padding:0.625rem 0.75rem;border-radius:0.5rem;font-size:0.875rem">
+      </div>
+      <div>
+        <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Human Request Cooldown (minutes)</label>
+        <input type="number" value="30" class="input-field" style="width:100%;padding:0.625rem 0.75rem;border-radius:0.5rem;font-size:0.875rem">
+      </div>
+      <button class="btn-primary" style="padding:0.625rem 1rem;border-radius:0.5rem;font-size:0.875rem;align-self:flex-start">Save Settings</button>
+    </div>
+  </div>
+  <div class="card" style="padding:1.5rem">
+    <h4 style="font-weight:600;margin-bottom:1rem;color:var(--text-primary)">System</h4>
+    <div style="display:flex;flex-direction:column;gap:0.75rem">
+      <button class="btn-secondary" style="padding:0.75rem 1rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem;justify-content:center">
+        ${I.download} Export All Data
+      </button>
+      <button class="btn-secondary" style="padding:0.75rem 1rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem;justify-content:center">
+        ${I.settings} System Configuration
+      </button>
+    </div>
+  </div>`;
+}
+
+function renderStatCard(title, value, change, icon) {
+  return `
+  <div class="card glow-border" style="padding:1.25rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+      <div style="width:2.25rem;height:2.25rem;border-radius:0.5rem;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;color:white;opacity:0.8">
+        ${icon}
+      </div>
+      <span style="font-size:0.75rem;padding:0.25rem 0.5rem;border-radius:9999px;background:rgba(0,255,136,0.1);color:#00ff88">${change}</span>
+    </div>
+    <p style="font-size:1.5rem;font-weight:bold;color:var(--text-primary)">${value}</p>
+    <p style="font-size:0.75rem;color:var(--text-secondary);margin-top:0.25rem">${title}</p>
+  </div>`;
+}
+
+function renderAdminChat() {
+  const chat = mockChatSessions.find(c => c.id === state.selectedChat) || mockChatSessions[0];
+  const user = mockUsers.find(u => u.id === chat.userId);
+  const isJoined = state.adminJoinedChats.has(chat.id);
+  
+  return `
+  <main style="padding-top:4rem;height:100vh;display:flex">
+    <div style="flex:1;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-bottom:1px solid var(--border-color);background:var(--bg-secondary)">
+        <div style="display:flex;align-items:center;gap:1rem">
+          <button onclick="navigateTo('admin-dashboard')" style="padding:0.5rem;border-radius:0.5rem;background:transparent;border:none;cursor:pointer;color:var(--text-secondary)">
+            ${I.arrowLeft}
+          </button>
+          <div style="width:2.25rem;height:2.25rem;border-radius:9999px;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;color:var(--text-secondary)">${I.user}</div>
+          <div>
+            <h3 style="font-weight:600;color:var(--text-primary)">${chat.topic}</h3>
+            <p style="font-size:0.75rem;color:var(--text-secondary)">${user.name} • ${user.email}</p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.75rem">
+          ${!isJoined ? `
+          <button onclick="joinAsHuman()" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:0.5rem;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.3);color:#00d4ff;cursor:pointer;font-size:0.875rem;font-weight:500">
+            ${I.userStar} Join as Human Expert
+          </button>` : `
+          <div style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:0.5rem;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);color:#00ff88;font-size:0.875rem">
+            <span style="width:0.5rem;height:0.5rem;border-radius:9999px;background:#00ff88" class="pulse-dot"></span>
+            Responding as Admin
+          </div>
+          <button onclick="leaveChat('${chat.id}')" class="btn-danger action-btn">
+            ${I.logout} Leave Chat
+          </button>`}
+        </div>
+      </div>
+      
+      <div style="flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1.5rem" id="admin-chat-messages">
+        ${mockMessages.map(msg => renderMessage(msg)).join('')}
+        ${isJoined ? `
+        <div class="slide-in" style="display:flex;align-items:flex-start;gap:0.75rem">
+          <div style="width:2rem;height:2rem;border-radius:0.5rem;background:rgba(0,212,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#00d4ff">
+            ${I.userStar}
+          </div>
+          <div class="chat-bubble-human" style="border-radius:1rem;border-top-left-radius:0.25rem;padding:0.75rem 1rem;max-width:36rem">
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem">
+              <span style="font-size:0.75rem;font-weight:500;color:#00d4ff">Admin Expert</span>
+              <span style="font-size:0.625rem;padding:0.125rem 0.375rem;border-radius:0.25rem;background:rgba(0,212,255,0.1);color:#00d4ff">Human</span>
+            </div>
+            <p style="font-size:0.875rem;line-height:1.625">Hey! I've reviewed your code and the AI's suggestions. I'd recommend also looking into using a Web Worker for the data processing pipeline.</p>
+            <p style="font-size:0.625rem;color:var(--text-subtle);margin-top:0.5rem">10:40 AM</p>
+          </div>
+        </div>` : ''}
+      </div>
+      
+      <div style="border-top:1px solid var(--border-color);padding:1rem 1.5rem;background:var(--bg-secondary)">
+        ${isJoined ? `
+        <div style="display:flex;align-items:center;gap:0.75rem">
+          <div style="width:2rem;height:2rem;border-radius:0.5rem;background:rgba(0,212,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#00d4ff">
+            ${I.userStar}
+          </div>
+          <input type="text" id="admin-message-input" value="${state.adminMessage}" placeholder="Respond as human expert..." 
+            class="input-field"
+            style="flex:1;padding:0.75rem 1rem;border-radius:0.5rem;font-size:0.875rem"
+            onkeydown="if(event.key==='Enter')sendAdminMessage()">
+          <button onclick="sendAdminMessage()" style="padding:0.75rem;border-radius:0.5rem;background:#00d4ff;border:none;cursor:pointer;color:white">
+            ${I.send}
+          </button>
+        </div>
+        <p style="font-size:0.75rem;color:rgba(0,212,255,0.6);margin-top:0.5rem;margin-left:2.75rem">Responding as Human Expert</p>
+        ` : `
+        <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.5rem;color:var(--text-subtle)">
+          ${I.lock}
+          <span style="font-size:0.875rem">Join as human expert to respond in this chat</span>
+        </div>`}
+      </div>
+    </div>
+    
+    <aside style="width:18rem;background:var(--bg-secondary);border-left:1px solid var(--border-color);overflow-y:auto">
+      <div style="padding:1.25rem;border-bottom:1px solid var(--border-color)">
+        <h4 style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;margin-bottom:1rem">User Details</h4>
+        <div style="text-align:center">
+          <div style="width:3.5rem;height:3.5rem;border-radius:9999px;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;color:var(--text-secondary);margin:0 auto 0.75rem">${I.user}</div>
+          <p style="font-weight:600;color:var(--text-primary)">${user.name}</p>
+          <p style="font-size:0.875rem;color:var(--text-secondary)">${user.email}</p>
+          <span class="plan-badge plan-${user.plan.toLowerCase()}" style="margin-top:0.5rem">${user.plan} Plan</span>
+          ${user.accountStatus !== 'active' ? `<span class="plan-badge plan-${user.accountStatus}" style="margin-top:0.25rem;margin-left:0.25rem">${user.accountStatus}</span>` : ''}
+        </div>
+      </div>
+      <div style="padding:1.25rem;border-bottom:1px solid var(--border-color)">
+        <h4 style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;margin-bottom:0.75rem">Session Info</h4>
+        <div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:0.5rem"><span style="color:var(--text-secondary)">Total Messages</span><span style="color:var(--text-primary)">${chat.messages}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:0.5rem"><span style="color:var(--text-secondary)">Status</span><span style="color:#00ff88">${chat.status}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:0.5rem"><span style="color:var(--text-secondary)">Last Active</span><span style="color:var(--text-primary)">${chat.lastMessage}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.875rem"><span style="color:var(--text-secondary)">Human Requested</span><span style="color:${chat.humanRequested ? '#ff006e' : 'var(--text-subtle)'}">${chat.humanRequested ? 'Yes' : 'No'}</span></div>
+      </div>
+      <div style="padding:1.25rem">
+        <h4 style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;margin-bottom:0.75rem">User Stats</h4>
+        <div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:0.5rem"><span style="color:var(--text-secondary)">Total Chats</span><span style="color:var(--text-primary)">${user.totalChats}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:0.5rem"><span style="color:var(--text-secondary)">API Calls</span><span style="color:var(--text-primary)">${user.apiCalls.toLocaleString()}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:0.5rem"><span style="color:var(--text-secondary)">Human Requests</span><span style="color:var(--text-primary)">${user.humanRequests}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.875rem"><span style="color:var(--text-secondary)">Member Since</span><span style="color:var(--text-primary)">${user.memberSince}</span></div>
+      </div>
+    </aside>
+  </main>`;
+}
+
+function renderUpgradeModal() {
+  return `
+  <div class="modal-backdrop" onclick="closeUpgradeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+        <h3 style="font-weight:600;color:var(--text-primary)">Upgrade Required</h3>
+        <button onclick="closeUpgradeModal()" style="background:transparent;border:none;color:var(--text-secondary);cursor:pointer">${I.x}</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:1rem;padding:1rem;background:rgba(124,58,237,0.1);border-radius:0.5rem;margin-bottom:1rem">
+        <div style="width:2.5rem;height:2.5rem;border-radius:0.5rem;background:rgba(124,58,237,0.2);display:flex;align-items:center;justify-content:center;color:#a78bfa">
+          ${I.lock}
+        </div>
+        <div>
+          <p style="font-weight:500;font-size:0.9375rem;color:var(--text-primary)">${state.showUpgradeModal === 'coder' ? 'Coder' : 'Human Expert'} requires Pro plan</p>
+          <p style="font-size:0.875rem;color:var(--text-secondary)">Upgrade for just $2.99/month</p>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0.75rem">
+        <button onclick="navigateTo('user-plans');closeUpgradeModal()" class="btn-primary" style="padding:0.75rem;border-radius:0.5rem;font-weight:500">
+          Upgrade to Pro
+        </button>
+        <button onclick="closeUpgradeModal()" class="btn-secondary" style="padding:0.75rem;border-radius:0.5rem;font-weight:500">
+          Maybe Later
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderDeleteModal() {
+  return `
+  <div class="modal-backdrop" onclick="closeDeleteModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem">
+        <div style="width:3rem;height:3rem;border-radius:0.75rem;background:rgba(255,0,110,0.1);display:flex;align-items:center;justify-content:center;color:#ff006e">
+          ${I.trash}
+        </div>
+        <div>
+          <h3 style="font-weight:600;color:var(--text-primary)">Request Account Deletion</h3>
+          <p style="font-size:0.875rem;color:var(--text-secondary)">This action cannot be undone</p>
+        </div>
+      </div>
+      <p style="font-size:0.875rem;line-height:1.625;margin-bottom:1rem;color:var(--text-primary)">Your account and all associated data will be permanently deleted within 30 days. You will lose access to all chats, settings, and subscription benefits.</p>
+      <div style="display:flex;flex-direction:column;gap:0.75rem">
+        <button onclick="confirmDelete()" style="padding:0.75rem;border-radius:0.5rem;background:#ff006e;color:white;border:none;cursor:pointer;font-weight:500">
+          Yes, Request Deletion
+        </button>
+        <button onclick="closeDeleteModal()" class="btn-secondary" style="padding:0.75rem;border-radius:0.5rem;font-weight:500">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderUserActionModal() {
+  const action = state.showUserActionModal;
+  if (!action) return '';
+  const user = mockUsers.find(u => u.id === action.userId);
+  if (!user) return '';
+  
+  let title = '', content = '', confirmText = '', confirmClass = 'btn-primary';
+  
+  switch(action.type) {
+    case 'view':
+      title = 'User Details';
+      content = `
+        <div style="display:flex;flex-direction:column;gap:0.75rem">
+          <div style="display:flex;justify-content:space-between;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem"><span style="color:var(--text-secondary)">Name</span><span style="color:var(--text-primary)">${user.name}</span></div>
+          <div style="display:flex;justify-content:space-between;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem"><span style="color:var(--text-secondary)">Email</span><span style="color:var(--text-primary)">${user.email}</span></div>
+          <div style="display:flex;justify-content:space-between;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem"><span style="color:var(--text-secondary)">Plan</span><span class="plan-badge plan-${user.plan.toLowerCase()}">${user.plan}</span></div>
+          <div style="display:flex;justify-content:space-between;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem"><span style="color:var(--text-secondary)">Status</span><span style="color:var(--text-primary)">${user.accountStatus}</span></div>
+          <div style="display:flex;justify-content:space-between;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem"><span style="color:var(--text-secondary)">Messages Today</span><span style="color:var(--text-primary)">${user.messagesToday}</span></div>
+          <div style="display:flex;justify-content:space-between;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem"><span style="color:var(--text-secondary)">Total Chats</span><span style="color:var(--text-primary)">${user.totalChats}</span></div>
+          <div style="display:flex;justify-content:space-between;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem"><span style="color:var(--text-secondary)">API Calls</span><span style="color:var(--text-primary)">${user.apiCalls.toLocaleString()}</span></div>
+          <div style="display:flex;justify-content:space-between;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem"><span style="color:var(--text-secondary)">Human Requests</span><span style="color:var(--text-primary)">${user.humanRequests}</span></div>
+          <div style="display:flex;justify-content:space-between;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem"><span style="color:var(--text-secondary)">Member Since</span><span style="color:var(--text-primary)">${user.memberSince}</span></div>
+          ${user.customLimits ? `<div style="display:flex;justify-content:space-between;padding:0.75rem;background:rgba(234,179,8,0.1);border-radius:0.5rem"><span style="color:#eab308">Custom Limit</span><span style="color:#eab308">${user.customLimits.messagesPerDay} msgs/day</span></div>` : ''}
+        </div>`;
+      confirmText = 'Close';
+      confirmClass = 'btn-secondary';
+      break;
+    case 'plan':
+      title = 'Override Plan';
+      content = `
+        <p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem">Change plan for <strong style="color:var(--text-primary)">${user.name}</strong></p>
+        <select id="plan-override-select" class="input-field" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem">
+          <option value="free" ${user.plan === 'Free' ? 'selected' : ''}>Free</option>
+          <option value="pro" ${user.plan === 'Pro' ? 'selected' : ''}>Pro</option>
+          <option value="enterprise" ${user.plan === 'Enterprise' ? 'selected' : ''}>Enterprise</option>
+        </select>`;
+      confirmText = 'Apply Plan Override';
+      break;
+    case 'limit':
+      title = 'Set Usage Limits';
+      content = `
+        <p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem">Set custom daily message limit for <strong style="color:var(--text-primary)">${user.name}</strong></p>
+        <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Daily Messages (0 = unlimited)</label>
+        <input type="number" id="limit-input" value="${user.customLimits ? user.customLimits.messagesPerDay : 0}" class="input-field" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem">
+        <p style="font-size:0.75rem;color:var(--text-subtle);margin-top:0.5rem">Leave as 0 to use plan defaults</p>`;
+      confirmText = 'Apply Limit';
+      break;
+    case 'ban':
+      title = 'Ban User';
+      content = `<p style="font-size:0.875rem;color:var(--text-primary);margin-bottom:1rem">Are you sure you want to ban <strong>${user.name}</strong>? They will be immediately logged out and unable to access the platform.</p>`;
+      confirmText = 'Ban User';
+      confirmClass = 'btn-danger';
+      break;
+    case 'unban':
+      title = 'Unban User';
+      content = `<p style="font-size:0.875rem;color:var(--text-primary);margin-bottom:1rem">Unban <strong>${user.name}</strong>? They will regain access to the platform.</p>`;
+      confirmText = 'Unban User';
+      confirmClass = 'btn-success';
+      break;
+    case 'restrict':
+      title = 'Restrict User';
+      content = `<p style="font-size:0.875rem;color:var(--text-primary);margin-bottom:1rem">Restrict <strong>${user.name}</strong>? Their usage will be limited but they can still access basic features.</p>`;
+      confirmText = 'Restrict User';
+      confirmClass = 'btn-warning';
+      break;
+    case 'unrestrict':
+      title = 'Remove Restriction';
+      content = `<p style="font-size:0.875rem;color:var(--text-primary);margin-bottom:1rem">Remove restrictions from <strong>${user.name}</strong>?</p>`;
+      confirmText = 'Remove Restriction';
+      confirmClass = 'btn-success';
+      break;
+    case 'delete':
+      title = 'Delete User Account';
+      content = `<p style="font-size:0.875rem;color:var(--text-primary);margin-bottom:1rem">Permanently delete <strong>${user.name}</strong>'s account and all associated data? This cannot be undone.</p>`;
+      confirmText = 'Delete Account';
+      confirmClass = 'btn-danger';
+      break;
+  }
+  
+  return `
+  <div class="modal-backdrop" onclick="closeUserActionModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+        <h3 style="font-weight:600;color:var(--text-primary)">${title}</h3>
+        <button onclick="closeUserActionModal()" style="background:transparent;border:none;color:var(--text-secondary);cursor:pointer">${I.x}</button>
+      </div>
+      ${content}
+      <div style="display:flex;gap:0.75rem;margin-top:1.5rem">
+        <button onclick="closeUserActionModal()" class="btn-secondary" style="flex:1;padding:0.75rem;border-radius:0.5rem;font-weight:500">Cancel</button>
+        <button onclick="confirmUserAction()" class="${confirmClass}" style="flex:1;padding:0.75rem;border-radius:0.5rem;font-weight:500">${confirmText}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ============ ACTIONS ============
+function navigateTo(view) {
+  state.currentView = view;
+  render();
+  setTimeout(() => {
+    const el = document.getElementById('chat-messages') || document.getElementById('admin-chat-messages');
+    if (el) el.scrollTop = el.scrollHeight;
+  }, 50);
+}
+
+function toggleTheme() {
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  render();
+}
+
+function setTheme(t) {
+  state.theme = t;
+  render();
+}
+
+function loginAdmin() {
+  state.currentRole = 'admin';
+  state.currentView = 'admin-dashboard';
+  state.adminTab = 'dashboard';
+  render();
+}
+
+function logoutAdmin() {
+  state.currentRole = 'user';
+  state.currentView = 'landing';
+  render();
+}
+
+function setAdminTab(tab) {
+  state.adminTab = tab;
+  render();
+}
+
+function newChat() {
+  state.humanRequested = false;
+  state.humanJoined = false;
+  mockMessages.length = 0;
+  navigateTo('user-chat');
+}
+
+function openChat(id) {
+  navigateTo('user-chat');
+}
+
+function handleCoderClick() {
+  if (state.currentPlan === 'free') {
+    state.showUpgradeModal = 'coder';
+    render();
+  } else {
+    navigateTo('user-coder');
+  }
+}
+
+function handleHumanRequest() {
+  if (state.currentPlan === 'free') {
+    state.showUpgradeModal = 'human';
+    render();
+    return;
+  }
+  requestHuman();
+}
+
+function requestHuman() {
+  state.humanRequested = true;
+  state.humanRequestsUsed++;
+  mockMessages.push({ id: mockMessages.length + 1, role: 'ai', content: 'Human response requested\n\nI\'ve flagged this conversation for human expert review. An admin will join this chat shortly to provide personalized assistance.', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+  render();
+  setTimeout(() => { state.humanJoined = true; render(); }, 8000);
+}
+
+function sendMessage() {
+  const input = document.getElementById('user-message-input');
+  if (!input || !input.value.trim()) return;
+  const msg = { id: mockMessages.length + 1, role: 'user', content: input.value.trim(), timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+  mockMessages.push(msg);
+  state.newMessage = '';
+  state.isTyping = true;
+  state.messagesToday++;
+  render();
+  setTimeout(() => {
+    state.isTyping = false;
+    mockMessages.push({ id: mockMessages.length + 1, role: 'ai', content: "That's a great question! Here are the key points:\n\n1. Evaluate the current architecture\n2. Identify bottlenecks\n3. Implement incremental improvements\n\nWould you like me to elaborate?", timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+    render();
+    const el = document.getElementById('chat-messages');
+    if (el) el.scrollTop = el.scrollHeight;
+  }, 2000);
+}
+
+function joinChat(chatId) {
+  state.selectedChat = chatId;
+  state.adminJoinedChats.add(chatId);
+  state.currentView = 'admin-chat';
+  render();
+}
+
+function viewChat(chatId) {
+  state.selectedChat = chatId;
+  state.currentView = 'admin-chat';
+  render();
+}
+
+function leaveChat(chatId) {
+  state.adminJoinedChats.delete(chatId);
+  if (state.currentView === 'admin-chat' && state.selectedChat === chatId) {
+    state.currentView = 'admin-dashboard';
+  }
+  render();
+}
+
+function joinAsHuman() {
+  if (state.selectedChat) state.adminJoinedChats.add(state.selectedChat);
+  render();
+  setTimeout(() => { const input = document.getElementById('admin-message-input'); if (input) input.focus(); }, 100);
+}
+
+function sendAdminMessage() {
+  const input = document.getElementById('admin-message-input');
+  if (!input || !input.value.trim()) return;
+  mockMessages.push({ id: mockMessages.length + 1, role: 'human', content: input.value.trim(), timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+  state.adminMessage = '';
+  render();
+  const el = document.getElementById('admin-chat-messages');
+  if (el) el.scrollTop = el.scrollHeight;
+}
+
+function toggleFaq(i) {
+  state.openFaq = state.openFaq === i ? null : i;
+  render();
+}
+
+function setSettingsTab(tab) {
+  state.settingsTab = tab;
+  render();
+}
+
+function setLanguage(lang) {
+  state.language = lang;
+  render();
+}
+
+function toggleDataControl(key) {
+  state.dataControls[key] = !state.dataControls[key];
+  render();
+}
+
+function selectPlan(plan) {
+  state.currentPlan = plan;
+  render();
+  setTimeout(() => alert(`Successfully switched to ${plan} plan!`), 100);
+}
+
+function openDeleteModal() {
+  state.showDeleteModal = true;
+  render();
+}
+
+function closeDeleteModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  state.showDeleteModal = false;
+  render();
+}
+
+function confirmDelete() {
+  state.deleteRequested = true;
+  state.showDeleteModal = false;
+  render();
+}
+
+function closeUpgradeModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  state.showUpgradeModal = null;
+  render();
+}
+
+function openUserAction(userId, type) {
+  state.showUserActionModal = { userId, type };
+  render();
+}
+
+function closeUserActionModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  state.showUserActionModal = null;
+  render();
+}
+
+function confirmUserAction() {
+  const action = state.showUserActionModal;
+  if (!action) return;
+  const user = mockUsers.find(u => u.id === action.userId);
+  if (!user) return;
+  
+  switch(action.type) {
+    case 'plan':
+      const newPlan = document.getElementById('plan-override-select').value;
+      user.plan = newPlan.charAt(0).toUpperCase() + newPlan.slice(1);
+      break;
+    case 'limit':
+      const limit = parseInt(document.getElementById('limit-input').value);
+      user.customLimits = limit > 0 ? { messagesPerDay: limit } : null;
+      break;
+    case 'ban':
+      user.accountStatus = 'banned';
+      break;
+    case 'unban':
+      user.accountStatus = 'active';
+      break;
+    case 'restrict':
+      user.accountStatus = 'restricted';
+      user.customLimits = { messagesPerDay: 20 };
+      break;
+    case 'unrestrict':
+      user.accountStatus = 'active';
+      user.customLimits = null;
+      break;
+    case 'delete':
+      const idx = mockUsers.findIndex(u => u.id === user.id);
+      if (idx > -1) mockUsers.splice(idx, 1);
+      break;
+  }
+  
+  state.showUserActionModal = null;
+  render();
+}
+
+function attachEventListeners() {
+  setTimeout(() => {
+    const el1 = document.getElementById('chat-messages');
+    if (el1) el1.scrollTop = el1.scrollHeight;
+    const el2 = document.getElementById('admin-chat-messages');
+    if (el2) el2.scrollTop = el2.scrollHeight;
+  }, 50);
+}
+
+// Secret admin access: Ctrl+Shift+A
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+    e.preventDefault();
+    if (state.currentRole === 'admin') {
+      navigateTo('admin-dashboard');
+    } else {
+      navigateTo('admin-login');
+    }
+  }
+});
+
+render();
+</script>
+</body>
+</html>
