@@ -57,7 +57,20 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; m
 @keyframes typing { 0%,60%,100% { transform:translateY(0); opacity:0.4; } 30% { transform:translateY(-6px); opacity:1; } }
 .chat-bubble-user { background: linear-gradient(135deg, #7c3aed, #5b21b6); color: white; }
 .chat-bubble-ai { background: var(--bg-tertiary); border: 1px solid rgba(124,58,237,0.2); color: var(--text-primary); }
-.chat-bubble-human { background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.3); color: var(--text-primary); }
+.chat-bubble-human { background: rgba(0,212,255,0.06); border: 1px solid rgba(0,212,255,0.18); color: var(--text-primary); }
+.message-action { border:0; background:transparent; color:var(--text-secondary); padding:.3rem .45rem; border-radius:.35rem; cursor:pointer; font-size:.75rem; }
+.message-action:hover { background:var(--bg-hover); color:var(--text-primary); }
+.markdown-body { font-size:.9rem; line-height:1.7; color:var(--text-primary); }
+.markdown-body > :first-child { margin-top:0; } .markdown-body > :last-child { margin-bottom:0; }
+.markdown-body p { margin:.45rem 0 .8rem; } .markdown-body h1,.markdown-body h2,.markdown-body h3 { font-weight:650; line-height:1.3; margin:1rem 0 .5rem; }
+.markdown-body h1 { font-size:1.25rem; } .markdown-body h2 { font-size:1.12rem; } .markdown-body h3 { font-size:1rem; }
+.markdown-body ul,.markdown-body ol { padding-left:1.35rem; margin:.5rem 0 .85rem; } .markdown-body li { margin:.2rem 0; }
+.markdown-body table { display:block; max-width:100%; overflow-x:auto; border-collapse:collapse; margin:.75rem 0; font-size:.82rem; }
+.markdown-body th,.markdown-body td { border:1px solid var(--border-color); padding:.45rem .6rem; text-align:left; white-space:normal; }
+.markdown-body th { text-transform:none; color:var(--text-primary); background:var(--bg-hover); }
+.markdown-body pre { white-space:pre-wrap; overflow-wrap:anywhere; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:.5rem; padding:.75rem; overflow-x:auto; }
+.markdown-body code { font-family:ui-monospace,monospace; font-size:.85em; background:var(--bg-hover); padding:.1rem .25rem; border-radius:.25rem; }
+.markdown-body blockquote { border-left:3px solid #7c3aed; padding-left:.75rem; margin:.75rem 0; color:var(--text-secondary); }
 .sidebar-item { transition: background 0.2s; color: var(--text-secondary); }
 .sidebar-item:hover { background: var(--bg-hover); color: var(--text-primary); }
 .sidebar-item.active { background: var(--bg-active); border-left: 3px solid #7c3aed; color: #a78bfa; }
@@ -414,6 +427,8 @@ tr:hover td { background: var(--bg-hover); }
 <body>
 <div id="app"></div>
 <div id="toast-container" class="toast-container"></div>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
@@ -1113,13 +1128,30 @@ function renderUserChat() {
   </main>`;
 }
 
+function renderMarkdown(content) {
+  const raw = String(content || '');
+  if (window.marked && window.DOMPurify) return window.DOMPurify.sanitize(window.marked.parse(raw, { gfm: true, breaks: true }));
+  return escapeHtml(raw).replace(/\n/g, '<br>');
+}
 function renderMessage(msg) {
-  if (msg.role === 'user') return `<div class="slide-in" style="display:flex;align-items:flex-start;gap:0.75rem;justify-content:flex-end"><div class="chat-bubble-user" style="border-radius:1rem;border-top-right-radius:0.25rem;padding:0.75rem 1rem;max-width:28rem"><p style="font-size:0.875rem;line-height:1.625">${msg.content}</p><p style="font-size:0.625rem;color:rgba(255,255,255,0.5);margin-top:0.25rem;text-align:right">${msg.timestamp}</p></div><div style="width:2rem;height:2rem;border-radius:0.5rem;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:white">${I.user}</div></div>`;
-  if (msg.role === 'ai') return `<div class="slide-in" style="display:flex;align-items:flex-start;gap:0.75rem"><div style="width:2rem;height:2rem;border-radius:0.5rem;background:rgba(124,58,237,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#a78bfa">${I.robot}</div><div class="chat-bubble-ai" style="border-radius:1rem;border-top-left-radius:0.25rem;padding:0.75rem 1rem;max-width:36rem"><p style="font-size:0.875rem;line-height:1.625;white-space:pre-line">${msg.content}</p><p style="font-size:0.625rem;color:var(--text-subtle);margin-top:0.5rem">${msg.timestamp}</p></div></div>`;
-  if (msg.role === 'human') return `<div class="slide-in" style="display:flex;align-items:flex-start;gap:0.75rem"><div style="width:2rem;height:2rem;border-radius:0.5rem;background:rgba(0,212,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#00d4ff">${I.userStar}</div><div class="chat-bubble-human" style="border-radius:1rem;border-top-left-radius:0.25rem;padding:0.75rem 1rem;max-width:36rem"><div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem"><span style="font-size:0.75rem;font-weight:500;color:#00d4ff">Admin Expert</span><span style="font-size:0.625rem;padding:0.125rem 0.375rem;border-radius:0.25rem;background:rgba(0,212,255,0.1);color:#00d4ff">Human</span></div><p style="font-size:0.875rem;line-height:1.625">${msg.content}</p><p style="font-size:0.625rem;color:var(--text-subtle);margin-top:0.5rem">${msg.timestamp}</p></div></div>`;
+  const safeTime = escapeHtml(msg.timestamp || '');
+  const safeContent = escapeHtml(msg.content || '');
+  const messageId = String(msg.id || '').replace(/[^a-zA-Z0-9_-]/g, '');
+  if (msg.role === 'user') return `<div class="slide-in" style="display:flex;align-items:flex-start;gap:.75rem;justify-content:flex-end"><div class="chat-bubble-user" style="border-radius:1rem;border-top-right-radius:.25rem;padding:.75rem 1rem;max-width:min(90%,48rem);min-width:0;overflow-wrap:anywhere"><div style="font-size:.9rem;line-height:1.65;white-space:pre-wrap">${safeContent}</div><p style="font-size:.625rem;color:rgba(255,255,255,.5);margin-top:.35rem;text-align:right">${safeTime}</p></div><div style="width:2rem;height:2rem;border-radius:.5rem;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:white">${I.user}</div></div>`;
+  if (msg.role === 'ai') return `<div class="slide-in" style="display:flex;align-items:flex-start;gap:.75rem;max-width:100%"><div style="width:2rem;height:2rem;border-radius:.5rem;background:rgba(124,58,237,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#a78bfa">${I.robot}</div><div style="min-width:0;max-width:min(100%,54rem);flex:1"><div class="chat-bubble-ai" style="border-radius:1rem;border-top-left-radius:.25rem;padding:1rem 1.1rem;overflow-wrap:anywhere"><div class="message-body markdown-body">${renderMarkdown(msg.content)}</div><p style="font-size:.625rem;color:var(--text-subtle);margin-top:.65rem">${safeTime}</p></div><div style="display:flex;gap:.25rem;margin-top:.35rem;align-items:center"><button class="message-action" title="Copy response" onclick="copyAssistantMessage('${messageId}')">Copy</button><button class="message-action" title="Helpful" onclick="rateAssistantMessage('${messageId}','like')">👍</button><button class="message-action" title="Not helpful" onclick="rateAssistantMessage('${messageId}','dislike')">👎</button></div></div></div>`;
+  if (msg.role === 'human') return `<div class="slide-in" style="display:flex;align-items:flex-start;gap:.75rem"><div style="width:2rem;height:2rem;border-radius:.5rem;background:rgba(0,212,255,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#00a8cc">${I.userStar}</div><div class="chat-bubble-human" style="border-radius:1rem;border-top-left-radius:.25rem;padding:.9rem 1rem;max-width:min(100%,54rem);overflow-wrap:anywhere"><div style="font-size:.75rem;font-weight:600;color:#00a8cc;margin-bottom:.35rem">Human support</div><div style="font-size:.9rem;line-height:1.65;white-space:pre-wrap">${safeContent}</div><p style="font-size:.625rem;color:var(--text-subtle);margin-top:.5rem">${safeTime}</p></div></div>`;
   return '';
 }
-
+function copyAssistantMessage(messageId) {
+  const message = state.chatMessages.find(m => String(m.id || '').replace(/[^a-zA-Z0-9_-]/g, '') === messageId);
+  if (!message) return;
+  navigator.clipboard.writeText(message.content || '').then(() => showToast('Response copied.', 'success')).catch(() => showToast('Could not copy. Select and copy the text manually.', 'error'));
+}
+function rateAssistantMessage(messageId, rating) {
+  state.messageFeedback = state.messageFeedback || {};
+  state.messageFeedback[messageId] = rating;
+  showToast(rating === 'like' ? 'Thanks for the feedback.' : 'Thanks. We’ll use that feedback to improve.', 'success');
+}
 function renderUserAllChats() { const chats = state.userChats || []; return `<main style="padding-top:4rem;height:100vh;display:flex;overflow:hidden">${renderSidebar(false)}<div class="content-scroll" style="flex:1;min-width:0" id="main-scroll"><div style="padding:1.5rem"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem"><div><h2 style="font-size:1.5rem;font-weight:bold;color:var(--text-primary)">All Chats</h2><p style="font-size:0.875rem;color:var(--text-secondary)">Your saved conversations</p></div><button onclick="newChat()" class="btn-primary" style="padding:0.625rem 1rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem">${I.plus} New Chat</button></div>${chats.length ? `<div style="display:flex;flex-direction:column;gap:0.75rem">${chats.map(chat => `<div class="card" style="padding:1rem;display:flex;align-items:center;gap:1rem;cursor:pointer" onclick="openChat('${chat.id}')"><div style="width:2.5rem;height:2.5rem;border-radius:0.5rem;background:rgba(124,58,237,0.1);display:flex;align-items:center;justify-content:center;color:#a78bfa">${I.chat}</div><div style="flex:1;min-width:0"><p style="font-weight:500;font-size:0.9375rem;color:var(--text-primary)">${escapeHtml(chat.title || 'New chat')}</p><p style="font-size:0.75rem;color:var(--text-secondary)">${chat.messageCount || 0} messages • ${formatRelativeTime(chat.updatedAt)}</p></div><span class="plan-badge plan-free">Saved</span></div>`).join('')}</div>` : `<div class="card" style="padding:2rem;text-align:center;color:var(--text-secondary)">No saved chats yet. Start a new chat to see it here.</div>`}</div></div></main>`; }
 
 function renderUserCoder() {
