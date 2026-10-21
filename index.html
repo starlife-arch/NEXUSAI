@@ -1594,6 +1594,7 @@ async function createSavedChat() {
 }
 async function ensureCurrentChat() { return state.currentChatId || await createSavedChat(); }
 async function loadChatMessages(chatId) {
+  state.isTyping = false;
   if (state.messagesUnsubscribe) state.messagesUnsubscribe();
   state.chatMessages = []; state.currentChatId = chatId;
   state.messagesUnsubscribe = chatCollection().doc(chatId).collection('messages').orderBy('createdAt','asc').onSnapshot(snapshot => {
@@ -1612,6 +1613,7 @@ async function saveChatMessage(chatId, role, content) {
   await chatRef.update(update);
 }
 async function newChat() {
+  state.isTyping = false;
   state.humanRequested = false; state.humanJoined = false; state.chatMessages = []; state.currentChatId = null;
   if (!window.firebaseAuth.currentUser) { navigateTo('user-chat'); return; }
   try { await createSavedChat(); navigateTo('user-chat'); } catch (error) { console.error(error); showToast('Could not create chat. Check Firestore rules.', 'error'); }
@@ -1643,11 +1645,22 @@ async function sendMessage() {
       content: message.content
     }));
     const token = await user.getIdToken();
-    const response = await fetch('/.netlify/functions/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ messages })
-    });
+    const controller = new AbortController();
+    const requestTimeout = setTimeout(() => controller.abort(), 45000);
+    let response;
+    try {
+      response = await fetch('/.netlify/functions/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ messages }),
+        signal: controller.signal
+      });
+    } catch (requestError) {
+      if (requestError.name === 'AbortError') throw new Error('The AI is taking too long to respond. Please try again.');
+      throw requestError;
+    } finally {
+      clearTimeout(requestTimeout);
+    }
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || 'The AI request failed.');
     await saveChatMessage(chatId, 'ai', data.reply);
