@@ -1966,7 +1966,7 @@ window.firebaseAuth.onAuthStateChanged(async (user) => {
         const feedbackSnap = await window.firebaseDb.collection('users').doc(user.uid).collection('feedback').get();
         feedbackSnap.forEach(doc => { state.messageFeedback[doc.id] = doc.data().rating; });
       } catch (feedbackError) { console.warn('Could not load saved feedback', feedbackError); }
-      const usageDay = new Date().toISOString().slice(0, 10);
+      const usageDay = new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Nairobi', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
       try {
         const usageSnap = await window.firebaseDb.collection('users').doc(user.uid).collection('usage').doc(usageDay).get();
         const usage = usageSnap.data() || {};
