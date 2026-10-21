@@ -416,6 +416,7 @@ tr:hover td { background: var(--bg-hover); }
 <div id="toast-container" class="toast-container"></div>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyDF_Xi2jcX9XLmN4kql1oIzw2YJMoSahHA",
@@ -428,6 +429,7 @@ tr:hover td { background: var(--bg-hover); }
   };
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   window.firebaseAuth = firebase.auth();
+  window.firebaseDb = firebase.firestore();
 </script>
 <script>
 // ============ TOAST NOTIFICATION SYSTEM ============
@@ -633,6 +635,7 @@ const mockNotifications = [
 
 const state = {
   currentView: 'landing', currentRole: 'user', isAdminUser: false, selectedChat: null, selectedUser: null,
+  currentChatId: null, chatMessages: [], userChats: [], profileLoaded: false, chatsUnsubscribe: null, messagesUnsubscribe: null,
   humanRequested: false, humanJoined: false, adminJoinedChats: new Set(),
   newMessage: '', adminMessage: '', isTyping: false, notifications: 3,
   theme: 'dark', currentPlan: 'free', settingsTab: 'account', language: 'English',
@@ -651,7 +654,7 @@ const state = {
     { id: 'k3', name: 'Old Integration', key: 'nx_live_c6h3i0j7k4l1m8n5o2p9q6r3s0t7', created: '2026-09-01', expiry: '2026-10-01', tokens: 5000, used: 5000, status: 'expired', lastUsed: '20 days ago' },
     { id: 'k4', name: 'Paused Key', key: 'nx_live_d5e2f9g6h3i0j7k4l1m8n5o2p9q6', created: '2026-10-10', expiry: '2027-04-10', tokens: 2000, used: 120, status: 'paused', lastUsed: '5 days ago' }
   ],
-  totalBalance: 7753,
+  totalBalance: 0,
   projects: [
     { id: 'p1', name: 'React App', chats: 12, lastActive: '2 min ago', color: '#7c3aed' },
     { id: 'p2', name: 'API Integration', chats: 5, lastActive: '1 hr ago', color: '#00d4ff' }
@@ -914,7 +917,7 @@ function renderSidebarContent(isAdmin) {
   }
   
   const isPaid = state.currentPlan !== 'free';
-  const recentChats = mockChatSessions.slice(0, 5);
+  const recentChats = (state.userChats || []).slice(0, 5);
   
   return `
   <div style="padding:1rem;border-bottom:1px solid var(--border-color);${state.sidebarCollapsed && window.innerWidth >= 768 ? 'display:flex;justify-content:center' : ''}">
@@ -940,13 +943,13 @@ function renderSidebarContent(isAdmin) {
   <p class="sidebar-section-label" style="padding-top:0.5rem">Recent Chats</p>
   <div class="recent-chats-scroll" style="flex:1;overflow-y:auto;padding:0 0.75rem;display:flex;flex-direction:column;gap:0.125rem" id="recent-chats-scroll">
     ${recentChats.map(chat => `
-    <div class="sidebar-item" style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="openChat('${chat.id}');closeSidebar()">
+    <div class="sidebar-item ${state.currentChatId === chat.id ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="openChat('${chat.id}');closeSidebar()">
       <span style="color:var(--text-secondary);flex-shrink:0">${I.chat}</span>
       <div style="flex:1;min-width:0">
-        <p style="font-size:0.8125rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-primary);margin:0">${chat.topic}</p>
-        <p style="font-size:0.6875rem;color:var(--text-subtle);margin:0">${chat.lastMessage}</p>
+        <p style="font-size:0.8125rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-primary);margin:0">${escapeHtml(chat.title || 'New chat')}</p>
+        <p style="font-size:0.6875rem;color:var(--text-subtle);margin:0">${formatRelativeTime(chat.updatedAt)}</p>
       </div>
-    </div>`).join('')}
+    </div>`).join('') || '<p style="padding:0.5rem 0.75rem;font-size:0.75rem;color:var(--text-subtle)">Your conversations will appear here.</p>'}
   </div>
   
   <div style="border-top:1px solid var(--border-color);padding:0.75rem;flex-shrink:0;position:relative">
@@ -1112,12 +1115,12 @@ function renderUserChat() {
       <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-bottom:1px solid var(--border-color);gap:1rem;flex-shrink:0;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:0.75rem">
           <div style="width:2.25rem;height:2.25rem;border-radius:0.5rem;background:linear-gradient(135deg,#7c3aed,#b14eff);display:flex;align-items:center;justify-content:center;color:white">${I.robot}</div>
-          <div><h3 style="font-weight:600;font-size:0.9375rem;color:var(--text-primary)">React Performance Optimization</h3><p style="font-size:0.75rem;color:var(--text-secondary);display:flex;align-items:center;gap:0.25rem"><span style="width:0.375rem;height:0.375rem;border-radius:9999px;background:#00ff88"></span>AI Active</p></div>
+          <div><h3 style="font-weight:600;font-size:0.9375rem;color:var(--text-primary)">${escapeHtml(state.userChats.find(c => c.id === state.currentChatId)?.title || "New chat")}</h3><p style="font-size:0.75rem;color:var(--text-secondary);display:flex;align-items:center;gap:0.25rem"><span style="width:0.375rem;height:0.375rem;border-radius:9999px;background:#00ff88"></span>AI Active</p></div>
         </div>
         <div>${!state.humanRequested && !state.humanJoined ? `<button onclick="handleHumanRequest()" style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:0.5rem;background:rgba(255,0,110,0.1);border:1px solid rgba(255,0,110,0.3);color:#ff006e;cursor:pointer;font-size:0.875rem;white-space:nowrap">${I.userStar} Request Human Expert ${!isPaid ? '<span style="font-size:0.625rem;padding:0.125rem 0.375rem;border-radius:0.25rem;background:rgba(124,58,237,0.3);color:#a78bfa;margin-left:0.25rem">PRO</span>' : ''}</button>` : state.humanRequested && !state.humanJoined ? `<div style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:0.5rem;background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.3);color:#eab308;font-size:0.875rem"><span style="width:0.5rem;height:0.5rem;border-radius:9999px;background:#eab308" class="pulse-dot"></span>Waiting for expert...</div>` : ''}</div>
       </div>
       <div class="chat-scroll-container" style="flex:1;padding:1.5rem;display:flex;flex-direction:column;gap:1.5rem" id="chat-messages">
-        ${mockMessages.map(msg => renderMessage(msg)).join('')}
+        ${state.chatMessages.map(msg => renderMessage(msg)).join('')}
         ${state.isTyping ? `<div class="slide-in" style="display:flex;align-items:flex-start;gap:0.75rem"><div style="width:2rem;height:2rem;border-radius:0.5rem;background:rgba(124,58,237,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#a78bfa">${I.robot}</div><div class="chat-bubble-ai" style="border-radius:1rem;border-top-left-radius:0.25rem;padding:0.75rem 1rem"><div class="typing-indicator"><span></span><span></span><span></span></div></div></div>` : ''}
       </div>
       <div style="border-top:1px solid var(--border-color);padding:1rem 1.5rem;flex-shrink:0;background:var(--bg-secondary)">
@@ -1138,7 +1141,7 @@ function renderMessage(msg) {
   return '';
 }
 
-function renderUserAllChats() { return `<main style="padding-top:4rem;height:100vh;display:flex;overflow:hidden">${renderSidebar(false)}<div class="content-scroll" style="flex:1;min-width:0" id="main-scroll"><div style="padding:1.5rem"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem"><div><h2 style="font-size:1.5rem;font-weight:bold;color:var(--text-primary)">All Chats</h2><p style="font-size:0.875rem;color:var(--text-secondary)">View and manage your conversations</p></div><button onclick="newChat()" class="btn-primary" style="padding:0.625rem 1rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem">${I.plus} New Chat</button></div><input type="text" placeholder="Search chats..." class="input-field" style="width:100%;padding:0.75rem 1rem;border-radius:0.5rem;font-size:0.875rem;margin-bottom:1rem"><div style="display:flex;flex-direction:column;gap:0.75rem">${mockChatSessions.map(chat => `<div class="card" style="padding:1rem;display:flex;align-items:center;gap:1rem;cursor:pointer" onclick="openChat('${chat.id}')"><div style="width:2.5rem;height:2.5rem;border-radius:0.5rem;background:rgba(124,58,237,0.1);display:flex;align-items:center;justify-content:center;color:#a78bfa">${I.chat}</div><div style="flex:1;min-width:0"><p style="font-weight:500;font-size:0.9375rem;color:var(--text-primary)">${chat.topic}</p><p style="font-size:0.75rem;color:var(--text-secondary)">${chat.messages} messages • ${chat.lastMessage}</p></div><span class="plan-badge ${chat.status === 'active' ? 'plan-pro' : 'plan-free'}">${chat.status}</span></div>`).join('')}</div></div></div></main>`; }
+function renderUserAllChats() { const chats = state.userChats || []; return `<main style="padding-top:4rem;height:100vh;display:flex;overflow:hidden">${renderSidebar(false)}<div class="content-scroll" style="flex:1;min-width:0" id="main-scroll"><div style="padding:1.5rem"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem"><div><h2 style="font-size:1.5rem;font-weight:bold;color:var(--text-primary)">All Chats</h2><p style="font-size:0.875rem;color:var(--text-secondary)">Your saved conversations</p></div><button onclick="newChat()" class="btn-primary" style="padding:0.625rem 1rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem">${I.plus} New Chat</button></div>${chats.length ? `<div style="display:flex;flex-direction:column;gap:0.75rem">${chats.map(chat => `<div class="card" style="padding:1rem;display:flex;align-items:center;gap:1rem;cursor:pointer" onclick="openChat('${chat.id}')"><div style="width:2.5rem;height:2.5rem;border-radius:0.5rem;background:rgba(124,58,237,0.1);display:flex;align-items:center;justify-content:center;color:#a78bfa">${I.chat}</div><div style="flex:1;min-width:0"><p style="font-weight:500;font-size:0.9375rem;color:var(--text-primary)">${escapeHtml(chat.title || 'New chat')}</p><p style="font-size:0.75rem;color:var(--text-secondary)">${chat.messageCount || 0} messages • ${formatRelativeTime(chat.updatedAt)}</p></div><span class="plan-badge plan-free">Saved</span></div>`).join('')}</div>` : `<div class="card" style="padding:2rem;text-align:center;color:var(--text-secondary)">No saved chats yet. Start a new chat to see it here.</div>`}</div></div></main>`; }
 
 function renderUserCoder() {
   const isPaid = state.currentPlan !== 'free';
@@ -1554,67 +1557,88 @@ async function loginAdmin() {
 function logoutAdmin() { state.currentRole = 'user'; state.currentView = 'landing'; render(); }
 function setAdminTab(tab) { state.adminTab = tab; render(); }
 function setApiTab(tab) { state.apiTab = tab; render(); }
-function newChat() { state.humanRequested = false; state.humanJoined = false; mockMessages.length = 0; navigateTo('user-chat'); }
-function openChat(id) { navigateTo('user-chat'); }
+function escapeHtml(value) { return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+function formatRelativeTime(value) {
+  const date = value && value.toDate ? value.toDate() : (value ? new Date(value) : null);
+  if (!date || Number.isNaN(date.getTime())) return 'Just now';
+  const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+  if (seconds < 60) return 'Just now';
+  if (seconds < 3600) return Math.floor(seconds / 60) + 'm ago';
+  if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ago';
+  return date.toLocaleDateString();
+}
+function chatCollection() {
+  const user = window.firebaseAuth.currentUser;
+  if (!user) throw new Error('Please sign in first.');
+  return window.firebaseDb.collection('users').doc(user.uid).collection('chats');
+}
+async function createSavedChat() {
+  const user = window.firebaseAuth.currentUser;
+  const ref = await chatCollection().add({ title: 'New chat', ownerUid: user.uid, createdAt: firebase.firestore.FieldValue.serverTimestamp(), updatedAt: firebase.firestore.FieldValue.serverTimestamp(), messageCount: 0 });
+  state.currentChatId = ref.id; state.chatMessages = [];
+  return ref.id;
+}
+async function ensureCurrentChat() { return state.currentChatId || await createSavedChat(); }
+async function loadChatMessages(chatId) {
+  if (state.messagesUnsubscribe) state.messagesUnsubscribe();
+  state.chatMessages = []; state.currentChatId = chatId;
+  state.messagesUnsubscribe = chatCollection().doc(chatId).collection('messages').orderBy('createdAt','asc').onSnapshot(snapshot => {
+    state.chatMessages = snapshot.docs.map(doc => {
+      const d = doc.data(), stamp = d.createdAt && d.createdAt.toDate ? d.createdAt.toDate() : new Date();
+      return { id: doc.id, role: d.role, content: d.content, timestamp: stamp.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) };
+    });
+    render(); const el = document.getElementById('chat-messages'); if (el) el.scrollTop = el.scrollHeight;
+  }, error => { console.error('Could not load chat messages', error); showToast('Could not load this chat. Check Firestore rules.', 'error'); });
+}
+async function saveChatMessage(chatId, role, content) {
+  const chatRef = chatCollection().doc(chatId);
+  await chatRef.collection('messages').add({ role, content, ownerUid: window.firebaseAuth.currentUser.uid, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+  const update = { updatedAt: firebase.firestore.FieldValue.serverTimestamp(), messageCount: firebase.firestore.FieldValue.increment(1) };
+  if (role === 'user') { const c = state.userChats.find(x => x.id === chatId); if (!c || c.title === 'New chat') update.title = content.slice(0,60) || 'New chat'; }
+  await chatRef.update(update);
+}
+async function newChat() {
+  state.humanRequested = false; state.humanJoined = false; state.chatMessages = []; state.currentChatId = null;
+  if (!window.firebaseAuth.currentUser) { navigateTo('user-chat'); return; }
+  try { await createSavedChat(); navigateTo('user-chat'); } catch (error) { console.error(error); showToast('Could not create chat. Check Firestore rules.', 'error'); }
+}
+async function openChat(id) {
+  try { await loadChatMessages(id); navigateTo('user-chat'); } catch (error) { console.error(error); showToast('Could not open chat.', 'error'); }
+}
 function handleCoderClick() { if (state.currentPlan === 'free') { state.showUpgradeModal = 'coder'; render(); } else { navigateTo('user-coder'); } }
 function handleHumanRequest() { if (state.currentPlan === 'free') { state.showUpgradeModal = 'human'; render(); return; } requestHuman(); }
-function requestHuman() { state.humanRequested = true; state.humanRequestsUsed++; mockMessages.push({ id: mockMessages.length + 1, role: 'ai', content: 'Human response requested\n\nI\'ve flagged this conversation for human expert review.', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }); render(); showToast('Human expert has been requested', 'info', 'Request sent'); setTimeout(() => { state.humanJoined = true; render(); showToast('A human expert has joined your chat', 'success', 'Expert joined'); }, 8000); }
+async function requestHuman() { if (!state.currentChatId) { showToast('Start a chat first.', 'info'); return; } state.humanRequested = true; state.humanRequestsUsed++; try { await chatCollection().doc(state.currentChatId).update({ humanRequested: true, updatedAt: firebase.firestore.FieldValue.serverTimestamp() }); await saveChatMessage(state.currentChatId, 'ai', 'Human response requested. Your request has been sent to the support team.'); showToast('Human expert request submitted.', 'success', 'Request sent'); } catch (error) { showToast('Could not submit the request.', 'error'); } render(); }
 
 async function sendMessage() {
   const input = document.getElementById('user-message-input');
   if (!input || !input.value.trim()) return;
-
   const user = window.firebaseAuth.currentUser;
-  if (!user) {
-    showToast('Please sign in before chatting with AI.', 'warning');
-    openAuthModal('signin');
-    return;
-  }
-
+  if (!user) { showToast('Please sign in before chatting with AI.', 'warning'); openAuthModal('signin'); return; }
   const content = input.value.trim();
-  mockMessages.push({
-    id: mockMessages.length + 1,
-    role: 'user',
-    content,
-    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  });
   state.newMessage = '';
   state.isTyping = true;
-  state.messagesToday++;
   render();
-
   try {
+    const chatId = await ensureCurrentChat();
+    await saveChatMessage(chatId, 'user', content);
+    state.messagesToday++;
+    const messages = [...state.chatMessages, { role: 'user', content }].slice(-20).map(message => ({
+      role: (message.role === 'ai' || message.role === 'human') ? 'assistant' : message.role,
+      content: message.content
+    }));
     const token = await user.getIdToken();
     const response = await fetch('/.netlify/functions/chat', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token
-      },
-      body: JSON.stringify({
-        messages: mockMessages.slice(-20).map((message) => ({
-          role: (message.role === 'ai' || message.role === 'human') ? 'assistant' : message.role,
-          content: message.content
-        }))
-      })
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ messages })
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || 'The AI request failed.');
-
-    mockMessages.push({
-      id: mockMessages.length + 1,
-      role: 'ai',
-      content: data.reply,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    });
+    await saveChatMessage(chatId, 'ai', data.reply);
     state.apiCalls++;
   } catch (error) {
-    mockMessages.push({
-      id: mockMessages.length + 1,
-      role: 'ai',
-      content: 'Sorry, I could not get an AI response. ' + (error.message || 'Please try again.'),
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    });
+    console.error('Chat request failed:', error);
+    showToast(error.message || 'Could not save your message or get an AI response.', 'error', 'Chat failed');
   } finally {
     state.isTyping = false;
     render();
@@ -1632,7 +1656,7 @@ function toggleFaq(i) { state.openFaq = state.openFaq === i ? null : i; render()
 function setSettingsTab(tab) { state.settingsTab = tab; render(); }
 function setLanguage(lang) { state.language = lang; render(); showToast(`Language set to ${lang}`, 'success', 'Language updated'); }
 function toggleDataControl(key) { state.dataControls[key] = !state.dataControls[key]; render(); }
-function selectPlan(plan) { state.currentPlan = plan; render(); showToast(`Successfully switched to ${plan} plan!`, 'success', 'Plan updated'); }
+function selectPlan(plan) { showToast('Plans are assigned by an administrator after payment or approval. Please contact support.', 'info', 'Plan changes restricted'); }
 function openDeleteModal() { state.showDeleteModal = true; render(); }
 function confirmDelete() { state.deleteRequested = true; closeModal(); showToast('Account deletion request submitted. Your account will be removed within 30 days.', 'warning', 'Deletion requested'); }
 function openUserAction(userId, type) { state.showUserActionModal = { userId, type }; render(); }
@@ -1703,22 +1727,17 @@ function updateCustomCreditsDirect(inputEl) {
   }
 }
 
-function processRecharge() {
-  const amount = state.selectedCreditPackage || state.customCreditAmount;
-  if (!amount || amount < 100) { showToast('Please select at least 100 credits', 'error', 'Invalid amount'); return; }
-  const price = amount * 0.0015;
-  state.totalBalance += amount;
-  closeModal();
-  showToast(`Successfully added ${amount.toLocaleString()} credits! New balance: ${state.totalBalance.toLocaleString()}`, 'success', 'Recharge complete');
+async function createCreditRequest(amount) {
+  const user = window.firebaseAuth.currentUser;
+  if (!user) { showToast('Please sign in first.', 'warning'); return; }
+  if (!Number.isInteger(amount) || amount < 100) { showToast('Minimum 100 credits.', 'error', 'Invalid amount'); return; }
+  try {
+    await window.firebaseDb.collection('creditRequests').add({ uid: user.uid, email: user.email || '', amount, estimatedPrice: Number((amount * 0.0015).toFixed(2)), status: 'pending', createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    closeModal(); showToast('Your credit request was submitted. Credits will appear after admin approval.', 'success', 'Request submitted');
+  } catch (error) { console.error('Credit request failed:', error); showToast('Could not submit your request. Check Firestore rules.', 'error'); }
 }
-function processCustomRecharge() {
-  const input = document.getElementById('modal-custom-credits');
-  const amount = input ? parseInt(input.value) : 0;
-  if (!amount || amount < 100) { showToast('Minimum 100 credits', 'error', 'Invalid amount'); return; }
-  state.totalBalance += amount;
-  closeModal();
-  showToast(`Successfully added ${amount.toLocaleString()} credits!`, 'success', 'Recharge complete');
-}
+function processRecharge() { return createCreditRequest(state.selectedCreditPackage || state.customCreditAmount); }
+function processCustomRecharge() { const input = document.getElementById('modal-custom-credits'); return createCreditRequest(input ? parseInt(input.value, 10) : 0); }
 
 function openKeyAction(keyId, type) { state.showKeyActionModal = { keyId, type }; render(); }
 function confirmKeyAction() {
@@ -1876,12 +1895,36 @@ window.firebaseAuth.onAuthStateChanged(async (user) => {
     } catch (error) {
       state.isAdminUser = false;
     }
+    try {
+      const profileRef = window.firebaseDb.collection('users').doc(user.uid);
+      const profileSnap = await profileRef.get();
+      if (!profileSnap.exists) {
+        await profileRef.set({ uid: user.uid, email: user.email || '', displayName: state.userName, plan: 'free', credits: 0, createdAt: firebase.firestore.FieldValue.serverTimestamp(), updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        state.currentPlan = 'free'; state.totalBalance = 0;
+      } else {
+        const profile = profileSnap.data() || {};
+        state.currentPlan = ['free','pro','enterprise'].includes(profile.plan) ? profile.plan : 'free';
+        state.totalBalance = Number.isFinite(profile.credits) ? profile.credits : 0;
+        state.memberSince = profile.createdAt && profile.createdAt.toDate ? profile.createdAt.toDate().toLocaleDateString('en-US',{month:'short',year:'numeric'}) : state.memberSince;
+      }
+      state.profileLoaded = true;
+      if (state.chatsUnsubscribe) state.chatsUnsubscribe();
+      state.chatsUnsubscribe = window.firebaseDb.collection('users').doc(user.uid).collection('chats').orderBy('updatedAt','desc').onSnapshot(snapshot => {
+        state.userChats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        state.totalChats = state.userChats.length;
+        if (!state.currentChatId && state.userChats.length) state.currentChatId = state.userChats[0].id;
+        render();
+      }, error => { console.error('Chat list listener failed:', error); showToast('Could not load saved chats. Check Firestore rules.', 'error'); });
+    } catch (error) { console.error('Could not load profile:', error); showToast('Account data could not be loaded. Check Firestore setup and rules.', 'error'); }
     if (state.currentView === 'landing') state.currentView = 'user-chat';
   } else {
     state.userName = '';
     state.userEmail = '';
     state.userAvatar = '';
     state.userProvider = '';
+    state.currentChatId = null; state.chatMessages = []; state.userChats = []; state.totalChats = 0; state.totalBalance = 0; state.currentPlan = 'free'; state.profileLoaded = false;
+    if (state.chatsUnsubscribe) { state.chatsUnsubscribe(); state.chatsUnsubscribe = null; }
+    if (state.messagesUnsubscribe) { state.messagesUnsubscribe(); state.messagesUnsubscribe = null; }
     state.isAdminUser = false;
     state.currentRole = 'user';
     if (state.currentView !== 'admin-login') state.currentView = 'landing';
