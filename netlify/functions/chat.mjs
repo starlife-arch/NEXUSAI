@@ -115,7 +115,7 @@ function firestoreFields(values) {
 }
 
 async function reserveDailyUsage(uid) {
-  const date = new Date().toISOString().slice(0, 10);
+  const date = new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Nairobi", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
   const usagePath = "/users/" + encodeURIComponent(uid) + "/usage/" + date;
   const userPath = "/users/" + encodeURIComponent(uid);
   const settingsPath = "/appSettings/global";
