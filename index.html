@@ -635,7 +635,7 @@ const mockNotifications = [
 
 const state = {
   currentView: 'landing', currentRole: 'user', isAdminUser: false, selectedChat: null, selectedUser: null,
-  currentChatId: null, chatMessages: [], userChats: [], profileLoaded: false, chatsUnsubscribe: null, messagesUnsubscribe: null,
+  currentChatId: null, chatMessages: [], userChats: [], currentUserProfile: {}, profileLoaded: false, chatsUnsubscribe: null, messagesUnsubscribe: null,
   adminUsers: [], adminCreditRequests: [], adminChats: [], adminSelectedChatOwnerUid: null, adminUsersUnsubscribe: null, adminCreditRequestsUnsubscribe: null, adminSettingsUnsubscribe: null, adminChatUnsubscribes: [], adminDataLoaded: false, adminDataError: '', adminSettings: {freeDailyMessages:50,humanRequestCooldownMinutes:30}, userNotifications: [], notificationsUnsubscribe: null,
   humanRequested: false, humanJoined: false, adminJoinedChats: new Set(),
   newMessage: '', adminMessage: '', isTyping: false, notifications: 0,
@@ -1262,7 +1262,7 @@ function renderCreate() {
 function renderAdminLogin() { return `<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto"><div class="card" style="padding:2rem;max-width:24rem;width:100%"><div style="text-align:center;margin-bottom:1.5rem"><div style="width:3rem;height:3rem;border-radius:0.75rem;background:linear-gradient(135deg,#00d4ff,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;margin:0 auto 1rem">${I.shield}</div><h2 style="font-size:1.25rem;font-weight:bold;color:var(--text-primary)">Admin Access</h2><p style="font-size:0.875rem;color:var(--text-secondary);margin-top:0.25rem">Sign in with your authorized Google account</p></div><div style="display:flex;flex-direction:column;gap:0.75rem"><button onclick="loginAdminWithGoogle()" class="btn-primary" style="padding:0.75rem;border-radius:0.5rem;font-weight:600">Continue with Google</button><div style="text-align:center;color:var(--text-subtle);font-size:0.75rem">Or use email and password</div><input type="email" id="admin-email" placeholder="Admin email" class="input-field" style="padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"><input type="password" id="admin-password" placeholder="Password" class="input-field" style="padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"><button onclick="loginAdmin()" class="btn-secondary" style="padding:0.75rem;border-radius:0.5rem;font-weight:600">Sign In with Email</button><button onclick="navigateTo('landing')" class="btn-secondary" style="padding:0.5rem;border-radius:0.5rem;font-size:0.875rem">← Back to home</button></div></div></main>`; }
 
 function renderAdminDashboard() {
-  const requestedChats = mockChatSessions.filter(c => c.humanRequested && !c.humanJoined && !state.adminJoinedChats.has(c.id));
+  const requestedChats = state.adminChats.filter(c => c.humanRequested && !c.humanJoined);
   const joinedChats = state.adminChats.filter(c => c.humanJoined);
   const bannedUsers = state.adminUsers.filter(u => u.accountStatus === 'banned').length;
   const restrictedUsers = state.adminUsers.filter(u => u.accountStatus === 'restricted').length;
@@ -1475,6 +1475,7 @@ async function signOut() {
     state.userName = '';
     state.userEmail = '';
     state.userAvatar = '';
+    state.currentUserProfile = {};
     state.userNotifications=[];state.notifications=0;if(state.notificationsUnsubscribe){state.notificationsUnsubscribe();state.notificationsUnsubscribe=null;}
     state.userProvider = '';
     state.currentPlan = 'free';
@@ -1627,6 +1628,7 @@ async function sendMessage() {
   const user = window.firebaseAuth.currentUser;
   if (!user) { showToast('Please sign in before chatting with AI.', 'warning'); openAuthModal('signin'); return; }
   const content = input.value.trim();
+  try { const profileSnap = await window.firebaseDb.collection('users').doc(user.uid).get(); const profile = profileSnap.data() || {}; state.currentUserProfile = profile; if (profile.accountStatus === 'banned') { showToast('Your account is banned. Contact support.', 'error'); return; } const limit = Number(profile.customLimits?.messagesPerDay || 0); if (profile.accountStatus === 'restricted' && limit > 0 && state.messagesToday >= limit) { showToast('Your account has reached its daily message limit.', 'warning'); return; } } catch (e) { showToast('Could not verify account status. Try again.', 'error'); return; }
   state.newMessage = '';
   state.isTyping = true;
   render();
@@ -1882,9 +1884,10 @@ window.firebaseAuth.onAuthStateChanged(async (user) => {
       const profileSnap = await profileRef.get();
       if (!profileSnap.exists) {
         await profileRef.set({ uid: user.uid, email: user.email || '', displayName: state.userName, plan: 'free', credits: 0, createdAt: firebase.firestore.FieldValue.serverTimestamp(), updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-        state.currentPlan = 'free'; state.totalBalance = 0;
+        state.currentPlan = 'free'; state.totalBalance = 0; state.currentUserProfile = {uid:user.uid,plan:'free',credits:0,accountStatus:'active'};
       } else {
-        const profile = profileSnap.data() || {};
+        const profile = profileSnap.data() || {}; state.currentUserProfile = profile;
+        if (profile.accountStatus === 'banned') { showToast('This account is banned. Contact support.', 'error', 'Account disabled'); state.profileLoaded = true; }
         state.currentPlan = ['free','pro','enterprise'].includes(profile.plan) ? profile.plan : 'free';
         state.totalBalance = Number.isFinite(profile.credits) ? profile.credits : 0;
         state.memberSince = profile.createdAt && profile.createdAt.toDate ? profile.createdAt.toDate().toLocaleDateString('en-US',{month:'short',year:'numeric'}) : state.memberSince;
