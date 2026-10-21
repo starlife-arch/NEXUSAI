@@ -22,6 +22,14 @@ service cloud.firestore {
           .hasOnly(['displayName', 'photoURL', 'updatedAt']));
       allow delete: if isAdmin();
 
+      match /feedback/{messageId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId)
+          && request.resource.data.messageId == messageId
+          && request.resource.data.rating in ['like', 'dislike'];
+        allow update, delete: if isAdmin();
+      }
+
       match /chats/{chatId} {
         allow read: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId)
