@@ -125,12 +125,12 @@ export const handler = async (event) => {
         messages: [
           {
             role: "system",
-            content: "You are Laud, a helpful AI assistant. Give accurate, clear, practical answers. If you are uncertain, say so."
+            content: "You are Laud, a helpful, natural conversational AI. Answer directly in clear, readable Markdown. Avoid decorative stars, excessive headings, unnecessary horizontal rules, and tables unless a table genuinely makes the answer clearer. Prefer short paragraphs and useful bullet lists. Complete the requested answer; if the topic is broad, prioritize the most useful details and offer to continue only when necessary. If uncertain, say so."
           },
           ...messages
         ],
         temperature: 0.7,
-        max_tokens: 1024
+        max_tokens: 2048
       })
     });
 
@@ -144,7 +144,7 @@ export const handler = async (event) => {
     if (typeof answer !== "string" || !answer.trim()) {
       return json(502, { error: "The AI provider returned an empty response." });
     }
-    return json(200, { reply: answer.trim() });
+    return json(200, { reply: answer.trim(), truncated: result.choices?.[0]?.finish_reason === "length" });
   } catch (error) {
     console.error("Chat function error:", error?.message || "Unknown error");
     return json(502, { error: "Could not reach the AI service. Please try again shortly." });
