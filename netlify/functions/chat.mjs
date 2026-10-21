@@ -1,4 +1,4 @@
-import { createPublicKey, verify as verifySignature } from "node:crypto";
+import { createPublicKey, createSign, verify as verifySignature } from "node:crypto";
 
 const PROJECT_ID = "drovix";
 const ALLOWED_ORIGIN = "https://drovix.netlify.app";
@@ -18,6 +18,165 @@ function json(statusCode, body) {
     },
     body: JSON.stringify(body)
   };
+}
+
+let serviceTokenCache = { token: "", expiresAt: 0 };
+
+function base64url(value) {
+  return Buffer.from(value).toString("base64url");
+}
+
+async function getServiceAccessToken() {
+  if (serviceTokenCache.token && serviceTokenCache.expiresAt > Date.now() + 60000) return serviceTokenCache.token;
+  if (!process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+    throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is not configured");
+  }
+  const account = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+  if (!account.client_email || !account.private_key) throw new Error("Service account JSON is missing required fields");
+  const now = Math.floor(Date.now() / 1000);
+  const header = base64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  const claim = base64url(JSON.stringify({
+    iss: account.client_email,
+    scope: "https://www.googleapis.com/auth/datastore",
+    aud: "https://oauth2.googleapis.com/token",
+    iat: now,
+    exp: now + 3600
+  }));
+  const unsigned = header + "." + claim;
+  const signer = createSign("RSA-SHA256");
+  signer.update(unsigned);
+  signer.end();
+  const assertion = unsigned + "." + signer.sign(account.private_key).toString("base64url");
+  const response = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+      assertion
+    })
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || !result.access_token) throw new Error("Could not obtain Firestore service access");
+  serviceTokenCache = { token: result.access_token, expiresAt: Date.now() + Number(result.expires_in || 3600) * 1000 };
+  return serviceTokenCache.token;
+}
+
+function firestoreBase() {
+  return "https://firestore.googleapis.com/v1/projects/" + PROJECT_ID + "/databases/(default)/documents";
+}
+
+async function firestoreRequest(path, options = {}) {
+  const token = await getServiceAccessToken();
+  const response = await fetch(firestoreBase() + path, {
+    ...options,
+    headers: {
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    }
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(data.error?.message || "Firestore request failed");
+    error.status = response.status;
+    error.data = data;
+    throw error;
+  }
+  return data;
+}
+
+function fieldValue(field) {
+  if (!field) return undefined;
+  if (field.integerValue !== undefined) return Number(field.integerValue);
+  if (field.doubleValue !== undefined) return Number(field.doubleValue);
+  if (field.stringValue !== undefined) return field.stringValue;
+  if (field.booleanValue !== undefined) return field.booleanValue;
+  if (field.mapValue) {
+    const output = {};
+    for (const [key, value] of Object.entries(field.mapValue.fields || {})) output[key] = fieldValue(value);
+    return output;
+  }
+  return undefined;
+}
+
+function documentFields(doc) {
+  const output = {};
+  for (const [key, value] of Object.entries(doc?.fields || {})) output[key] = fieldValue(value);
+  return output;
+}
+
+function firestoreFields(values) {
+  const fields = {};
+  for (const [key, value] of Object.entries(values)) {
+    if (typeof value === "number") fields[key] = { integerValue: String(Math.trunc(value)) };
+    else fields[key] = { stringValue: String(value) };
+  }
+  return fields;
+}
+
+async function reserveDailyUsage(uid) {
+  const date = new Date().toISOString().slice(0, 10);
+  const usagePath = "/users/" + encodeURIComponent(uid) + "/usage/" + date;
+  const userPath = "/users/" + encodeURIComponent(uid);
+  const settingsPath = "/appSettings/global";
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const transactionResult = await firestoreRequest(":beginTransaction", {
+      method: "POST",
+      body: JSON.stringify({ options: { readWrite: {} } })
+    });
+    const transaction = transactionResult.transaction;
+    const query = "?transaction=" + encodeURIComponent(transaction);
+    let settingsDoc, userDoc, usageDoc;
+    try {
+      [settingsDoc, userDoc, usageDoc] = await Promise.all([
+        firestoreRequest(settingsPath + query).catch(error => error.status === 404 ? null : Promise.reject(error)),
+        firestoreRequest(userPath + query).catch(error => error.status === 404 ? null : Promise.reject(error)),
+        firestoreRequest(usagePath + query).catch(error => error.status === 404 ? null : Promise.reject(error))
+      ]);
+    } catch (error) {
+      console.error("Could not read daily usage records", error.message);
+      throw new Error("Could not verify your daily usage. Please try again.");
+    }
+
+    const settings = documentFields(settingsDoc);
+    const profile = documentFields(userDoc);
+    const usage = documentFields(usageDoc);
+    if (profile.accountStatus === "banned") throw new Error("Your account is banned. Contact support.");
+    if (profile.accountStatus === "restricted" && profile.customLimits && Number(profile.customLimits.messagesPerDay) >= 0) {
+      const restrictedLimit = Number(profile.customLimits.messagesPerDay);
+      if (Number(usage.messageCount || 0) >= restrictedLimit) throw new Error("Your account has reached its daily message limit.");
+    } else if (String(profile.plan || "free").toLowerCase() === "free") {
+      const dailyLimit = Number(settings.freeDailyMessages ?? 50);
+      if (Number(usage.messageCount || 0) >= dailyLimit) throw new Error("You have reached today's free message limit. Please try again tomorrow.");
+    }
+
+    const nextUsage = {
+      day: date,
+      messageCount: Number(usage.messageCount || 0) + 1,
+      apiCalls: Number(usage.apiCalls || 0) + 1
+    };
+    const write = {
+      update: {
+        name: "projects/" + PROJECT_ID + "/databases/(default)/documents" + usagePath,
+        fields: firestoreFields(nextUsage)
+      },
+      updateMask: { fieldPaths: ["day", "messageCount", "apiCalls"] },
+      currentDocument: usageDoc?.updateTime ? { updateTime: usageDoc.updateTime } : { exists: false }
+    };
+    try {
+      await firestoreRequest(":commit", {
+        method: "POST",
+        body: JSON.stringify({ writes: [write], transaction })
+      });
+      return { date, ...nextUsage, plan: profile.plan || "free" };
+    } catch (error) {
+      if (attempt < 2 && (error.status === 409 || /ABORTED|transaction/i.test(error.message))) continue;
+      console.error("Could not save daily usage", error.message);
+      throw new Error("Could not record your usage securely. Please try again.");
+    }
+  }
+  throw new Error("Your usage could not be checked. Please try again.");
 }
 
 async function verifyFirebaseIdToken(token) {
@@ -84,8 +243,9 @@ export const handler = async (event) => {
   const match = authHeader.match(/^Bearer\s+(.+)$/i);
   if (!match) return json(401, { error: "Please sign in before using AI chat." });
 
+  let claims;
   try {
-    await verifyFirebaseIdToken(match[1]);
+    claims = await verifyFirebaseIdToken(match[1]);
   } catch {
     return json(401, { error: "Your session is invalid or expired. Please sign in again." });
   }
@@ -114,6 +274,14 @@ export const handler = async (event) => {
   }
 
   try {
+    try {
+      await reserveDailyUsage(claims.sub);
+    } catch (usageError) {
+      if (/FIREBASE_SERVICE_ACCOUNT_JSON/.test(usageError.message)) {
+        return json(503, { error: "The AI service is waiting for secure usage tracking to be configured by the administrator." });
+      }
+      return json(usageError.message.includes("reached today's") || usageError.message.includes("daily message limit") || usageError.message.includes("banned") ? 429 : 503, { error: usageError.message || "Could not verify your daily usage." });
+    }
     const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
