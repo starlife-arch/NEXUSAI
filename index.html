@@ -414,6 +414,21 @@ tr:hover td { background: var(--bg-hover); }
 <body>
 <div id="app"></div>
 <div id="toast-container" class="toast-container"></div>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDF_Xi2jcX9XLmN4kql1oIzw2YJMoSahHA",
+    authDomain: "drovix.firebaseapp.com",
+    projectId: "drovix",
+    storageBucket: "drovix.firebasestorage.app",
+    messagingSenderId: "1023330945540",
+    appId: "1:1023330945540:web:29da5f29d6c78dd11a0351",
+    measurementId: "G-DV3GX5GVF6"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  window.firebaseAuth = firebase.auth();
+</script>
 <script>
 // ============ TOAST NOTIFICATION SYSTEM ============
 function showToast(message, type = 'info', title = '') {
@@ -1261,7 +1276,7 @@ function renderCreate() {
   return `<main style="padding-top:4rem;height:100vh;display:flex;overflow:hidden">${renderSidebar(false)}<div class="content-scroll" style="flex:1;min-width:0" id="main-scroll"><div style="padding:1.5rem;max-width:64rem"><div style="margin-bottom:1.5rem"><h2 style="font-size:1.5rem;font-weight:bold;color:var(--text-primary);margin-bottom:0.5rem">Create</h2><p style="font-size:0.875rem;color:var(--text-secondary)">Start a new creation with AI-powered templates</p></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem">${templates.map(t => `<div class="card" style="padding:1.5rem;cursor:pointer;transition:transform 0.2s" onclick="startTemplate('${t.name}')" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'"><div style="width:3rem;height:3rem;border-radius:0.75rem;background:${t.color}22;display:flex;align-items:center;justify-content:center;color:${t.color};margin-bottom:1rem">${t.icon}</div><h3 style="font-weight:600;color:var(--text-primary);margin:0 0 0.5rem 0">${t.name}</h3><p style="font-size:0.8125rem;color:var(--text-secondary);margin:0">${t.desc}</p></div>`).join('')}</div><div class="card" style="padding:2rem;margin-top:1rem;text-align:center;border:2px dashed var(--border-color)"><div style="width:3rem;height:3rem;border-radius:0.75rem;background:rgba(124,58,237,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;color:#a78bfa">${I.plus}</div><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:0.5rem">Start from Scratch</h3><p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem">Create a completely custom AI workflow</p><button onclick="startFromScratch()" class="btn-primary" style="padding:0.625rem 1.25rem;border-radius:0.5rem;font-size:0.875rem">Create New</button></div></div></div></main>`;
 }
 
-function renderAdminLogin() { return `<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto"><div class="card" style="padding:2rem;max-width:24rem;width:100%"><div style="text-align:center;margin-bottom:1.5rem"><div style="width:3rem;height:3rem;border-radius:0.75rem;background:linear-gradient(135deg,#00d4ff,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;margin:0 auto 1rem">${I.shield}</div><h2 style="font-size:1.25rem;font-weight:bold;color:var(--text-primary)">Admin Access</h2><p style="font-size:0.875rem;color:var(--text-secondary);margin-top:0.25rem">Sign in to manage users</p></div><div style="display:flex;flex-direction:column;gap:0.75rem"><input type="email" placeholder="admin@laud.com" value="admin@laud.com" class="input-field" style="padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"><input type="password" placeholder="Password" value="admin123" class="input-field" style="padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"><button onclick="loginAdmin()" class="btn-primary" style="padding:0.75rem;border-radius:0.5rem;font-weight:600">Sign In</button><button onclick="navigateTo('landing')" class="btn-secondary" style="padding:0.5rem;border-radius:0.5rem;font-size:0.875rem">← Back to home</button></div></div></main>`; }
+function renderAdminLogin() { return `<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto"><div class="card" style="padding:2rem;max-width:24rem;width:100%"><div style="text-align:center;margin-bottom:1.5rem"><div style="width:3rem;height:3rem;border-radius:0.75rem;background:linear-gradient(135deg,#00d4ff,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;margin:0 auto 1rem">${I.shield}</div><h2 style="font-size:1.25rem;font-weight:bold;color:var(--text-primary)">Admin Access</h2><p style="font-size:0.875rem;color:var(--text-secondary);margin-top:0.25rem">Sign in to manage users</p></div><div style="display:flex;flex-direction:column;gap:0.75rem"><input type="email" id="admin-email" placeholder="admin@laud.com" class="input-field" style="padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"><input type="password" id="admin-password" placeholder="Password" class="input-field" style="padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"><button onclick="loginAdmin()" class="btn-primary" style="padding:0.75rem;border-radius:0.5rem;font-weight:600">Sign In</button><button onclick="navigateTo('landing')" class="btn-secondary" style="padding:0.5rem;border-radius:0.5rem;font-size:0.875rem">← Back to home</button></div></div></main>`; }
 
 function renderAdminDashboard() {
   const requestedChats = mockChatSessions.filter(c => c.humanRequested && !c.humanJoined && !state.adminJoinedChats.has(c.id));
@@ -1380,43 +1395,114 @@ function navigateTo(view) {
 function openAuthModal(mode) { state.authMode = mode || 'signin'; state.showAuthModal = true; render(); }
 function toggleAuthMode() { state.authMode = state.authMode === 'signin' ? 'signup' : 'signin'; render(); }
 
-function signInWithGoogle() {
-  const mockGoogleUser = { name: 'Alex Morgan', email: 'alex.morgan@gmail.com', avatar: 'A', provider: 'Google' };
-  state.userName = mockGoogleUser.name; state.userEmail = mockGoogleUser.email; state.userAvatar = mockGoogleUser.avatar; state.userProvider = mockGoogleUser.provider;
-  state.memberSince = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-  state.currentPlan = 'free'; closeModal(); state.currentView = 'user-chat';
-  render();
-  showToast('Signed in successfully with Google!', 'success', 'Welcome back');
+async function signInWithGoogle() {
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await window.firebaseAuth.signInWithPopup(provider);
+    closeModal();
+    state.currentView = 'user-chat';
+    render();
+    showToast('Signed in successfully with Google!', 'success', 'Welcome back');
+  } catch (error) {
+    console.error('Google sign-in failed:', error);
+    showToast(error.message || 'Google sign-in failed. Please try again.', 'error', 'Sign-in failed');
+  }
 }
 
-function signInWithEmail() {
+async function signInWithEmail() {
   const nameInput = document.getElementById('auth-name');
   const emailInput = document.getElementById('auth-email');
   const passwordInput = document.getElementById('auth-password');
   const email = emailInput ? emailInput.value.trim() : '';
-  const name = nameInput ? nameInput.value.trim() : email.split('@')[0];
+  const name = nameInput ? nameInput.value.trim() : '';
   const password = passwordInput ? passwordInput.value : '';
-  if (!email || !password) { showToast('Please fill in all fields', 'error', 'Missing information'); return; }
-  if (password.length < 6) { showToast('Password must be at least 6 characters', 'error', 'Invalid password'); return; }
-  state.userName = state.authMode === 'signup' ? (name || email.split('@')[0]) : (name || email.split('@')[0]);
-  state.userEmail = email; state.userAvatar = state.userName.charAt(0).toUpperCase(); state.userProvider = 'Email';
-  state.memberSince = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-  closeModal(); state.currentView = 'user-chat'; render();
-  showToast(`Welcome to Laud, ${state.userName}!`, 'success', 'Account created');
+
+  if (!email || !password) {
+    showToast('Please enter your email and password.', 'error', 'Missing information');
+    return;
+  }
+  if (password.length < 6) {
+    showToast('Password must be at least 6 characters.', 'error', 'Invalid password');
+    return;
+  }
+
+  try {
+    if (state.authMode === 'signup') {
+      if (!name) {
+        showToast('Please enter your name.', 'error', 'Missing name');
+        return;
+      }
+      const credential = await window.firebaseAuth.createUserWithEmailAndPassword(email, password);
+      await credential.user.updateProfile({ displayName: name });
+    } else {
+      await window.firebaseAuth.signInWithEmailAndPassword(email, password);
+    }
+    closeModal();
+    state.currentView = 'user-chat';
+    render();
+    showToast(state.authMode === 'signup' ? 'Account created successfully.' : 'Welcome back!', 'success');
+  } catch (error) {
+    console.error('Email authentication failed:', error);
+    const messages = {
+      'auth/email-already-in-use': 'An account already exists for this email.',
+      'auth/invalid-email': 'Please check the email address.',
+      'auth/invalid-credential': 'Email or password is incorrect.',
+      'auth/weak-password': 'Choose a stronger password (at least 6 characters).',
+      'auth/popup-closed-by-user': 'The Google sign-in window was closed.'
+    };
+    showToast(messages[error.code] || error.message || 'Authentication failed.', 'error', 'Sign-in failed');
+  }
 }
 
-function signOut() {
-  state.userName = ''; state.userEmail = ''; state.userAvatar = ''; state.userProvider = '';
-  state.currentPlan = 'free'; state.currentView = 'landing';
-  state.messagesToday = 0; state.totalChats = 0; state.apiCalls = 0; state.humanRequestsUsed = 0;
-  state.userMenuOpen = false;
-  render();
-  showToast('You have been signed out', 'info', 'Signed out');
+async function signOut() {
+  try {
+    await window.firebaseAuth.signOut();
+    state.currentRole = 'user';
+    state.userName = '';
+    state.userEmail = '';
+    state.userAvatar = '';
+    state.userProvider = '';
+    state.currentPlan = 'free';
+    state.currentView = 'landing';
+    state.userMenuOpen = false;
+    render();
+    showToast('You have been signed out.', 'info');
+  } catch (error) {
+    console.error('Sign-out failed:', error);
+    showToast('Could not sign out. Please try again.', 'error');
+  }
 }
 
 function toggleTheme() { state.theme = state.theme === 'dark' ? 'light' : 'dark'; render(); showToast(`Switched to ${state.theme} mode`, 'info', 'Theme changed'); }
 function setTheme(t) { state.theme = t; render(); }
-function loginAdmin() { state.currentRole = 'admin'; state.currentView = 'admin-dashboard'; state.adminTab = 'dashboard'; render(); showToast('Admin access granted', 'success', 'Welcome Admin'); }
+
+async function loginAdmin() {
+  const email = document.getElementById('admin-email')?.value.trim();
+  const password = document.getElementById('admin-password')?.value;
+  if (!email || !password) {
+    showToast('Enter your admin email and password.', 'error');
+    return;
+  }
+  try {
+    const credential = await window.firebaseAuth.signInWithEmailAndPassword(email, password);
+    const token = await credential.user.getIdTokenResult(true);
+    if (token.claims.admin !== true) {
+      state.currentRole = 'user';
+      state.currentView = 'landing';
+      render();
+      showToast('This account does not have administrator access.', 'error', 'Access denied');
+      return;
+    }
+    state.currentRole = 'admin';
+    state.currentView = 'admin-dashboard';
+    state.adminTab = 'dashboard';
+    render();
+    showToast('Admin access verified.', 'success');
+  } catch (error) {
+    showToast('Admin sign-in failed. Check your credentials.', 'error');
+  }
+}
+
 function logoutAdmin() { state.currentRole = 'user'; state.currentView = 'landing'; render(); }
 function setAdminTab(tab) { state.adminTab = tab; render(); }
 function setApiTab(tab) { state.apiTab = tab; render(); }
@@ -1425,7 +1511,70 @@ function openChat(id) { navigateTo('user-chat'); }
 function handleCoderClick() { if (state.currentPlan === 'free') { state.showUpgradeModal = 'coder'; render(); } else { navigateTo('user-coder'); } }
 function handleHumanRequest() { if (state.currentPlan === 'free') { state.showUpgradeModal = 'human'; render(); return; } requestHuman(); }
 function requestHuman() { state.humanRequested = true; state.humanRequestsUsed++; mockMessages.push({ id: mockMessages.length + 1, role: 'ai', content: 'Human response requested\n\nI\'ve flagged this conversation for human expert review.', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }); render(); showToast('Human expert has been requested', 'info', 'Request sent'); setTimeout(() => { state.humanJoined = true; render(); showToast('A human expert has joined your chat', 'success', 'Expert joined'); }, 8000); }
-function sendMessage() { const input = document.getElementById('user-message-input'); if (!input || !input.value.trim()) return; const msg = { id: mockMessages.length + 1, role: 'user', content: input.value.trim(), timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }; mockMessages.push(msg); state.newMessage = ''; state.isTyping = true; state.messagesToday++; render(); setTimeout(() => { state.isTyping = false; mockMessages.push({ id: mockMessages.length + 1, role: 'ai', content: "That's a great question! Here are the key points:\n\n1. Evaluate the current architecture\n2. Identify bottlenecks\n3. Implement incremental improvements", timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }); render(); const el = document.getElementById('chat-messages'); if (el) el.scrollTop = el.scrollHeight; }, 2000); }
+
+async function sendMessage() {
+  const input = document.getElementById('user-message-input');
+  if (!input || !input.value.trim()) return;
+
+  const user = window.firebaseAuth.currentUser;
+  if (!user) {
+    showToast('Please sign in before chatting with AI.', 'warning');
+    openAuthModal('signin');
+    return;
+  }
+
+  const content = input.value.trim();
+  mockMessages.push({
+    id: mockMessages.length + 1,
+    role: 'user',
+    content,
+    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  });
+  state.newMessage = '';
+  state.isTyping = true;
+  state.messagesToday++;
+  render();
+
+  try {
+    const token = await user.getIdToken();
+    const response = await fetch('/.netlify/functions/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({
+        messages: mockMessages.slice(-20).map((message) => ({
+          role: (message.role === 'ai' || message.role === 'human') ? 'assistant' : message.role,
+          content: message.content
+        }))
+      })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || 'The AI request failed.');
+
+    mockMessages.push({
+      id: mockMessages.length + 1,
+      role: 'ai',
+      content: data.reply,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    });
+    state.apiCalls++;
+  } catch (error) {
+    mockMessages.push({
+      id: mockMessages.length + 1,
+      role: 'ai',
+      content: 'Sorry, I could not get an AI response. ' + (error.message || 'Please try again.'),
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    });
+  } finally {
+    state.isTyping = false;
+    render();
+    const el = document.getElementById('chat-messages');
+    if (el) el.scrollTop = el.scrollHeight;
+  }
+}
+
 function joinChat(chatId) { state.selectedChat = chatId; state.adminJoinedChats.add(chatId); state.currentView = 'admin-chat'; render(); showToast('You joined the chat as human expert', 'success', 'Joined chat'); }
 function viewChat(chatId) { state.selectedChat = chatId; state.currentView = 'admin-chat'; render(); }
 function leaveChat(chatId) { state.adminJoinedChats.delete(chatId); if (state.currentView === 'admin-chat' && state.selectedChat === chatId) state.currentView = 'admin-dashboard'; render(); showToast('You left the chat', 'info', 'Left chat'); }
@@ -1664,6 +1813,25 @@ window.addEventListener('resize', () => {
 });
 
 render();
+
+window.firebaseAuth.onAuthStateChanged((user) => {
+  if (user) {
+    state.userName = user.displayName || user.email?.split('@')[0] || 'User';
+    state.userEmail = user.email || '';
+    state.userAvatar = state.userName.charAt(0).toUpperCase();
+    state.userProvider = user.providerData?.[0]?.providerId === 'google.com' ? 'Google' : 'Email';
+    state.memberSince = state.memberSince || new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    if (state.currentView === 'landing') state.currentView = 'user-chat';
+  } else {
+    state.userName = '';
+    state.userEmail = '';
+    state.userAvatar = '';
+    state.userProvider = '';
+    state.currentRole = 'user';
+    if (state.currentView !== 'admin-login') state.currentView = 'landing';
+  }
+  render();
+});
 </script>
 </body>
 </html>
