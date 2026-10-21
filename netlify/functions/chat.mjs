@@ -273,15 +273,21 @@ export const handler = async (event) => {
     return json(413, { error: "This conversation is too long. Please start a new chat." });
   }
 
+  const requestStartedAt = Date.now();
+  let usageDurationMs = 0;
+  let groqDurationMs = 0;
   try {
     try {
+      const usageStartedAt = Date.now();
       await reserveDailyUsage(claims.sub);
+      usageDurationMs = Date.now() - usageStartedAt;
     } catch (usageError) {
       if (/FIREBASE_SERVICE_ACCOUNT_JSON/.test(usageError.message)) {
         return json(503, { error: "The AI service is waiting for secure usage tracking to be configured by the administrator." });
       }
       return json(usageError.message.includes("reached today's") || usageError.message.includes("daily message limit") || usageError.message.includes("banned") ? 429 : 503, { error: usageError.message || "Could not verify your daily usage." });
     }
+    const groqStartedAt = Date.now();
     const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -302,6 +308,7 @@ export const handler = async (event) => {
       })
     });
 
+    groqDurationMs = Date.now() - groqStartedAt;
     const result = await groqResponse.json().catch(() => ({}));
     if (!groqResponse.ok) {
       console.error("Groq request failed with status", groqResponse.status);
@@ -312,6 +319,7 @@ export const handler = async (event) => {
     if (typeof answer !== "string" || !answer.trim()) {
       return json(502, { error: "The AI provider returned an empty response." });
     }
+    console.info("Chat timing ms", { usage: usageDurationMs, groq: groqDurationMs, total: Date.now() - requestStartedAt });
     return json(200, { reply: answer.trim(), truncated: result.choices?.[0]?.finish_reason === "length" });
   } catch (error) {
     console.error("Chat function error:", error?.message || "Unknown error");
