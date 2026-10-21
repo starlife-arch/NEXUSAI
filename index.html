@@ -42,6 +42,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; m
 .fade-in { animation: fadeIn 0.2s ease-out; }
 @keyframes slideInLeft { from { transform: translateX(-100%); } to { transform: translateX(0); } }
 .slide-in-left { animation: slideInLeft 0.3s ease-out; }
+@keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+.slide-down { animation: slideDown 0.2s ease-out; }
 .typing-indicator span { display:inline-block; width:6px; height:6px; border-radius:50%; background:#7c3aed; margin:0 2px; animation: typing 1.4s infinite; }
 .typing-indicator span:nth-child(2) { animation-delay:0.2s; }
 .typing-indicator span:nth-child(3) { animation-delay:0.4s; }
@@ -126,51 +128,84 @@ tr:hover td { background: var(--bg-hover); }
   z-index: 40; animation: fadeIn 0.2s ease-out;
 }
 
-/* SIDEBAR - collapsible on all screen sizes */
+/* QWEN-STYLE SIDEBAR */
 .app-sidebar {
-  background: var(--bg-secondary);
+  width: 16rem; background: var(--bg-secondary);
   border-right: 1px solid var(--border-color);
   display: flex; flex-direction: column; flex-shrink: 0;
-  transition: width 0.3s ease, transform 0.3s ease;
+  transition: transform 0.3s ease;
   overflow: hidden;
 }
-.app-sidebar.expanded { width: 16rem; }
-.app-sidebar.collapsed { width: 4rem; }
-.app-sidebar.collapsed .sidebar-text,
-.app-sidebar.collapsed .sidebar-label,
-.app-sidebar.collapsed .user-info-text,
-.app-sidebar.collapsed .new-chat-text { display: none; }
-.app-sidebar.collapsed .sidebar-item { justify-content: center; padding: 0.625rem; }
-.app-sidebar.collapsed nav { padding: 0.5rem; }
-.app-sidebar.collapsed .sidebar-divider { display: none; }
-.app-sidebar.collapsed .user-section { justify-content: center; padding: 0.75rem 0.5rem; }
-.app-sidebar.collapsed .user-section > div:first-child { display: none; }
-.app-sidebar.collapsed .theme-logout-btns .btn-secondary span { display: none; }
-.app-sidebar.collapsed .theme-logout-btns { flex-direction: column; }
+.app-sidebar.mobile-hidden {
+  position: fixed; top: 4rem; left: 0; bottom: 0;
+  z-index: 45; transform: translateX(-100%);
+  border-right: 1px solid var(--border-color);
+  box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+}
+.app-sidebar.mobile-visible {
+  position: fixed; top: 4rem; left: 0; bottom: 0;
+  z-index: 45; transform: translateX(0);
+  border-right: 1px solid var(--border-color);
+  box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+}
 
-/* Mobile: sidebar is overlay */
+/* User popover */
+.user-popover {
+  position: absolute;
+  bottom: 4.5rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 0.5rem;
+  z-index: 60;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  animation: slideDown 0.2s ease-out;
+}
+.user-popover-item {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.625rem 0.75rem; border-radius: 0.5rem;
+  cursor: pointer; color: var(--text-primary);
+  font-size: 0.875rem; transition: background 0.15s;
+}
+.user-popover-item:hover { background: var(--bg-hover); }
+.user-popover-divider { height: 1px; background: var(--border-color); margin: 0.375rem 0; }
+
+/* Notifications dropdown */
+.notif-dropdown {
+  position: absolute;
+  top: 3.5rem;
+  right: 1rem;
+  width: 20rem;
+  max-height: 24rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 0.5rem;
+  z-index: 60;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  animation: slideDown 0.2s ease-out;
+  overflow-y: auto;
+}
+.notif-item {
+  display: flex; align-items: flex-start; gap: 0.75rem;
+  padding: 0.75rem; border-radius: 0.5rem;
+  cursor: pointer; transition: background 0.15s;
+}
+.notif-item:hover { background: var(--bg-hover); }
+.notif-item.unread { background: rgba(124,58,237,0.05); }
+
 @media (max-width: 767px) {
   .nav-user-pill { display: none !important; }
   .nav-bell-btn { padding: 0.5rem !important; }
-  .app-sidebar {
-    position: fixed; top: 4rem; left: 0; bottom: 0;
-    z-index: 45; width: 16rem !important;
+  .app-sidebar.mobile-hidden,
+  .app-sidebar.mobile-visible {
+    position: fixed; transform: translateX(-100%); z-index: 45;
+    top: 4rem; left: 0; bottom: 0; width: 16rem;
     box-shadow: 4px 0 20px rgba(0,0,0,0.3);
   }
-  .app-sidebar.mobile-hidden { transform: translateX(-100%); }
   .app-sidebar.mobile-visible { transform: translateX(0); }
-  .app-sidebar.collapsed { width: 16rem !important; }
-  .app-sidebar.collapsed .sidebar-text,
-  .app-sidebar.collapsed .sidebar-label,
-  .app-sidebar.collapsed .user-info-text,
-  .app-sidebar.collapsed .new-chat-text { display: inline; }
-  .app-sidebar.collapsed .sidebar-item { justify-content: flex-start; padding: 0.625rem 0.75rem; }
-  .app-sidebar.collapsed nav { padding: 0.75rem; }
-  .app-sidebar.collapsed .sidebar-divider { display: block; }
-  .app-sidebar.collapsed .user-section { justify-content: flex-start; padding: 0.75rem; }
-  .app-sidebar.collapsed .user-section > div:first-child { display: flex; }
-  .app-sidebar.collapsed .theme-logout-btns { flex-direction: row; }
-  .app-sidebar.collapsed .theme-logout-btns .btn-secondary span { display: inline; }
   main { height: calc(100vh - 4rem) !important; overflow: hidden; }
   .chat-scroll-container {
     overflow-y: auto !important;
@@ -182,6 +217,8 @@ tr:hover td { background: var(--bg-hover); }
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
   }
+  .user-popover { left: 0.5rem; right: 0.5rem; }
+  .notif-dropdown { right: 0.5rem; width: calc(100vw - 1rem); }
 }
 
 @media (min-width: 768px) {
@@ -212,14 +249,9 @@ const scrollState = { containers: {} };
 const focusState = { id: null, start: 0, end: 0 };
 
 function saveScrollState() {
-  // Save scroll positions of ALL scrollable containers
-  document.querySelectorAll('.content-scroll, .chat-scroll-container').forEach(el => {
-    if (el.id) scrollState.containers[el.id] = el.scrollTop;
-    else {
-      // Use parent chain as key
-      const key = el.parentElement?.id || el.className;
-      scrollState.containers['scroll_' + key] = el.scrollTop;
-    }
+  document.querySelectorAll('.content-scroll, .chat-scroll-container, .recent-chats-scroll').forEach(el => {
+    const key = el.id || ('scroll_' + (el.parentElement?.id || ''));
+    scrollState.containers[key] = el.scrollTop;
   });
 }
 
@@ -237,8 +269,8 @@ function saveFocusState() {
 }
 
 function restoreScrollState() {
-  document.querySelectorAll('.content-scroll, .chat-scroll-container').forEach(el => {
-    let key = el.id || ('scroll_' + (el.parentElement?.id || el.className));
+  document.querySelectorAll('.content-scroll, .chat-scroll-container, .recent-chats-scroll').forEach(el => {
+    const key = el.id || ('scroll_' + (el.parentElement?.id || ''));
     if (scrollState.containers[key] !== undefined) {
       el.scrollTop = scrollState.containers[key];
     }
@@ -253,7 +285,6 @@ function restoreFocusState() {
       if (el.setSelectionRange && focusState.type !== 'number') {
         try { el.setSelectionRange(focusState.start, focusState.end); } catch(e) {}
       } else if (focusState.type === 'number') {
-        // For number inputs, just ensure cursor is at end
         el.select();
         el.setSelectionRange(el.value.length, el.value.length);
       }
@@ -297,10 +328,9 @@ const I = {
   database: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>`,
   trash: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
   chevron: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`,
+  chevronDown: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`,
   x: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
   menu: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>`,
-  panelLeft: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>`,
-  panelRight: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>`,
   download: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
   list: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`,
   ban: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>`,
@@ -312,10 +342,19 @@ const I = {
   play: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>`,
   refresh: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`,
   wallet: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z"/></svg>`,
-  coins: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>`
+  coins: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>`,
+  folder: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`,
+  users2: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+  magic: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L9.5 9.5 2 12l7.5 2.5L12 22l2.5-7.5L22 12l-7.5-2.5z"/></svg>`
 };
 
 const GOOGLE_SVG = `<svg class="google-icon" viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>`;
+
+const mockNotifications = [
+  { id: 1, title: 'Human expert joined your chat', desc: 'Sarah Chen\'s chat now has an admin responding', time: '2 min ago', unread: true, icon: I.userStar, color: '#00d4ff' },
+  { id: 2, title: 'New feature: API Keys', desc: 'You can now create and manage API keys', time: '1 hr ago', unread: true, icon: I.key, color: '#a78bfa' },
+  { id: 3, title: 'Welcome to Laud!', desc: 'Get started by creating your first chat', time: '1 day ago', unread: true, icon: I.sparkle, color: '#00ff88' }
+];
 
 const state = {
   currentView: 'landing', currentRole: 'user', selectedChat: null, selectedUser: null,
@@ -330,14 +369,18 @@ const state = {
   memberSince: 'Oct 2026', totalChats: 0, apiCalls: 0, humanRequestsUsed: 0, messagesToday: 0,
   adminTab: 'dashboard', userSearch: '', authMode: 'signin',
   apiTab: 'keys', selectedCreditPackage: null, customCreditAmount: 0,
-  sidebarOpen: false, sidebarCollapsed: false,
+  sidebarOpen: false, userMenuOpen: false, notifOpen: false,
   apiKeys: [
     { id: 'k1', name: 'Production App', key: 'nx_live_a8f3k2m9p1q4r7s0t3v6w9x2y5z8', created: '2026-10-15', expiry: '2027-10-15', tokens: 10000, used: 3247, status: 'active', lastUsed: '2 min ago' },
     { id: 'k2', name: 'Testing Environment', key: 'nx_test_b7g4j1m8n5p2q9r6s3t0u7v4w1x8', created: '2026-10-18', expiry: '2026-11-01', tokens: 1000, used: 456, status: 'active', lastUsed: '1 hr ago' },
     { id: 'k3', name: 'Old Integration', key: 'nx_live_c6h3i0j7k4l1m8n5o2p9q6r3s0t7', created: '2026-09-01', expiry: '2026-10-01', tokens: 5000, used: 5000, status: 'expired', lastUsed: '20 days ago' },
     { id: 'k4', name: 'Paused Key', key: 'nx_live_d5e2f9g6h3i0j7k4l1m8n5o2p9q6', created: '2026-10-10', expiry: '2027-04-10', tokens: 2000, used: 120, status: 'paused', lastUsed: '5 days ago' }
   ],
-  totalBalance: 7753
+  totalBalance: 7753,
+  projects: [
+    { id: 'p1', name: 'React App', chats: 12, lastActive: '2 min ago' },
+    { id: 'p2', name: 'API Integration', chats: 5, lastActive: '1 hr ago' }
+  ]
 };
 
 const mockUsers = [
@@ -410,6 +453,9 @@ function render() {
   else if (state.currentView === 'user-api-docs') html += renderApiDocs();
   else if (state.currentView === 'user-help') html += renderUserHelp();
   else if (state.currentView === 'user-settings') html += renderUserSettings();
+  else if (state.currentView === 'user-projects') html += renderProjects();
+  else if (state.currentView === 'user-community') html += renderCommunity();
+  else if (state.currentView === 'user-create') html += renderCreate();
   else if (state.currentView === 'admin-login') html += renderAdminLogin();
   else if (state.currentView === 'admin-dashboard') html += renderAdminDashboard();
   else if (state.currentView === 'admin-chat') html += renderAdminChat();
@@ -447,20 +493,40 @@ function closeModal() {
 function toggleSidebar() {
   if (window.innerWidth < 768) {
     state.sidebarOpen = !state.sidebarOpen;
-  } else {
-    state.sidebarCollapsed = !state.sidebarCollapsed;
+    state.userMenuOpen = false;
+    state.notifOpen = false;
   }
   render();
 }
 
 function closeSidebar() {
   state.sidebarOpen = false;
+  state.userMenuOpen = false;
+  render();
+}
+
+function toggleUserMenu() {
+  state.userMenuOpen = !state.userMenuOpen;
+  state.notifOpen = false;
+  render();
+}
+
+function toggleNotif() {
+  state.notifOpen = !state.notifOpen;
+  state.userMenuOpen = false;
+  render();
+}
+
+function closeAllPopovers() {
+  state.userMenuOpen = false;
+  state.notifOpen = false;
   render();
 }
 
 function nav(view) {
   navigateTo(view);
   state.sidebarOpen = false;
+  state.userMenuOpen = false;
 }
 
 function renderNavbar() {
@@ -471,7 +537,7 @@ function renderNavbar() {
     <div style="max-width:1280px;margin:0 auto;padding:0 1rem">
       <div style="display:flex;align-items:center;justify-content:space-between;height:4rem">
         <div style="display:flex;align-items:center;gap:0.75rem">
-          <button onclick="toggleSidebar()" style="padding:0.5rem;border-radius:0.5rem;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;justify-content:center" title="Toggle sidebar">${state.sidebarCollapsed && window.innerWidth >= 768 ? I.panelRight : I.menu}</button>
+          <button onclick="toggleSidebar()" style="padding:0.5rem;border-radius:0.5rem;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;justify-content:center" title="Menu">${I.menu}</button>
           <div style="display:flex;align-items:center;gap:0.75rem;cursor:pointer" onclick="navigateTo('${isAdmin ? 'admin-dashboard' : (isSignedIn ? 'user-chat' : 'landing')}')">
             <div style="width:2rem;height:2rem;border-radius:0.5rem;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;color:white">${I.brain}</div>
             <span style="font-size:1.125rem;font-weight:bold" class="gradient-text">Laud</span>
@@ -481,12 +547,15 @@ function renderNavbar() {
           <button onclick="toggleTheme()" class="nav-bell-btn" style="padding:0.5rem;border-radius:0.5rem;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;justify-content:center" title="Toggle theme">${state.theme === 'dark' ? I.sun : I.moon}</button>
           ${isSignedIn ? `
           <div style="position:relative">
-            <button class="nav-bell-btn" style="padding:0.5rem;border-radius:0.5rem;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;justify-content:center">${I.bell}${state.notifications > 0 ? `<span style="position:absolute;top:-2px;right:-2px;width:1rem;height:1rem;background:#ff006e;border-radius:9999px;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:bold;color:white">${state.notifications}</span>` : ''}</button>
+            <button onclick="toggleNotif()" class="nav-bell-btn" style="padding:0.5rem;border-radius:0.5rem;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;position:relative">${I.bell}${state.notifications > 0 ? `<span style="position:absolute;top:-2px;right:-2px;width:1rem;height:1rem;background:#ff006e;border-radius:9999px;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:bold;color:white">${state.notifications}</span>` : ''}</button>
+            ${state.notifOpen ? renderNotifDropdown() : ''}
           </div>
-          <div class="nav-user-pill" style="display:flex;align-items:center;gap:0.5rem;padding:0.375rem 0.75rem;border-radius:9999px;background:var(--bg-tertiary);border:1px solid var(--border-color)">
-            <div style="width:0.5rem;height:0.5rem;border-radius:9999px;background:${isAdmin ? '#00d4ff' : '#00ff88'}"></div>
-            <span style="font-size:0.875rem;color:var(--text-primary)">${isAdmin ? 'Admin' : state.userName.split(' ')[0]}</span>
-          </div>` : `
+          <div class="nav-user-pill" style="display:flex;align-items:center;gap:0.5rem;padding:0.375rem 0.75rem;border-radius:9999px;background:var(--bg-tertiary);border:1px solid var(--border-color);cursor:pointer" onclick="toggleUserMenu()">
+            <div style="width:0.5rem;height:0.5rem;border-radius:9999px;background:#00ff88"></div>
+            <span style="font-size:0.875rem;color:var(--text-primary)">${state.userName.split(' ')[0]}</span>
+          </div>
+          ${state.userMenuOpen ? renderUserPopover() : ''}
+          ` : `
           <button onclick="openAuthModal('signin')" class="btn-secondary" style="padding:0.5rem 1rem;border-radius:0.5rem;font-size:0.875rem">Sign In</button>
           <button onclick="openAuthModal('signup')" class="btn-primary" style="padding:0.5rem 1rem;border-radius:0.5rem;font-size:0.875rem">Get Started</button>`}
         </div>
@@ -495,90 +564,150 @@ function renderNavbar() {
   </nav>`;
 }
 
+function renderNotifDropdown() {
+  return `
+  <div class="notif-dropdown slide-down" onclick="event.stopPropagation()">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0.5rem 0.75rem 0.5rem;border-bottom:1px solid var(--border-color);margin-bottom:0.5rem">
+      <h4 style="font-weight:600;font-size:0.9375rem;color:var(--text-primary);margin:0">Notifications</h4>
+      <button onclick="clearNotifications()" style="background:transparent;border:none;color:#a78bfa;cursor:pointer;font-size:0.75rem">Mark all read</button>
+    </div>
+    ${mockNotifications.length > 0 ? mockNotifications.map(n => `
+    <div class="notif-item ${n.unread ? 'unread' : ''}" onclick="markNotifRead(${n.id})">
+      <div style="width:2rem;height:2rem;border-radius:0.5rem;background:${n.color}22;display:flex;align-items:center;justify-content:center;color:${n.color};flex-shrink:0">${n.icon}</div>
+      <div style="flex:1;min-width:0">
+        <p style="font-size:0.8125rem;font-weight:500;color:var(--text-primary);margin:0 0 0.125rem 0">${n.title}</p>
+        <p style="font-size:0.75rem;color:var(--text-secondary);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n.desc}</p>
+        <p style="font-size:0.6875rem;color:var(--text-subtle);margin:0.25rem 0 0 0">${n.time}</p>
+      </div>
+      ${n.unread ? `<div style="width:0.5rem;height:0.5rem;border-radius:9999px;background:#7c3aed;flex-shrink:0;margin-top:0.5rem"></div>` : ''}
+    </div>`).join('') : `
+    <div style="padding:2rem;text-align:center;color:var(--text-subtle)">
+      <p style="font-size:0.875rem">No notifications</p>
+    </div>`}
+  </div>`;
+}
+
+function renderUserPopover() {
+  const isSignedIn = state.userEmail !== '';
+  if (!isSignedIn) return '';
+  return `
+  <div class="user-popover slide-down" onclick="event.stopPropagation()">
+    <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;border-bottom:1px solid var(--border-color);margin-bottom:0.5rem">
+      <div style="width:2.5rem;height:2.5rem;border-radius:9999px;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;color:white;font-weight:600">${state.userAvatar || state.userName.charAt(0).toUpperCase()}</div>
+      <div style="flex:1;min-width:0">
+        <p style="font-size:0.875rem;font-weight:600;color:var(--text-primary);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${state.userName}</p>
+        <p style="font-size:0.75rem;color:var(--text-secondary);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${state.userEmail}</p>
+      </div>
+      <span class="plan-badge plan-${state.currentPlan}">${state.currentPlan}</span>
+    </div>
+    <div class="user-popover-item" onclick="nav('user-profile')">${I.user}<span>Profile</span></div>
+    <div class="user-popover-item" onclick="nav('user-plans')">${I.credit}<span>Plans & Payments</span></div>
+    <div class="user-popover-item" onclick="nav('user-api-keys')">${I.key}<span>API Keys</span></div>
+    <div class="user-popover-item" onclick="nav('user-api-docs')">${I.book}<span>API Docs</span></div>
+    <div class="user-popover-divider"></div>
+    <div class="user-popover-item" onclick="nav('user-settings')">${I.settings}<span>Settings</span></div>
+    <div class="user-popover-item" onclick="nav('user-help')">${I.help}<span>Help Center</span></div>
+    <div class="user-popover-divider"></div>
+    <div class="user-popover-item" onclick="signOut()" style="color:#ff006e">${I.logout}<span>Log Out</span></div>
+  </div>`;
+}
+
+// QWEN-STYLE SIDEBAR
 function renderSidebarContent(isAdmin) {
   if (isAdmin) {
     const requestedChats = mockChatSessions.filter(c => c.humanRequested && !c.humanJoined && !state.adminJoinedChats.has(c.id));
     return `
-    <div style="padding:1rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;gap:0.75rem;${state.sidebarCollapsed && window.innerWidth >= 768 ? 'justify-content:center' : ''}">
-      <div style="width:2.25rem;height:2.25rem;border-radius:0.5rem;background:linear-gradient(135deg,#00d4ff,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;flex-shrink:0">${I.shield}</div>
-      ${!(state.sidebarCollapsed && window.innerWidth >= 768) ? `<div><p style="font-weight:600;font-size:0.875rem;color:var(--text-primary)">Admin Panel</p><p style="font-size:0.75rem;color:var(--text-subtle)">Full Access</p></div>` : ''}
+    <div style="padding:1rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;gap:0.75rem">
+      <div style="width:2.25rem;height:2.25rem;border-radius:0.5rem;background:linear-gradient(135deg,#00d4ff,#7c3aed);display:flex;align-items:center;justify-content:center;color:white">${I.shield}</div>
+      <div><p style="font-weight:600;font-size:0.875rem;color:var(--text-primary)">Admin Panel</p><p style="font-size:0.75rem;color:var(--text-subtle)">Full Access</p></div>
     </div>
     <nav style="flex:1;padding:0.75rem;display:flex;flex-direction:column;gap:0.25rem;overflow-y:auto">
-      <div class="sidebar-item ${state.adminTab === 'dashboard' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('dashboard');closeSidebar()"><span style="color:#a78bfa;flex-shrink:0">${I.dashboard}</span><span class="sidebar-text" style="font-size:0.875rem">Dashboard</span></div>
-      <div class="sidebar-item ${state.adminTab === 'users' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('users');closeSidebar()"><span style="color:#9ca3af;flex-shrink:0">${I.users}</span><span class="sidebar-text" style="font-size:0.875rem;flex:1">Users</span><span class="sidebar-text" style="margin-left:auto;font-size:0.75rem;padding:0.125rem 0.5rem;border-radius:9999px;background:rgba(124,58,237,0.2);color:#a78bfa">${mockUsers.length}</span></div>
-      <div class="sidebar-item ${state.adminTab === 'chats' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('chats');closeSidebar()"><span style="color:#9ca3af;flex-shrink:0">${I.history}</span><span class="sidebar-text" style="font-size:0.875rem">All Chats</span></div>
-      <div class="sidebar-item ${state.adminTab === 'requests' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('requests');closeSidebar()"><span style="color:#ff006e;flex-shrink:0">${I.userStar}</span><span class="sidebar-text" style="font-size:0.875rem;flex:1">Human Requests</span>${requestedChats.length > 0 ? `<span class="sidebar-text" style="margin-left:auto;width:1.25rem;height:1.25rem;border-radius:9999px;background:#ff006e;display:flex;align-items:center;justify-content:center;font-size:0.625rem;font-weight:bold;color:white" class="pulse-dot">${requestedChats.length}</span>` : ''}</div>
-      <div class="sidebar-item ${state.adminTab === 'analytics' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('analytics');closeSidebar()"><span style="color:#9ca3af;flex-shrink:0">${I.chart}</span><span class="sidebar-text" style="font-size:0.875rem">Analytics</span></div>
-      <div class="sidebar-item ${state.adminTab === 'settings' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('settings');closeSidebar()"><span style="color:#9ca3af;flex-shrink:0">${I.settings}</span><span class="sidebar-text" style="font-size:0.875rem">Settings</span></div>
+      <div class="sidebar-item ${state.adminTab === 'dashboard' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('dashboard');closeSidebar()"><span style="color:#a78bfa">${I.dashboard}</span><span style="font-size:0.875rem">Dashboard</span></div>
+      <div class="sidebar-item ${state.adminTab === 'users' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('users');closeSidebar()"><span style="color:#9ca3af">${I.users}</span><span style="font-size:0.875rem">Users</span><span style="margin-left:auto;font-size:0.75rem;padding:0.125rem 0.5rem;border-radius:9999px;background:rgba(124,58,237,0.2);color:#a78bfa">${mockUsers.length}</span></div>
+      <div class="sidebar-item ${state.adminTab === 'chats' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('chats');closeSidebar()"><span style="color:#9ca3af">${I.history}</span><span style="font-size:0.875rem">All Chats</span></div>
+      <div class="sidebar-item ${state.adminTab === 'requests' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('requests');closeSidebar()"><span style="color:#ff006e">${I.userStar}</span><span style="font-size:0.875rem">Human Requests</span>${requestedChats.length > 0 ? `<span style="margin-left:auto;width:1.25rem;height:1.25rem;border-radius:9999px;background:#ff006e;display:flex;align-items:center;justify-content:center;font-size:0.625rem;font-weight:bold;color:white" class="pulse-dot">${requestedChats.length}</span>` : ''}</div>
+      <div class="sidebar-item ${state.adminTab === 'analytics' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('analytics');closeSidebar()"><span style="color:#9ca3af">${I.chart}</span><span style="font-size:0.875rem">Analytics</span></div>
+      <div class="sidebar-item ${state.adminTab === 'settings' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('settings');closeSidebar()"><span style="color:#9ca3af">${I.settings}</span><span style="font-size:0.875rem">Settings</span></div>
     </nav>
     <div style="padding:0.75rem;border-top:1px solid var(--border-color)">
-      <button onclick="logoutAdmin()" class="btn-secondary" style="width:100%;padding:0.5rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;justify-content:center;gap:0.5rem">${I.logout}<span class="sidebar-text"> Sign Out</span></button>
+      <button onclick="logoutAdmin()" class="btn-secondary" style="width:100%;padding:0.5rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;justify-content:center;gap:0.5rem">${I.logout} Sign Out</button>
     </div>`;
   }
   
   const isPaid = state.currentPlan !== 'free';
-  
-  // Recent chats for sidebar
-  const recentChats = mockChatSessions.slice(0, 3);
+  const recentChats = mockChatSessions.slice(0, 5);
   
   return `
-  <div style="padding:1rem;border-bottom:1px solid var(--border-color);${state.sidebarCollapsed && window.innerWidth >= 768 ? 'display:flex;justify-content:center' : ''}">
-    <button onclick="newChat();closeSidebar()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.625rem;border-radius:0.5rem;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.2);color:#a78bfa;cursor:pointer;font-size:0.875rem;font-weight:500">${I.plus}<span class="new-chat-text"> New Chat</span></button>
+  <!-- Top: New Chat -->
+  <div style="padding:1rem;border-bottom:1px solid var(--border-color)">
+    <button onclick="newChat();closeSidebar()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.75rem;border-radius:0.5rem;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.2);color:#a78bfa;cursor:pointer;font-size:0.875rem;font-weight:500">${I.plus} New Chat</button>
   </div>
   
-  <!-- Recent Chats Section -->
-  <div style="padding:0.75rem 0.75rem 0.25rem 0.75rem;${state.sidebarCollapsed && window.innerWidth >= 768 ? 'display:none' : ''}">
-    <p class="sidebar-label" style="font-size:0.6875rem;font-weight:600;color:var(--text-subtle);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem;padding:0 0.75rem">Recent Chats</p>
-    <div style="display:flex;flex-direction:column;gap:0.125rem">
-      ${recentChats.map(chat => `
-      <div class="sidebar-item" style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="openChat('${chat.id}');closeSidebar()">
-        <span style="color:var(--text-secondary);flex-shrink:0">${I.chat}</span>
-        <div style="flex:1;min-width:0">
-          <p style="font-size:0.8125rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-primary)">${chat.topic}</p>
-          <p style="font-size:0.6875rem;color:var(--text-subtle)">${chat.lastMessage}</p>
-        </div>
-      </div>`).join('')}
+  <!-- Primary nav: Chat, All Chats, Coder -->
+  <nav style="padding:0.75rem;border-bottom:1px solid var(--border-color);display:flex;flex-direction:column;gap:0.125rem">
+    <div class="sidebar-item ${state.currentView === 'user-chat' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="nav('user-chat')"><span>${I.chat}</span><span style="font-size:0.875rem">Chat</span></div>
+    <div class="sidebar-item ${state.currentView === 'user-all-chats' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="nav('user-all-chats')"><span>${I.list}</span><span style="font-size:0.875rem">All Chats</span></div>
+    <div class="sidebar-item ${state.currentView === 'user-coder' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer;position:relative" onclick="handleCoderClick();closeSidebar()">
+      <span>${I.code}</span><span style="font-size:0.875rem;flex:1">Coder</span>
+      ${!isPaid ? `<span style="font-size:0.625rem;padding:0.125rem 0.375rem;border-radius:0.25rem;background:rgba(124,58,237,0.2);color:#a78bfa">PRO</span>` : ''}
     </div>
-  </div>
-  
-  <div class="sidebar-divider" style="height:1px;background:var(--border-color);margin:0.5rem 0.75rem;${state.sidebarCollapsed && window.innerWidth >= 768 ? 'display:none' : ''}"></div>
-  
-  <nav style="flex:1;padding:0.25rem 0.75rem;display:flex;flex-direction:column;gap:0.125rem;overflow-y:auto">
-    <div class="sidebar-item ${state.currentView === 'user-chat' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="nav('user-chat')"><span style="flex-shrink:0">${I.chat}</span><span class="sidebar-text" style="font-size:0.875rem">Chat</span></div>
-    <div class="sidebar-item ${state.currentView === 'user-all-chats' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="nav('user-all-chats')"><span style="flex-shrink:0">${I.list}</span><span class="sidebar-text" style="font-size:0.875rem">All Chats</span></div>
-    <div class="sidebar-item ${state.currentView === 'user-coder' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer;position:relative" onclick="handleCoderClick();closeSidebar()"><span style="flex-shrink:0">${I.code}</span><span class="sidebar-text" style="font-size:0.875rem;flex:1">Coder</span>${!isPaid ? `<span class="sidebar-text" style="font-size:0.625rem;padding:0.125rem 0.375rem;border-radius:0.25rem;background:rgba(124,58,237,0.2);color:#a78bfa">PRO</span>` : ''}</div>
   </nav>
   
-  <!-- Bottom section with user info and account pages -->
-  <div style="border-top:1px solid var(--border-color);padding:0.5rem 0.75rem;overflow-y:auto;max-height:45%">
-    <div style="display:flex;flex-direction:column;gap:0.125rem;margin-bottom:0.5rem">
-      <div class="sidebar-item ${state.currentView === 'user-profile' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="nav('user-profile')"><span style="flex-shrink:0">${I.user}</span><span class="sidebar-text" style="font-size:0.875rem">Profile</span></div>
-      <div class="sidebar-item ${state.currentView === 'user-plans' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="nav('user-plans')"><span style="flex-shrink:0">${I.credit}</span><span class="sidebar-text" style="font-size:0.875rem">Plans & Payments</span></div>
-      <div class="sidebar-item ${state.currentView === 'user-api-keys' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="nav('user-api-keys')"><span style="flex-shrink:0">${I.key}</span><span class="sidebar-text" style="font-size:0.875rem">API Keys</span></div>
-      <div class="sidebar-item ${state.currentView === 'user-api-docs' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="nav('user-api-docs')"><span style="flex-shrink:0">${I.book}</span><span class="sidebar-text" style="font-size:0.875rem">API Docs</span></div>
-      <div class="sidebar-item ${state.currentView === 'user-settings' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="nav('user-settings')"><span style="flex-shrink:0">${I.settings}</span><span class="sidebar-text" style="font-size:0.875rem">Settings</span></div>
-      <div class="sidebar-item ${state.currentView === 'user-help' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="nav('user-help')"><span style="flex-shrink:0">${I.help}</span><span class="sidebar-text" style="font-size:0.875rem">Help Center</span></div>
-    </div>
-    
-    <div class="user-section" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;border-top:1px solid var(--border-color);margin-top:0.25rem">
+  <!-- Recent Chats (scrollable, grows) -->
+  <div style="padding:0.5rem 0.75rem 0.25rem 0.75rem;flex-shrink:0">
+    <p style="font-size:0.6875rem;font-weight:600;color:var(--text-subtle);text-transform:uppercase;letter-spacing:0.05em;margin:0 0 0.5rem 0.75rem">Recent Chats</p>
+  </div>
+  <div class="recent-chats-scroll" style="flex:1;overflow-y:auto;padding:0 0.75rem;display:flex;flex-direction:column;gap:0.125rem" id="recent-chats-scroll">
+    ${recentChats.map(chat => `
+    <div class="sidebar-item" style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="openChat('${chat.id}');closeSidebar()">
+      <span style="color:var(--text-secondary);flex-shrink:0">${I.chat}</span>
+      <div style="flex:1;min-width:0">
+        <p style="font-size:0.8125rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-primary);margin:0">${chat.topic}</p>
+        <p style="font-size:0.6875rem;color:var(--text-subtle);margin:0">${chat.lastMessage}</p>
+      </div>
+    </div>`).join('')}
+  </div>
+  
+  <!-- Bottom: User avatar (clickable) -->
+  <div style="border-top:1px solid var(--border-color);padding:0.75rem;flex-shrink:0;position:relative">
+    <div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem;border-radius:0.5rem;cursor:pointer;background:${state.userMenuOpen ? 'var(--bg-active)' : 'transparent'};transition:background 0.15s" onclick="toggleUserMenu()">
       <div style="width:2rem;height:2rem;border-radius:9999px;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;color:white;font-size:0.75rem;font-weight:600;flex-shrink:0">${state.userAvatar || state.userName.charAt(0).toUpperCase()}</div>
-      <div class="user-info-text" style="flex:1;min-width:0">
-        <p style="font-size:0.875rem;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-primary)">${state.userName || 'Guest'}</p>
+      <div style="flex:1;min-width:0">
+        <p style="font-size:0.875rem;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-primary);margin:0">${state.userName || 'Guest'}</p>
         <span class="plan-badge plan-${state.currentPlan}">${state.currentPlan}</span>
       </div>
+      <span style="color:var(--text-secondary);transform:${state.userMenuOpen ? 'rotate(180deg)' : ''};transition:transform 0.2s">${I.chevronDown}</span>
     </div>
-    <div class="theme-logout-btns" style="display:flex;gap:0.5rem;padding:0 0 0.5rem 0">
+    ${state.userMenuOpen ? renderUserPopoverInline() : ''}
+    <div style="display:flex;gap:0.5rem;margin-top:0.5rem">
       <button onclick="toggleTheme()" class="btn-secondary" style="flex:1;padding:0.5rem;border-radius:0.5rem;font-size:0.75rem;display:flex;align-items:center;justify-content:center;gap:0.25rem">${state.theme === 'dark' ? I.sun : I.moon}<span> ${state.theme === 'dark' ? 'Light' : 'Dark'}</span></button>
       <button onclick="signOut()" class="btn-secondary" style="flex:1;padding:0.5rem;border-radius:0.5rem;font-size:0.75rem;display:flex;align-items:center;justify-content:center;gap:0.25rem">${I.logout}<span> Out</span></button>
     </div>
   </div>`;
 }
 
+function renderUserPopoverInline() {
+  return `
+  <div style="position:absolute;bottom:4.5rem;left:0.75rem;right:0.75rem;background:var(--bg-card);border:1px solid var(--border-color);border-radius:0.75rem;padding:0.5rem;z-index:60;box-shadow:0 10px 30px rgba(0,0,0,0.3);animation:slideDown 0.2s ease-out">
+    <div class="user-popover-item" onclick="nav('user-profile')">${I.user}<span>Profile</span></div>
+    <div class="user-popover-item" onclick="nav('user-plans')">${I.credit}<span>Plans & Payments</span></div>
+    <div class="user-popover-item" onclick="nav('user-api-keys')">${I.key}<span>API Keys</span></div>
+    <div class="user-popover-item" onclick="nav('user-api-docs')">${I.book}<span>API Docs</span></div>
+    <div class="user-popover-divider"></div>
+    <div class="user-popover-item" onclick="nav('user-projects')">${I.folder}<span>Projects</span></div>
+    <div class="user-popover-item" onclick="nav('user-community')">${I.users2}<span>Community</span></div>
+    <div class="user-popover-item" onclick="nav('user-create')">${I.magic}<span>Create</span></div>
+    <div class="user-popover-divider"></div>
+    <div class="user-popover-item" onclick="nav('user-settings')">${I.settings}<span>Settings</span></div>
+    <div class="user-popover-item" onclick="nav('user-help')">${I.help}<span>Help Center</span></div>
+  </div>`;
+}
+
 function renderSidebar(isAdmin) {
   const isMobile = window.innerWidth < 768;
   const sidebarClass = isMobile 
-    ? (state.sidebarOpen ? 'app-sidebar expanded mobile-visible slide-in-left' : 'app-sidebar expanded mobile-hidden')
-    : (state.sidebarCollapsed ? 'app-sidebar collapsed' : 'app-sidebar expanded');
+    ? (state.sidebarOpen ? 'app-sidebar mobile-visible slide-in-left' : 'app-sidebar mobile-hidden')
+    : 'app-sidebar';
   const backdrop = (isMobile && state.sidebarOpen) ? `<div class="sidebar-backdrop" onclick="closeSidebar()"></div>` : '';
   return `${backdrop}<aside class="${sidebarClass}">${renderSidebarContent(isAdmin)}</aside>`;
 }
@@ -677,32 +806,16 @@ function renderAuthModal() {
       <h2 style="font-size:1.375rem;font-weight:bold;color:var(--text-primary);margin-bottom:0.25rem">${isSignup ? 'Create your account' : 'Welcome back'}</h2>
       <p style="font-size:0.875rem;color:var(--text-secondary)">${isSignup ? 'Start chatting with AI in seconds' : 'Sign in to continue to Laud'}</p>
     </div>
-    
     <button onclick="signInWithGoogle()" class="btn-google" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;justify-content:center">
       ${GOOGLE_SVG} Continue with Google
     </button>
-    
     <div class="divider">or</div>
-    
     <div style="display:flex;flex-direction:column;gap:0.75rem">
-      ${isSignup ? `
-      <div>
-        <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Full Name</label>
-        <input type="text" id="auth-name" placeholder="John Doe" class="input-field" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem">
-      </div>` : ''}
-      <div>
-        <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Email</label>
-        <input type="email" id="auth-email" placeholder="you@example.com" class="input-field" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem">
-      </div>
-      <div>
-        <label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Password</label>
-        <input type="password" id="auth-password" placeholder="••••••••" class="input-field" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem">
-      </div>
-      <button onclick="signInWithEmail()" class="btn-primary" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-weight:600;margin-top:0.5rem">
-        ${isSignup ? 'Create Account' : 'Sign In'}
-      </button>
+      ${isSignup ? `<div><label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Full Name</label><input type="text" id="auth-name" placeholder="John Doe" class="input-field" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"></div>` : ''}
+      <div><label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Email</label><input type="email" id="auth-email" placeholder="you@example.com" class="input-field" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"></div>
+      <div><label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Password</label><input type="password" id="auth-password" placeholder="••••••••" class="input-field" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"></div>
+      <button onclick="signInWithEmail()" class="btn-primary" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-weight:600;margin-top:0.5rem">${isSignup ? 'Create Account' : 'Sign In'}</button>
     </div>
-    
     <p style="text-align:center;margin-top:1.25rem;font-size:0.875rem;color:var(--text-secondary)">
       ${isSignup ? 'Already have an account?' : "Don't have an account?"}
       <button onclick="toggleAuthMode()" style="background:transparent;border:none;color:#a78bfa;cursor:pointer;font-weight:500">${isSignup ? 'Sign In' : 'Sign Up'}</button>
@@ -775,7 +888,6 @@ function renderApiKeys() {
   const blockedKeys = state.apiKeys.filter(k => k.status === 'blocked').length;
   const expiredKeys = state.apiKeys.filter(k => k.status === 'expired').length;
   const totalUsed = state.apiKeys.reduce((sum, k) => sum + k.used, 0);
-  
   return `<main style="padding-top:4rem;height:100vh;display:flex;overflow:hidden">${renderSidebar(false)}<div class="content-scroll" style="flex:1;min-width:0" id="main-scroll"><div style="padding:1.5rem;max-width:72rem"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem"><div><h2 style="font-size:1.5rem;font-weight:bold;color:var(--text-primary)">API Keys</h2><p style="color:var(--text-secondary);font-size:0.875rem">Manage your API keys and token balance</p></div><div style="display:flex;gap:0.75rem;flex-wrap:wrap"><button onclick="openRechargeModal()" class="btn-secondary" style="padding:0.625rem 1rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem">${I.wallet} Recharge</button><button onclick="openCreateKeyModal()" class="btn-primary" style="padding:0.625rem 1rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem">${I.plus} Create Key</button></div></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:2rem">${renderApiStat('Total Balance', `${state.totalBalance.toLocaleString()} credits`, I.coins)}${renderApiStat('Active Keys', activeKeys, I.key)}${renderApiStat('Paused', pausedKeys, I.pause)}${renderApiStat('Blocked', blockedKeys, I.ban)}${renderApiStat('Expired', expiredKeys, I.clock)}${renderApiStat('Total Used', totalUsed.toLocaleString(), I.zap)}</div><div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap">${tabs.map(t => `<button onclick="setApiTab('${t.id}')" class="tab-btn ${state.apiTab === t.id ? 'active' : ''}" style="display:flex;align-items:center;gap:0.5rem">${t.icon} ${t.label}</button>`).join('')}</div>${state.apiTab === 'keys' ? renderApiKeysList() : renderRechargeSection()}</div></div></main>`;
 }
 
@@ -809,12 +921,11 @@ function renderRechargeSection() {
   const rechargePrice = state.selectedCreditPackage 
     ? packages.find(p => p.credits === state.selectedCreditPackage)?.price 
     : (state.customCreditAmount * 0.0015).toFixed(2);
-  
   return `<div><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:0.5rem">Current Balance</h3><p style="font-size:2rem;font-weight:bold;color:var(--text-primary);margin-bottom:1.5rem">${state.totalBalance.toLocaleString()} <span style="font-size:1rem;color:var(--text-secondary)">credits</span></p><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:1rem">Choose a Package</h3><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;margin-bottom:2rem">${packages.map(p => `<div class="credit-card-option ${state.selectedCreditPackage === p.credits ? 'selected' : ''}" onclick="selectCreditPackage(${p.credits})" style="position:relative">${p.popular ? `<div style="position:absolute;top:-0.5rem;right:0.75rem;background:linear-gradient(135deg,#7c3aed,#00d4ff);color:white;padding:0.125rem 0.5rem;border-radius:9999px;font-size:0.625rem;font-weight:600">Popular</div>` : ''}<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;color:#a78bfa">${I.coins}<span style="font-weight:600;color:var(--text-primary)">${p.credits.toLocaleString()}</span><span style="font-size:0.75rem;color:var(--text-secondary)">credits</span></div><div style="font-size:1.5rem;font-weight:bold;color:var(--text-primary)">$${p.price}</div><div style="font-size:0.75rem;color:var(--text-subtle)">$${(p.price/p.credits*1000).toFixed(2)} per 1K</div></div>`).join('')}</div><div class="card" style="padding:1.5rem;margin-bottom:1rem"><h4 style="font-weight:600;color:var(--text-primary);margin-bottom:1rem">Custom Amount</h4><div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:140px"><label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Credits</label><input type="number" id="custom-credits" value="${state.customCreditAmount || ''}" placeholder="Enter amount" min="100" class="input-field" style="width:100%;padding:0.625rem 0.75rem;border-radius:0.5rem;font-size:0.875rem" oninput="updateCustomCreditsDirect(this)"></div><div style="flex:1;min-width:140px"><label style="font-size:0.75rem;color:var(--text-secondary);display:block;margin-bottom:0.25rem">Estimated Price</label><div id="custom-price-display" style="padding:0.625rem 0.75rem;background:var(--bg-tertiary);border-radius:0.5rem;font-size:0.875rem;color:var(--text-primary);min-height:2.25rem;display:flex;align-items:center">$${priceDisplay}</div></div></div><p style="font-size:0.75rem;color:var(--text-subtle);margin-top:0.5rem">Minimum 100 credits. Rate: $0.0015 per credit</p></div>${rechargeAmount ? `<button onclick="processRecharge()" class="btn-primary recharge-btn-dynamic" style="width:100%;padding:0.875rem;border-radius:0.5rem;font-weight:600;font-size:1rem">${I.wallet} Recharge ${rechargeAmount.toLocaleString()} Credits — $${rechargePrice}</button>` : `<button class="btn-secondary recharge-btn-dynamic" style="width:100%;padding:0.875rem;border-radius:0.5rem;font-weight:600;font-size:1rem;opacity:0.5;cursor:not-allowed" disabled>Select a package or enter custom amount</button>`}</div>`;
 }
 
 function renderApiDocs() {
-  return `<main style="padding-top:4rem;height:100vh;display:flex;overflow:hidden">${renderSidebar(false)}<div class="content-scroll" style="flex:1;min-width:0" id="main-scroll"><div style="padding:1.5rem;max-width:56rem"><div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem"><div style="width:2.5rem;height:2.5rem;border-radius:0.5rem;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;color:white">${I.book}</div><div><h2 style="font-size:1.5rem;font-weight:bold;color:var(--text-primary)">API Documentation</h2><p style="color:var(--text-secondary);font-size:0.875rem">Integrate Laud into your apps</p></div></div><div class="card" style="padding:1.5rem;margin-bottom:1.5rem"><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:0.75rem">Base URL</h3><div class="code-block">https://api.laud.com/v1</div><p style="font-size:0.875rem;color:var(--text-secondary)">All API requests must include your API key in the Authorization header.</p><div class="code-block" style="margin-top:0.75rem">Authorization: Bearer nx_live_your_api_key_here</div></div><div class="card" style="padding:1.5rem;margin-bottom:1.5rem"><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:1rem">Authentication</h3><p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem">All endpoints require a valid API key. Keys can be created and managed from the API Keys page.</p><div class="code-block">curl -X POST https://api.laud.com/v1/chat/completions \\
+  return `<main style="padding-top:4rem;height:100vh;display:flex;overflow:hidden">${renderSidebar(false)}<div class="content-scroll" style="flex:1;min-width:0" id="main-scroll"><div style="padding:1.5rem;max-width:56rem"><div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem"><div style="width:2.5rem;height:2.5rem;border-radius:0.5rem;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;color:white">${I.book}</div><div><h2 style="font-size:1.5rem;font-weight:bold;color:var(--text-primary)">API Documentation</h2><p style="color:var(--text-secondary);font-size:0.875rem">Integrate Laud into your apps</p></div></div><div class="card" style="padding:1.5rem;margin-bottom:1.5rem"><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:0.75rem">Base URL</h3><div class="code-block">https://api.laud.com/v1</div><p style="font-size:0.875rem;color:var(--text-secondary)">All API requests must include your API key in the Authorization header.</p><div class="code-block" style="margin-top:0.75rem">Authorization: Bearer nx_live_your_api_key_here</div></div><div class="card" style="padding:1.5rem;margin-bottom:1.5rem"><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:1rem">Authentication</h3><p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem">All endpoints require a valid API key.</p><div class="code-block">curl -X POST https://api.laud.com/v1/chat/completions \\
   -H "Authorization: Bearer nx_live_abc123..." \\
   -H "Content-Type: application/json" \\
   -d '{"model": "gpt-4", "messages": [{"role": "user", "content": "Hello"}]}'</div></div><div class="doc-section"><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem">${I.chat} Chat Completions</h3><p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem">Create a chat completion using any supported AI model.</p><div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem"><span class="endpoint-badge method-post">POST</span><code style="font-family:monospace;font-size:0.875rem;color:var(--text-primary)">/v1/chat/completions</code></div><h4 style="font-weight:600;color:var(--text-primary);margin-bottom:0.5rem;font-size:0.9375rem">Request Body</h4><div class="code-block">{
@@ -866,6 +977,34 @@ function renderToggle(label, desc, value, key) { return `<div style="display:fle
 function renderUsageSettings() { const limits = { free: { messages: 50, humanRequests: 0, coder: false, api: false }, pro: { messages: 'Unlimited', humanRequests: 'Unlimited', coder: true, api: false }, enterprise: { messages: 'Unlimited', humanRequests: 'Unlimited', coder: true, api: true } }; const current = limits[state.currentPlan]; return `<div class="card" style="padding:1.5rem;margin-bottom:1rem"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem"><h4 style="font-weight:600;color:var(--text-primary)">Current Usage</h4><span class="plan-badge plan-${state.currentPlan}">${state.currentPlan}</span></div><div style="display:flex;flex-direction:column;gap:1rem">${renderUsageBar('Messages Today', state.messagesToday, 50, state.currentPlan === 'free')}${renderUsageBar('Human Requests', state.humanRequestsUsed, 5, state.currentPlan === 'free')}</div></div><div class="card" style="padding:1.5rem"><h4 style="font-weight:600;margin-bottom:1rem;color:var(--text-primary)">Plan Limits</h4><div style="display:flex;flex-direction:column;gap:0.75rem"><div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem;flex-wrap:wrap;gap:0.5rem"><span style="font-size:0.875rem;color:var(--text-primary)">Daily Messages</span><span style="font-size:0.875rem;font-weight:500;color:var(--text-primary)">${current.messages}</span></div><div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem;flex-wrap:wrap;gap:0.5rem"><span style="font-size:0.875rem;color:var(--text-primary)">Human Expert Requests</span><span style="font-size:0.875rem;font-weight:500;color:var(--text-primary)">${current.humanRequests}</span></div><div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem;flex-wrap:wrap;gap:0.5rem"><span style="font-size:0.875rem;color:var(--text-primary)">Coder Access</span><span style="font-size:0.875rem;font-weight:500;color:${current.coder ? '#00ff88' : '#ff006e'}">${current.coder ? 'Included' : 'Not Available'}</span></div><div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--stat-bg);border-radius:0.5rem;flex-wrap:wrap;gap:0.5rem"><span style="font-size:0.875rem;color:var(--text-primary)">API Access</span><span style="font-size:0.875rem;font-weight:500;color:${current.api ? '#00ff88' : '#ff006e'}">${current.api ? 'Included' : 'Not Available'}</span></div></div>${state.currentPlan !== 'pro' && state.currentPlan !== 'enterprise' ? `<button onclick="navigateTo('user-plans')" class="btn-primary" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-weight:500;margin-top:1rem">Upgrade for Higher Limits</button>` : ''}</div>`; }
 
 function renderUsageBar(label, used, total, isLimited) { const pct = isLimited ? Math.min((used / total) * 100, 100) : 0; return `<div><div style="display:flex;justify-content:space-between;margin-bottom:0.375rem"><span style="font-size:0.875rem;color:var(--text-primary)">${label}</span><span style="font-size:0.75rem;color:var(--text-secondary)">${isLimited ? `${used}/${total}` : 'Unlimited'}</span></div>${isLimited ? `<div style="height:0.5rem;background:var(--border-color);border-radius:9999px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${pct > 80 ? '#ff006e' : 'linear-gradient(90deg,#7c3aed,#00d4ff)'};border-radius:9999px"></div></div>` : `<div style="height:0.5rem;background:rgba(0,255,136,0.2);border-radius:9999px"></div>`}</div>`; }
+
+// NEW: Projects page
+function renderProjects() {
+  return `<main style="padding-top:4rem;height:100vh;display:flex;overflow:hidden">${renderSidebar(false)}<div class="content-scroll" style="flex:1;min-width:0" id="main-scroll"><div style="padding:1.5rem;max-width:64rem"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem"><div><h2 style="font-size:1.5rem;font-weight:bold;color:var(--text-primary)">Projects</h2><p style="font-size:0.875rem;color:var(--text-secondary)">Organize your chats into projects</p></div><button class="btn-primary" style="padding:0.625rem 1rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem">${I.plus} New Project</button></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem">${state.projects.map(p => `<div class="card" style="padding:1.5rem;cursor:pointer"><div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem"><div style="width:2.5rem;height:2.5rem;border-radius:0.5rem;background:rgba(124,58,237,0.1);display:flex;align-items:center;justify-content:center;color:#a78bfa">${I.folder}</div><div><h3 style="font-weight:600;color:var(--text-primary);margin:0;font-size:1rem">${p.name}</h3><p style="font-size:0.75rem;color:var(--text-secondary);margin:0">${p.chats} chats</p></div></div><p style="font-size:0.75rem;color:var(--text-subtle);margin:0">Last active: ${p.lastActive}</p></div>`).join('')}</div><div class="card" style="padding:3rem;text-align:center;margin-top:1rem;border-style:dashed"><div style="width:3rem;height:3rem;border-radius:0.75rem;background:rgba(124,58,237,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;color:#a78bfa">${I.folder}</div><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:0.5rem">Create Your First Project</h3><p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem">Group related chats together for better organization</p><button class="btn-primary" style="padding:0.625rem 1.25rem;border-radius:0.5rem;font-size:0.875rem">Create Project</button></div></div></div></main>`;
+}
+
+// NEW: Community page
+function renderCommunity() {
+  const posts = [
+    { id: 1, author: 'Sarah Chen', avatar: 'S', title: 'Best practices for React performance', content: 'Here are some tips I\'ve learned for optimizing large React apps...', likes: 24, replies: 8, time: '2 hours ago' },
+    { id: 2, author: 'Marcus Johnson', avatar: 'M', title: 'Showcase: My AI-generated art project', content: 'Just finished a project using the Coder API to generate art...', likes: 56, replies: 12, time: '5 hours ago' },
+    { id: 3, author: 'Aisha Patel', avatar: 'A', title: 'Question: How to handle rate limits?', content: 'I\'m hitting the 60 req/min limit on the free plan. Any workarounds?', likes: 15, replies: 23, time: '1 day ago' }
+  ];
+  return `<main style="padding-top:4rem;height:100vh;display:flex;overflow:hidden">${renderSidebar(false)}<div class="content-scroll" style="flex:1;min-width:0" id="main-scroll"><div style="padding:1.5rem;max-width:56rem"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem"><div><h2 style="font-size:1.5rem;font-weight:bold;color:var(--text-primary)">Community</h2><p style="font-size:0.875rem;color:var(--text-secondary)">Connect with other Laud users</p></div><button class="btn-primary" style="padding:0.625rem 1rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem">${I.plus} New Post</button></div><div style="display:flex;flex-direction:column;gap:1rem">${posts.map(p => `<div class="card" style="padding:1.5rem"><div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem"><div style="width:2.5rem;height:2.5rem;border-radius:9999px;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;color:white;font-weight:600">${p.avatar}</div><div><p style="font-weight:600;color:var(--text-primary);margin:0;font-size:0.9375rem">${p.author}</p><p style="font-size:0.75rem;color:var(--text-subtle);margin:0">${p.time}</p></div></div><h3 style="font-weight:600;color:var(--text-primary);margin:0 0 0.5rem 0;font-size:1.0625rem">${p.title}</h3><p style="font-size:0.875rem;color:var(--text-secondary);margin:0 0 1rem 0;line-height:1.625">${p.content}</p><div style="display:flex;gap:1rem"><button style="background:transparent;border:none;color:var(--text-secondary);cursor:pointer;font-size:0.8125rem;display:flex;align-items:center;gap:0.25rem">❤️ ${p.likes}</button><button style="background:transparent;border:none;color:var(--text-secondary);cursor:pointer;font-size:0.8125rem;display:flex;align-items:center;gap:0.25rem">💬 ${p.replies}</button></div></div>`).join('')}</div></div></div></main>`;
+}
+
+// NEW: Create page
+function renderCreate() {
+  const templates = [
+    { name: 'Blog Post', desc: 'Generate a blog post on any topic', icon: I.book, color: '#7c3aed' },
+    { name: 'Code Assistant', desc: 'Write, debug, and explain code', icon: I.code, color: '#00d4ff' },
+    { name: 'Image Generator', desc: 'Create images from text descriptions', icon: I.sparkle, color: '#ff006e' },
+    { name: 'Data Analyzer', desc: 'Analyze and visualize datasets', icon: I.chart, color: '#00ff88' },
+    { name: 'Translator', desc: 'Translate text between languages', icon: I.globe, color: '#eab308' },
+    { name: 'Custom Agent', desc: 'Build your own AI agent', icon: I.robot, color: '#a78bfa' }
+  ];
+  return `<main style="padding-top:4rem;height:100vh;display:flex;overflow:hidden">${renderSidebar(false)}<div class="content-scroll" style="flex:1;min-width:0" id="main-scroll"><div style="padding:1.5rem;max-width:64rem"><div style="margin-bottom:1.5rem"><h2 style="font-size:1.5rem;font-weight:bold;color:var(--text-primary);margin-bottom:0.5rem">Create</h2><p style="font-size:0.875rem;color:var(--text-secondary)">Start a new creation with AI-powered templates</p></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem">${templates.map(t => `<div class="card" style="padding:1.5rem;cursor:pointer;transition:transform 0.2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'"><div style="width:3rem;height:3rem;border-radius:0.75rem;background:${t.color}22;display:flex;align-items:center;justify-content:center;color:${t.color};margin-bottom:1rem">${t.icon}</div><h3 style="font-weight:600;color:var(--text-primary);margin:0 0 0.5rem 0">${t.name}</h3><p style="font-size:0.8125rem;color:var(--text-secondary);margin:0">${t.desc}</p></div>`).join('')}</div><div class="card" style="padding:2rem;margin-top:1rem;text-align:center;border:2px dashed var(--border-color)"><div style="width:3rem;height:3rem;border-radius:0.75rem;background:rgba(124,58,237,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;color:#a78bfa">${I.plus}</div><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:0.5rem">Start from Scratch</h3><p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem">Create a completely custom AI workflow</p><button class="btn-primary" style="padding:0.625rem 1.25rem;border-radius:0.5rem;font-size:0.875rem">Create New</button></div></div></div></main>`;
+}
 
 function renderAdminLogin() { return `<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto"><div class="card" style="padding:2rem;max-width:24rem;width:100%"><div style="text-align:center;margin-bottom:1.5rem"><div style="width:3rem;height:3rem;border-radius:0.75rem;background:linear-gradient(135deg,#00d4ff,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;margin:0 auto 1rem">${I.shield}</div><h2 style="font-size:1.25rem;font-weight:bold;color:var(--text-primary)">Admin Access</h2><p style="font-size:0.875rem;color:var(--text-secondary);margin-top:0.25rem">Sign in to manage users</p></div><div style="display:flex;flex-direction:column;gap:0.75rem"><input type="email" placeholder="admin@laud.com" value="admin@laud.com" class="input-field" style="padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"><input type="password" placeholder="Password" value="admin123" class="input-field" style="padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"><button onclick="loginAdmin()" class="btn-primary" style="padding:0.75rem;border-radius:0.5rem;font-weight:600">Sign In</button><button onclick="navigateTo('landing')" class="btn-secondary" style="padding:0.5rem;border-radius:0.5rem;font-size:0.875rem">← Back to home</button></div></div></main>`; }
 
@@ -976,7 +1115,7 @@ function renderUserActionModal() {
 }
 
 function navigateTo(view) {
-  const requiresAuth = ['user-chat', 'user-all-chats', 'user-coder', 'user-profile', 'user-plans', 'user-settings', 'user-help', 'user-api-keys', 'user-api-docs'];
+  const requiresAuth = ['user-chat', 'user-all-chats', 'user-coder', 'user-profile', 'user-plans', 'user-settings', 'user-help', 'user-api-keys', 'user-api-docs', 'user-projects', 'user-community', 'user-create'];
   if (requiresAuth.includes(view) && state.userEmail === '') { state.showAuthModal = true; state.authMode = 'signin'; render(); return; }
   state.currentView = view;
   render();
@@ -1013,6 +1152,7 @@ function signOut() {
   state.userName = ''; state.userEmail = ''; state.userAvatar = ''; state.userProvider = '';
   state.currentPlan = 'free'; state.currentView = 'landing';
   state.messagesToday = 0; state.totalChats = 0; state.apiCalls = 0; state.humanRequestsUsed = 0;
+  state.userMenuOpen = false;
   render();
 }
 
@@ -1033,10 +1173,7 @@ function viewChat(chatId) { state.selectedChat = chatId; state.currentView = 'ad
 function leaveChat(chatId) { state.adminJoinedChats.delete(chatId); if (state.currentView === 'admin-chat' && state.selectedChat === chatId) state.currentView = 'admin-dashboard'; render(); }
 function joinAsHuman() { if (state.selectedChat) state.adminJoinedChats.add(state.selectedChat); render(); setTimeout(() => { const input = document.getElementById('admin-message-input'); if (input) input.focus(); }, 100); }
 function sendAdminMessage() { const input = document.getElementById('admin-message-input'); if (!input || !input.value.trim()) return; mockMessages.push({ id: mockMessages.length + 1, role: 'human', content: input.value.trim(), timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }); state.adminMessage = ''; render(); const el = document.getElementById('admin-chat-messages'); if (el) el.scrollTop = el.scrollHeight; }
-
-// FIXED: toggleFaq preserves scroll via render() save/restore
 function toggleFaq(i) { state.openFaq = state.openFaq === i ? null : i; render(); }
-
 function setSettingsTab(tab) { state.settingsTab = tab; render(); }
 function setLanguage(lang) { state.language = lang; render(); }
 function toggleDataControl(key) { state.dataControls[key] = !state.dataControls[key]; render(); }
@@ -1085,51 +1222,25 @@ function confirmCreateKey() {
 }
 
 function openRechargeModal() { state.showRechargeModal = true; render(); }
+function selectCreditPackage(amount) { state.selectedCreditPackage = amount; state.customCreditAmount = 0; render(); }
 
-// FIXED: selectCreditPackage doesn't cause scroll jump
-function selectCreditPackage(amount) { 
-  state.selectedCreditPackage = amount; 
-  state.customCreditAmount = 0; 
-  render(); 
-}
-
-// FIXED: updateCustomCreditsDirect updates DOM directly without full re-render
-// This prevents the input from losing focus and digits from reversing
 function updateCustomCreditsDirect(inputEl) {
   const val = inputEl.value;
   state.customCreditAmount = parseInt(val) || 0;
   state.selectedCreditPackage = null;
-  
-  // Update price display directly without re-rendering
   const priceDisplay = document.getElementById('custom-price-display');
-  if (priceDisplay) {
-    priceDisplay.textContent = '$' + (state.customCreditAmount * 0.0015).toFixed(2);
-  }
-  
-  // Update recharge button directly
+  if (priceDisplay) priceDisplay.textContent = '$' + (state.customCreditAmount * 0.0015).toFixed(2);
   const rechargeBtn = document.querySelector('.recharge-btn-dynamic');
   if (rechargeBtn && state.customCreditAmount >= 100) {
     const price = (state.customCreditAmount * 0.0015).toFixed(2);
     rechargeBtn.innerHTML = `${I.wallet} Recharge ${state.customCreditAmount.toLocaleString()} Credits — $${price}`;
     rechargeBtn.className = 'btn-primary recharge-btn-dynamic';
-    rechargeBtn.style.width = '100%';
-    rechargeBtn.style.padding = '0.875rem';
-    rechargeBtn.style.borderRadius = '0.5rem';
-    rechargeBtn.style.fontWeight = '600';
-    rechargeBtn.style.fontSize = '1rem';
-    rechargeBtn.style.opacity = '1';
-    rechargeBtn.style.cursor = 'pointer';
+    rechargeBtn.style.cssText = 'width:100%;padding:0.875rem;border-radius:0.5rem;font-weight:600;font-size:1rem;opacity:1;cursor:pointer';
     rechargeBtn.disabled = false;
     rechargeBtn.onclick = processRecharge;
   } else if (rechargeBtn) {
     rechargeBtn.className = 'btn-secondary recharge-btn-dynamic';
-    rechargeBtn.style.width = '100%';
-    rechargeBtn.style.padding = '0.875rem';
-    rechargeBtn.style.borderRadius = '0.5rem';
-    rechargeBtn.style.fontWeight = '600';
-    rechargeBtn.style.fontSize = '1rem';
-    rechargeBtn.style.opacity = '0.5';
-    rechargeBtn.style.cursor = 'not-allowed';
+    rechargeBtn.style.cssText = 'width:100%;padding:0.875rem;border-radius:0.5rem;font-weight:600;font-size:1rem;opacity:0.5;cursor:not-allowed';
     rechargeBtn.disabled = true;
     rechargeBtn.textContent = 'Select a package or enter custom amount';
   }
@@ -1170,12 +1281,19 @@ function confirmKeyAction() {
 function copyKey(keyId) {
   const key = state.apiKeys.find(k => k.id === keyId);
   if (key) {
-    navigator.clipboard.writeText(key.key).then(() => {
-      alert('API key copied to clipboard!');
-    }).catch(() => {
-      alert('Key: ' + key.key);
-    });
+    navigator.clipboard.writeText(key.key).then(() => alert('API key copied to clipboard!')).catch(() => alert('Key: ' + key.key));
   }
+}
+
+// Notification helpers
+function markNotifRead(id) {
+  const n = mockNotifications.find(x => x.id === id);
+  if (n) { n.unread = false; state.notifications = mockNotifications.filter(x => x.unread).length; render(); }
+}
+function clearNotifications() {
+  mockNotifications.forEach(n => n.unread = false);
+  state.notifications = 0;
+  render();
 }
 
 function attachEventListeners() {
@@ -1183,20 +1301,28 @@ function attachEventListeners() {
     const el1 = document.getElementById('chat-messages'); if (el1) el1.scrollTop = el1.scrollHeight;
     const el2 = document.getElementById('admin-chat-messages'); if (el2) el2.scrollTop = el2.scrollHeight;
   }, 50);
+  
+  // Close popovers when clicking outside
+  document.addEventListener('click', (e) => {
+    const isUserMenu = e.target.closest('.user-popover, .user-popover-item, [onclick*="toggleUserMenu"]');
+    const isNotif = e.target.closest('.notif-dropdown, [onclick*="toggleNotif"]');
+    if (!isUserMenu && state.userMenuOpen) { state.userMenuOpen = false; render(); }
+    if (!isNotif && state.notifOpen) { state.notifOpen = false; render(); }
+  });
 }
 
 document.addEventListener('keydown', (e) => {
   if (e.ctrlKey && e.shiftKey && e.key === 'A') { e.preventDefault(); if (state.currentRole === 'admin') navigateTo('admin-dashboard'); else navigateTo('admin-login'); }
   if (e.key === 'Escape') {
+    if (state.userMenuOpen) { state.userMenuOpen = false; render(); return; }
+    if (state.notifOpen) { state.notifOpen = false; render(); return; }
     if (state.sidebarOpen) { state.sidebarOpen = false; render(); return; }
     closeModal();
   }
 });
 
 window.addEventListener('resize', () => {
-  if (window.innerWidth >= 768) {
-    state.sidebarOpen = false;
-  }
+  if (window.innerWidth >= 768) state.sidebarOpen = false;
 });
 
 render();
