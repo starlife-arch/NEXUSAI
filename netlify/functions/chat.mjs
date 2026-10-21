@@ -276,6 +276,7 @@ export const handler = async (event) => {
   const requestStartedAt = Date.now();
   let usageDurationMs = 0;
   let groqDurationMs = 0;
+  let groqStartedAt = 0;
   try {
     try {
       const usageStartedAt = Date.now();
@@ -287,7 +288,7 @@ export const handler = async (event) => {
       }
       return json(usageError.message.includes("reached today's") || usageError.message.includes("daily message limit") || usageError.message.includes("banned") ? 429 : 503, { error: usageError.message || "Could not verify your daily usage." });
     }
-    const groqStartedAt = Date.now();
+    groqStartedAt = Date.now();
     const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -311,7 +312,7 @@ export const handler = async (event) => {
     groqDurationMs = Date.now() - groqStartedAt;
     const result = await groqResponse.json().catch(() => ({}));
     if (!groqResponse.ok) {
-      console.error("Groq request failed with status", groqResponse.status);
+      console.error("Groq request failed", { status: groqResponse.status, usageMs: usageDurationMs, groqMs: groqDurationMs, totalMs: Date.now() - requestStartedAt });
       return json(502, { error: "The AI provider could not complete that request. Please try again." });
     }
 
@@ -322,7 +323,8 @@ export const handler = async (event) => {
     console.info("Chat timing ms", { usage: usageDurationMs, groq: groqDurationMs, total: Date.now() - requestStartedAt });
     return json(200, { reply: answer.trim(), truncated: result.choices?.[0]?.finish_reason === "length" });
   } catch (error) {
-    console.error("Chat function error:", error?.message || "Unknown error");
+    if (groqStartedAt && !groqDurationMs) groqDurationMs = Date.now() - groqStartedAt;
+    console.error("Chat function error:", { message: error?.message || "Unknown error", usageMs: usageDurationMs, groqMs: groqDurationMs, totalMs: Date.now() - requestStartedAt });
     return json(502, { error: "Could not reach the AI service. Please try again shortly." });
   }
 };
