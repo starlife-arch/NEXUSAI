@@ -632,7 +632,7 @@ const mockNotifications = [
 ];
 
 const state = {
-  currentView: 'landing', currentRole: 'user', selectedChat: null, selectedUser: null,
+  currentView: 'landing', currentRole: 'user', isAdminUser: false, selectedChat: null, selectedUser: null,
   humanRequested: false, humanJoined: false, adminJoinedChats: new Set(),
   newMessage: '', adminMessage: '', isTyping: false, notifications: 3,
   theme: 'dark', currentPlan: 'free', settingsTab: 'account', language: 'English',
@@ -823,6 +823,7 @@ function renderNavbar() {
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:0.75rem">
+          ${state.isAdminUser ? `<button onclick="openAdminDashboard()" class="btn-primary" style="padding:0.5rem 0.75rem;border-radius:0.5rem;font-size:0.8125rem">Admin</button>` : ''}
           <button onclick="toggleTheme()" class="nav-bell-btn" style="padding:0.5rem;border-radius:0.5rem;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;justify-content:center" title="Toggle theme">${state.theme === 'dark' ? I.sun : I.moon}</button>
           ${isSignedIn ? `
           <div style="position:relative">
@@ -1018,7 +1019,7 @@ function renderLanding() {
           <button onclick="openAuthModal('signin')" class="btn-secondary" style="padding:0.875rem 1.75rem;border-radius:0.75rem;font-weight:600">Sign In</button>
           `}
         </div>
-        <p style="font-size:0.75rem;color:var(--text-subtle);margin-top:2rem;opacity:0.5">Press Ctrl+Shift+A for admin access</p>
+        <button onclick="navigateTo('admin-login')" class="btn-secondary" style="padding:0.5rem 1rem;border-radius:0.5rem;font-size:0.8125rem;margin-top:1.5rem">Admin Sign In</button>
       </div>
     </section>
     
@@ -1276,7 +1277,7 @@ function renderCreate() {
   return `<main style="padding-top:4rem;height:100vh;display:flex;overflow:hidden">${renderSidebar(false)}<div class="content-scroll" style="flex:1;min-width:0" id="main-scroll"><div style="padding:1.5rem;max-width:64rem"><div style="margin-bottom:1.5rem"><h2 style="font-size:1.5rem;font-weight:bold;color:var(--text-primary);margin-bottom:0.5rem">Create</h2><p style="font-size:0.875rem;color:var(--text-secondary)">Start a new creation with AI-powered templates</p></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem">${templates.map(t => `<div class="card" style="padding:1.5rem;cursor:pointer;transition:transform 0.2s" onclick="startTemplate('${t.name}')" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'"><div style="width:3rem;height:3rem;border-radius:0.75rem;background:${t.color}22;display:flex;align-items:center;justify-content:center;color:${t.color};margin-bottom:1rem">${t.icon}</div><h3 style="font-weight:600;color:var(--text-primary);margin:0 0 0.5rem 0">${t.name}</h3><p style="font-size:0.8125rem;color:var(--text-secondary);margin:0">${t.desc}</p></div>`).join('')}</div><div class="card" style="padding:2rem;margin-top:1rem;text-align:center;border:2px dashed var(--border-color)"><div style="width:3rem;height:3rem;border-radius:0.75rem;background:rgba(124,58,237,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;color:#a78bfa">${I.plus}</div><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:0.5rem">Start from Scratch</h3><p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem">Create a completely custom AI workflow</p><button onclick="startFromScratch()" class="btn-primary" style="padding:0.625rem 1.25rem;border-radius:0.5rem;font-size:0.875rem">Create New</button></div></div></div></main>`;
 }
 
-function renderAdminLogin() { return `<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto"><div class="card" style="padding:2rem;max-width:24rem;width:100%"><div style="text-align:center;margin-bottom:1.5rem"><div style="width:3rem;height:3rem;border-radius:0.75rem;background:linear-gradient(135deg,#00d4ff,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;margin:0 auto 1rem">${I.shield}</div><h2 style="font-size:1.25rem;font-weight:bold;color:var(--text-primary)">Admin Access</h2><p style="font-size:0.875rem;color:var(--text-secondary);margin-top:0.25rem">Sign in to manage users</p></div><div style="display:flex;flex-direction:column;gap:0.75rem"><input type="email" id="admin-email" placeholder="admin@laud.com" class="input-field" style="padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"><input type="password" id="admin-password" placeholder="Password" class="input-field" style="padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"><button onclick="loginAdmin()" class="btn-primary" style="padding:0.75rem;border-radius:0.5rem;font-weight:600">Sign In</button><button onclick="navigateTo('landing')" class="btn-secondary" style="padding:0.5rem;border-radius:0.5rem;font-size:0.875rem">← Back to home</button></div></div></main>`; }
+function renderAdminLogin() { return `<main style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto"><div class="card" style="padding:2rem;max-width:24rem;width:100%"><div style="text-align:center;margin-bottom:1.5rem"><div style="width:3rem;height:3rem;border-radius:0.75rem;background:linear-gradient(135deg,#00d4ff,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;margin:0 auto 1rem">${I.shield}</div><h2 style="font-size:1.25rem;font-weight:bold;color:var(--text-primary)">Admin Access</h2><p style="font-size:0.875rem;color:var(--text-secondary);margin-top:0.25rem">Sign in with your authorized Google account</p></div><div style="display:flex;flex-direction:column;gap:0.75rem"><button onclick="loginAdminWithGoogle()" class="btn-primary" style="padding:0.75rem;border-radius:0.5rem;font-weight:600">Continue with Google</button><div style="text-align:center;color:var(--text-subtle);font-size:0.75rem">Or use email and password</div><input type="email" id="admin-email" placeholder="Admin email" class="input-field" style="padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"><input type="password" id="admin-password" placeholder="Password" class="input-field" style="padding:0.75rem;border-radius:0.5rem;font-size:0.875rem"><button onclick="loginAdmin()" class="btn-secondary" style="padding:0.75rem;border-radius:0.5rem;font-weight:600">Sign In with Email</button><button onclick="navigateTo('landing')" class="btn-secondary" style="padding:0.5rem;border-radius:0.5rem;font-size:0.875rem">← Back to home</button></div></div></main>`; }
 
 function renderAdminDashboard() {
   const requestedChats = mockChatSessions.filter(c => c.humanRequested && !c.humanJoined && !state.adminJoinedChats.has(c.id));
@@ -1475,6 +1476,53 @@ async function signOut() {
 
 function toggleTheme() { state.theme = state.theme === 'dark' ? 'light' : 'dark'; render(); showToast(`Switched to ${state.theme} mode`, 'info', 'Theme changed'); }
 function setTheme(t) { state.theme = t; render(); }
+
+async function loginAdminWithGoogle() {
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    const credential = await window.firebaseAuth.signInWithPopup(provider);
+    const token = await credential.user.getIdTokenResult(true);
+    if (token.claims.admin !== true) {
+      state.isAdminUser = false;
+      state.currentRole = 'user';
+      state.currentView = 'user-chat';
+      render();
+      showToast('This Google account does not have administrator access.', 'error', 'Access denied');
+      return;
+    }
+    state.isAdminUser = true;
+    state.currentRole = 'admin';
+    state.currentView = 'admin-dashboard';
+    state.adminTab = 'dashboard';
+    render();
+    showToast('Admin access verified.', 'success');
+  } catch (error) {
+    console.error('Admin Google sign-in failed:', error);
+    showToast(error.message || 'Google sign-in failed. Please try again.', 'error', 'Sign-in failed');
+  }
+}
+
+async function openAdminDashboard() {
+  const user = window.firebaseAuth.currentUser;
+  if (!user) { navigateTo('admin-login'); return; }
+  try {
+    const token = await user.getIdTokenResult(true);
+    if (token.claims.admin !== true) {
+      state.isAdminUser = false;
+      state.currentRole = 'user';
+      render();
+      showToast('This account does not have administrator access.', 'error', 'Access denied');
+      return;
+    }
+    state.isAdminUser = true;
+    state.currentRole = 'admin';
+    state.currentView = 'admin-dashboard';
+    state.adminTab = 'dashboard';
+    render();
+  } catch (error) {
+    showToast('Could not verify administrator access. Please try again.', 'error');
+  }
+}
 
 async function loginAdmin() {
   const email = document.getElementById('admin-email')?.value.trim();
@@ -1814,19 +1862,27 @@ window.addEventListener('resize', () => {
 
 render();
 
-window.firebaseAuth.onAuthStateChanged((user) => {
+window.firebaseAuth.onAuthStateChanged(async (user) => {
   if (user) {
     state.userName = user.displayName || user.email?.split('@')[0] || 'User';
     state.userEmail = user.email || '';
     state.userAvatar = state.userName.charAt(0).toUpperCase();
     state.userProvider = user.providerData?.[0]?.providerId === 'google.com' ? 'Google' : 'Email';
     state.memberSince = state.memberSince || new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    try {
+      const token = await user.getIdTokenResult();
+      state.isAdminUser = token.claims.admin === true;
+      if (!state.isAdminUser && state.currentRole === 'admin') state.currentRole = 'user';
+    } catch (error) {
+      state.isAdminUser = false;
+    }
     if (state.currentView === 'landing') state.currentView = 'user-chat';
   } else {
     state.userName = '';
     state.userEmail = '';
     state.userAvatar = '';
     state.userProvider = '';
+    state.isAdminUser = false;
     state.currentRole = 'user';
     if (state.currentView !== 'admin-login') state.currentView = 'landing';
   }
