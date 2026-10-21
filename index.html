@@ -46,6 +46,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; m
 .slide-up { animation: slideUp 0.2s ease-out; }
 @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
 .slide-down { animation: slideDown 0.2s ease-out; }
+@keyframes slideInRight { from { opacity:0; transform:translateX(100%); } to { opacity:1; transform:translateX(0); } }
+.slide-in-right { animation: slideInRight 0.3s ease-out; }
+@keyframes slideOutRight { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(100%); } }
+.slide-out-right { animation: slideOutRight 0.3s ease-in forwards; }
+
 .typing-indicator span { display:inline-block; width:6px; height:6px; border-radius:50%; background:#7c3aed; margin:0 2px; animation: typing 1.4s infinite; }
 .typing-indicator span:nth-child(2) { animation-delay:0.2s; }
 .typing-indicator span:nth-child(3) { animation-delay:0.4s; }
@@ -138,6 +143,55 @@ tr:hover td { background: var(--bg-hover); }
   transition: width 0.3s ease, transform 0.3s ease;
   overflow: hidden;
 }
+
+/* DESKTOP COLLAPSED STATE */
+.app-sidebar.desktop-collapsed {
+  width: 4rem;
+}
+.app-sidebar.desktop-collapsed .sidebar-text,
+.app-sidebar.desktop-collapsed .sidebar-label,
+.app-sidebar.desktop-collapsed .user-info-text,
+.app-sidebar.desktop-collapsed .new-chat-text,
+.app-sidebar.desktop-collapsed .theme-logout-text,
+.app-sidebar.desktop-collapsed .user-popover-trigger-text {
+  display: none !important;
+  width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.app-sidebar.desktop-collapsed .sidebar-item {
+  justify-content: center;
+  padding: 0.625rem;
+  border-left: none;
+}
+.app-sidebar.desktop-collapsed .sidebar-item.active {
+  border-left: none;
+  background: var(--bg-active);
+}
+.app-sidebar.desktop-collapsed nav {
+  padding: 0.5rem;
+}
+.app-sidebar.desktop-collapsed .recent-chats-scroll {
+  display: none;
+}
+.app-sidebar.desktop-collapsed .user-section-trigger {
+  justify-content: center;
+  padding: 0.5rem;
+}
+.app-sidebar.desktop-collapsed .theme-logout-btns {
+  flex-direction: column;
+}
+.app-sidebar.desktop-collapsed .theme-logout-btns .btn-secondary {
+  justify-content: center;
+}
+.app-sidebar.desktop-collapsed .section-divider {
+  display: none;
+}
+.app-sidebar.desktop-collapsed .sidebar-section-label {
+  display: none;
+}
+
+/* MOBILE SIDEBAR */
 .app-sidebar.mobile-hidden {
   position: fixed; top: 4rem; left: 0; bottom: 0;
   z-index: 45; transform: translateX(-100%);
@@ -151,7 +205,7 @@ tr:hover td { background: var(--bg-hover); }
   box-shadow: 4px 0 20px rgba(0,0,0,0.3);
 }
 
-/* User popover - appears ABOVE the user section, doesn't cover it */
+/* User popover */
 .user-popover {
   position: absolute;
   bottom: 100%;
@@ -201,7 +255,77 @@ tr:hover td { background: var(--bg-hover); }
 .notif-item:hover { background: var(--bg-hover); }
 .notif-item.unread { background: rgba(124,58,237,0.05); }
 
-/* Section headers in sidebar */
+/* TOAST NOTIFICATIONS */
+.toast-container {
+  position: fixed;
+  top: 5rem;
+  right: 1rem;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+.toast {
+  pointer-events: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 0.875rem 1rem;
+  min-width: 280px;
+  max-width: 360px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  animation: slideInRight 0.3s ease-out;
+}
+.toast.removing {
+  animation: slideOutRight 0.3s ease-in forwards;
+}
+.toast-icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.toast-success .toast-icon { background: rgba(0,255,136,0.15); color: #00ff88; }
+.toast-error .toast-icon { background: rgba(255,0,110,0.15); color: #ff006e; }
+.toast-info .toast-icon { background: rgba(0,212,255,0.15); color: #00d4ff; }
+.toast-warning .toast-icon { background: rgba(234,179,8,0.15); color: #eab308; }
+.toast-content { flex: 1; min-width: 0; }
+.toast-title { font-size: 0.875rem; font-weight: 600; color: var(--text-primary); margin: 0 0 0.125rem 0; }
+.toast-message { font-size: 0.8125rem; color: var(--text-secondary); margin: 0; line-height: 1.4; }
+.toast-close {
+  background: transparent;
+  border: none;
+  color: var(--text-subtle);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.toast-close:hover { color: var(--text-primary); }
+
+/* PROMPT MODAL */
+.prompt-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+  z-index: 1500; display: flex; align-items: center; justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+.prompt-box {
+  position: relative; background: var(--modal-bg); border: 1px solid var(--modal-border);
+  border-radius: 1rem; padding: 1.5rem; max-width: 28rem; width: 90%;
+  color: var(--text-primary); z-index: 1501;
+  animation: slideIn 0.2s ease-out;
+}
+
 .sidebar-section-label {
   font-size: 0.6875rem;
   font-weight: 600;
@@ -222,6 +346,34 @@ tr:hover td { background: var(--bg-hover); }
     box-shadow: 4px 0 20px rgba(0,0,0,0.3);
   }
   .app-sidebar.mobile-visible { transform: translateX(0); }
+  .app-sidebar.desktop-collapsed { width: 16rem; }
+  .app-sidebar.desktop-collapsed .sidebar-text,
+  .app-sidebar.desktop-collapsed .sidebar-label,
+  .app-sidebar.desktop-collapsed .user-info-text,
+  .app-sidebar.desktop-collapsed .new-chat-text,
+  .app-sidebar.desktop-collapsed .theme-logout-text,
+  .app-sidebar.desktop-collapsed .user-popover-trigger-text {
+    display: inline !important;
+    width: auto !important;
+  }
+  .app-sidebar.desktop-collapsed .sidebar-item {
+    justify-content: flex-start;
+    padding: 0.625rem 0.75rem;
+  }
+  .app-sidebar.desktop-collapsed .sidebar-item.active {
+    border-left: 3px solid #7c3aed;
+  }
+  .app-sidebar.desktop-collapsed nav { padding: 0.75rem; }
+  .app-sidebar.desktop-collapsed .recent-chats-scroll { display: flex; }
+  .app-sidebar.desktop-collapsed .user-section-trigger {
+    justify-content: flex-start;
+    padding: 0.5rem;
+  }
+  .app-sidebar.desktop-collapsed .theme-logout-btns { flex-direction: row; }
+  .app-sidebar.desktop-collapsed .theme-logout-btns .btn-secondary { justify-content: center; }
+  .app-sidebar.desktop-collapsed .theme-logout-btns .btn-secondary span { display: inline; }
+  .app-sidebar.desktop-collapsed .section-divider { display: block; }
+  .app-sidebar.desktop-collapsed .sidebar-section-label { display: block; }
   main { height: calc(100vh - 4rem) !important; overflow: hidden; }
   .chat-scroll-container {
     overflow-y: auto !important;
@@ -235,6 +387,8 @@ tr:hover td { background: var(--bg-hover); }
   }
   .user-popover { left: 0.5rem; right: 0.5rem; }
   .notif-dropdown { right: 0.5rem; width: calc(100vw - 1rem); }
+  .toast-container { right: 0.5rem; left: 0.5rem; }
+  .toast { min-width: auto; max-width: none; }
 }
 
 @media (min-width: 768px) {
@@ -259,7 +413,95 @@ tr:hover td { background: var(--bg-hover); }
 </head>
 <body>
 <div id="app"></div>
+<div id="toast-container" class="toast-container"></div>
 <script>
+// ============ TOAST NOTIFICATION SYSTEM ============
+function showToast(message, type = 'info', title = '') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  
+  const icons = {
+    success: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+    error: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+    info: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`,
+    warning: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+  };
+  
+  const defaultTitles = {
+    success: 'Success',
+    error: 'Error',
+    info: 'Info',
+    warning: 'Warning'
+  };
+  
+  const displayTitle = title || defaultTitles[type];
+  
+  toast.innerHTML = `
+    <div class="toast-icon">${icons[type]}</div>
+    <div class="toast-content">
+      <p class="toast-title">${displayTitle}</p>
+      <p class="toast-message">${message}</p>
+    </div>
+    <button class="toast-close" onclick="this.parentElement.remove()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  `;
+  
+  container.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.classList.add('removing');
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+// ============ CUSTOM PROMPT MODAL ============
+function showPrompt(title, placeholder, callback, defaultValue = '') {
+  const overlay = document.createElement('div');
+  overlay.className = 'prompt-overlay';
+  overlay.innerHTML = `
+    <div class="prompt-box">
+      <h3 style="font-weight:600;color:var(--text-primary);margin:0 0 1rem 0;font-size:1.125rem">${title}</h3>
+      <input type="text" id="prompt-input" placeholder="${placeholder}" value="${defaultValue}" 
+        class="input-field" style="width:100%;padding:0.75rem;border-radius:0.5rem;font-size:0.875rem;margin-bottom:1rem">
+      <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+        <button id="prompt-cancel" class="btn-secondary" style="padding:0.625rem 1rem;border-radius:0.5rem;font-size:0.875rem;font-weight:500">Cancel</button>
+        <button id="prompt-ok" class="btn-primary" style="padding:0.625rem 1rem;border-radius:0.5rem;font-size:0.875rem;font-weight:500">OK</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  
+  const input = overlay.querySelector('#prompt-input');
+  const okBtn = overlay.querySelector('#prompt-ok');
+  const cancelBtn = overlay.querySelector('#prompt-cancel');
+  
+  setTimeout(() => input.focus(), 50);
+  
+  function close() { overlay.remove(); }
+  
+  okBtn.onclick = () => {
+    const value = input.value.trim();
+    close();
+    if (callback) callback(value);
+  };
+  
+  cancelBtn.onclick = () => {
+    close();
+    if (callback) callback(null);
+  };
+  
+  input.onkeydown = (e) => {
+    if (e.key === 'Enter') okBtn.click();
+    if (e.key === 'Escape') cancelBtn.click();
+  };
+  
+  overlay.onclick = (e) => {
+    if (e.target === overlay) cancelBtn.click();
+  };
+}
+
 // ============ SCROLL & FOCUS PRESERVATION ============
 const scrollState = { containers: {} };
 const focusState = { id: null, start: 0, end: 0 };
@@ -542,12 +784,6 @@ function toggleNotif() {
   render();
 }
 
-function closeAllPopovers() {
-  state.userMenuOpen = false;
-  state.notifOpen = false;
-  render();
-}
-
 function nav(view) {
   navigateTo(view);
   state.sidebarOpen = false;
@@ -557,12 +793,15 @@ function nav(view) {
 function renderNavbar() {
   const isAdmin = state.currentRole === 'admin' && (state.currentView === 'admin-dashboard' || state.currentView === 'admin-chat');
   const isSignedIn = state.userEmail !== '';
+  const isDesktop = window.innerWidth >= 768;
+  const toggleIcon = (isDesktop && state.sidebarCollapsed) ? I.panelRight : I.menu;
+  
   return `
   <nav style="position:fixed;top:0;left:0;right:0;z-index:50;background:var(--bg-secondary);backdrop-filter:blur(12px);border-bottom:1px solid var(--border-color)">
     <div style="max-width:1280px;margin:0 auto;padding:0 1rem">
       <div style="display:flex;align-items:center;justify-content:space-between;height:4rem">
         <div style="display:flex;align-items:center;gap:0.75rem">
-          <button onclick="toggleSidebar()" style="padding:0.5rem;border-radius:0.5rem;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;justify-content:center" title="Toggle sidebar">${state.sidebarCollapsed && window.innerWidth >= 768 ? I.panelRight : I.menu}</button>
+          <button onclick="toggleSidebar()" style="padding:0.5rem;border-radius:0.5rem;background:transparent;border:none;cursor:pointer;color:var(--text-secondary);display:flex;align-items:center;justify-content:center" title="Toggle sidebar">${toggleIcon}</button>
           <div style="display:flex;align-items:center;gap:0.75rem;cursor:pointer" onclick="navigateTo('${isAdmin ? 'admin-dashboard' : (isSignedIn ? 'user-chat' : 'landing')}')">
             <div style="width:2rem;height:2rem;border-radius:0.5rem;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;color:white">${I.brain}</div>
             <span style="font-size:1.125rem;font-weight:bold" class="gradient-text">Laud</span>
@@ -637,25 +876,24 @@ function renderUserPopoverNavbar() {
   </div>`;
 }
 
-// QWEN-STYLE SIDEBAR - RESTRUCTURED
 function renderSidebarContent(isAdmin) {
   if (isAdmin) {
     const requestedChats = mockChatSessions.filter(c => c.humanRequested && !c.humanJoined && !state.adminJoinedChats.has(c.id));
     return `
-    <div style="padding:1rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;gap:0.75rem">
-      <div style="width:2.25rem;height:2.25rem;border-radius:0.5rem;background:linear-gradient(135deg,#00d4ff,#7c3aed);display:flex;align-items:center;justify-content:center;color:white">${I.shield}</div>
-      <div><p style="font-weight:600;font-size:0.875rem;color:var(--text-primary)">Admin Panel</p><p style="font-size:0.75rem;color:var(--text-subtle)">Full Access</p></div>
+    <div style="padding:1rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;gap:0.75rem;justify-content:${state.sidebarCollapsed && window.innerWidth >= 768 ? 'center' : 'flex-start'}">
+      <div style="width:2.25rem;height:2.25rem;border-radius:0.5rem;background:linear-gradient(135deg,#00d4ff,#7c3aed);display:flex;align-items:center;justify-content:center;color:white;flex-shrink:0">${I.shield}</div>
+      ${!(state.sidebarCollapsed && window.innerWidth >= 768) ? `<div><p style="font-weight:600;font-size:0.875rem;color:var(--text-primary);margin:0">Admin Panel</p><p style="font-size:0.75rem;color:var(--text-subtle);margin:0">Full Access</p></div>` : ''}
     </div>
     <nav style="flex:1;padding:0.75rem;display:flex;flex-direction:column;gap:0.25rem;overflow-y:auto">
-      <div class="sidebar-item ${state.adminTab === 'dashboard' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('dashboard');closeSidebar()"><span style="color:#a78bfa">${I.dashboard}</span><span style="font-size:0.875rem">Dashboard</span></div>
-      <div class="sidebar-item ${state.adminTab === 'users' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('users');closeSidebar()"><span style="color:#9ca3af">${I.users}</span><span style="font-size:0.875rem">Users</span><span style="margin-left:auto;font-size:0.75rem;padding:0.125rem 0.5rem;border-radius:9999px;background:rgba(124,58,237,0.2);color:#a78bfa">${mockUsers.length}</span></div>
-      <div class="sidebar-item ${state.adminTab === 'chats' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('chats');closeSidebar()"><span style="color:#9ca3af">${I.history}</span><span style="font-size:0.875rem">All Chats</span></div>
-      <div class="sidebar-item ${state.adminTab === 'requests' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('requests');closeSidebar()"><span style="color:#ff006e">${I.userStar}</span><span style="font-size:0.875rem">Human Requests</span>${requestedChats.length > 0 ? `<span style="margin-left:auto;width:1.25rem;height:1.25rem;border-radius:9999px;background:#ff006e;display:flex;align-items:center;justify-content:center;font-size:0.625rem;font-weight:bold;color:white" class="pulse-dot">${requestedChats.length}</span>` : ''}</div>
-      <div class="sidebar-item ${state.adminTab === 'analytics' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('analytics');closeSidebar()"><span style="color:#9ca3af">${I.chart}</span><span style="font-size:0.875rem">Analytics</span></div>
-      <div class="sidebar-item ${state.adminTab === 'settings' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('settings');closeSidebar()"><span style="color:#9ca3af">${I.settings}</span><span style="font-size:0.875rem">Settings</span></div>
+      <div class="sidebar-item ${state.adminTab === 'dashboard' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('dashboard');closeSidebar()"><span style="color:#a78bfa;flex-shrink:0">${I.dashboard}</span><span class="sidebar-text" style="font-size:0.875rem">Dashboard</span></div>
+      <div class="sidebar-item ${state.adminTab === 'users' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('users');closeSidebar()"><span style="color:#9ca3af;flex-shrink:0">${I.users}</span><span class="sidebar-text" style="font-size:0.875rem;flex:1">Users</span><span class="sidebar-text" style="margin-left:auto;font-size:0.75rem;padding:0.125rem 0.5rem;border-radius:9999px;background:rgba(124,58,237,0.2);color:#a78bfa">${mockUsers.length}</span></div>
+      <div class="sidebar-item ${state.adminTab === 'chats' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('chats');closeSidebar()"><span style="color:#9ca3af;flex-shrink:0">${I.history}</span><span class="sidebar-text" style="font-size:0.875rem">All Chats</span></div>
+      <div class="sidebar-item ${state.adminTab === 'requests' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('requests');closeSidebar()"><span style="color:#ff006e;flex-shrink:0">${I.userStar}</span><span class="sidebar-text" style="font-size:0.875rem;flex:1">Human Requests</span>${requestedChats.length > 0 ? `<span class="sidebar-text" style="margin-left:auto;width:1.25rem;height:1.25rem;border-radius:9999px;background:#ff006e;display:flex;align-items:center;justify-content:center;font-size:0.625rem;font-weight:bold;color:white" class="pulse-dot">${requestedChats.length}</span>` : ''}</div>
+      <div class="sidebar-item ${state.adminTab === 'analytics' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('analytics');closeSidebar()"><span style="color:#9ca3af;flex-shrink:0">${I.chart}</span><span class="sidebar-text" style="font-size:0.875rem">Analytics</span></div>
+      <div class="sidebar-item ${state.adminTab === 'settings' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="setAdminTab('settings');closeSidebar()"><span style="color:#9ca3af;flex-shrink:0">${I.settings}</span><span class="sidebar-text" style="font-size:0.875rem">Settings</span></div>
     </nav>
     <div style="padding:0.75rem;border-top:1px solid var(--border-color)">
-      <button onclick="logoutAdmin()" class="btn-secondary" style="width:100%;padding:0.5rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;justify-content:center;gap:0.5rem">${I.logout} Sign Out</button>
+      <button onclick="logoutAdmin()" class="btn-secondary" style="width:100%;padding:0.5rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;justify-content:center;gap:0.5rem">${I.logout}<span class="sidebar-text"> Sign Out</span></button>
     </div>`;
   }
   
@@ -663,30 +901,26 @@ function renderSidebarContent(isAdmin) {
   const recentChats = mockChatSessions.slice(0, 5);
   
   return `
-  <!-- Top: New Chat -->
-  <div style="padding:1rem;border-bottom:1px solid var(--border-color)">
-    <button onclick="newChat();closeSidebar()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.75rem;border-radius:0.5rem;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.2);color:#a78bfa;cursor:pointer;font-size:0.875rem;font-weight:500">${I.plus} New Chat</button>
+  <div style="padding:1rem;border-bottom:1px solid var(--border-color);${state.sidebarCollapsed && window.innerWidth >= 768 ? 'display:flex;justify-content:center' : ''}">
+    <button onclick="newChat();closeSidebar()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.75rem;border-radius:0.5rem;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.2);color:#a78bfa;cursor:pointer;font-size:0.875rem;font-weight:500">${I.plus}<span class="new-chat-text"> New Chat</span></button>
   </div>
   
-  <!-- Primary nav: Chat, All Chats, Coder -->
   <nav style="padding:0.5rem 0.75rem;border-bottom:1px solid var(--border-color);display:flex;flex-direction:column;gap:0.125rem">
-    <div class="sidebar-item ${state.currentView === 'user-chat' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="nav('user-chat')"><span>${I.chat}</span><span style="font-size:0.875rem">Chat</span></div>
-    <div class="sidebar-item ${state.currentView === 'user-all-chats' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="nav('user-all-chats')"><span>${I.list}</span><span style="font-size:0.875rem">All Chats</span></div>
+    <div class="sidebar-item ${state.currentView === 'user-chat' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="nav('user-chat')"><span style="flex-shrink:0">${I.chat}</span><span class="sidebar-text" style="font-size:0.875rem">Chat</span></div>
+    <div class="sidebar-item ${state.currentView === 'user-all-chats' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="nav('user-all-chats')"><span style="flex-shrink:0">${I.list}</span><span class="sidebar-text" style="font-size:0.875rem">All Chats</span></div>
     <div class="sidebar-item ${state.currentView === 'user-coder' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer;position:relative" onclick="handleCoderClick();closeSidebar()">
-      <span>${I.code}</span><span style="font-size:0.875rem;flex:1">Coder</span>
-      ${!isPaid ? `<span style="font-size:0.625rem;padding:0.125rem 0.375rem;border-radius:0.25rem;background:rgba(124,58,237,0.2);color:#a78bfa">PRO</span>` : ''}
+      <span style="flex-shrink:0">${I.code}</span><span class="sidebar-text" style="font-size:0.875rem;flex:1">Coder</span>
+      ${!isPaid ? `<span class="sidebar-text" style="font-size:0.625rem;padding:0.125rem 0.375rem;border-radius:0.25rem;background:rgba(124,58,237,0.2);color:#a78bfa">PRO</span>` : ''}
     </div>
   </nav>
   
-  <!-- Projects, Community, Create section -->
   <nav style="padding:0.5rem 0.75rem;border-bottom:1px solid var(--border-color);display:flex;flex-direction:column;gap:0.125rem">
     <p class="sidebar-section-label">Workspace</p>
-    <div class="sidebar-item ${state.currentView === 'user-projects' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="nav('user-projects')"><span>${I.folder}</span><span style="font-size:0.875rem">Projects</span></div>
-    <div class="sidebar-item ${state.currentView === 'user-community' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="nav('user-community')"><span>${I.users2}</span><span style="font-size:0.875rem">Community</span></div>
-    <div class="sidebar-item ${state.currentView === 'user-create' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="nav('user-create')"><span>${I.magic}</span><span style="font-size:0.875rem">Create</span></div>
+    <div class="sidebar-item ${state.currentView === 'user-projects' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="nav('user-projects')"><span style="flex-shrink:0">${I.folder}</span><span class="sidebar-text" style="font-size:0.875rem">Projects</span></div>
+    <div class="sidebar-item ${state.currentView === 'user-community' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="nav('user-community')"><span style="flex-shrink:0">${I.users2}</span><span class="sidebar-text" style="font-size:0.875rem">Community</span></div>
+    <div class="sidebar-item ${state.currentView === 'user-create' ? 'active' : ''}" style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;border-radius:0.5rem;cursor:pointer" onclick="nav('user-create')"><span style="flex-shrink:0">${I.magic}</span><span class="sidebar-text" style="font-size:0.875rem">Create</span></div>
   </nav>
   
-  <!-- Recent Chats (scrollable, grows) -->
   <p class="sidebar-section-label" style="padding-top:0.5rem">Recent Chats</p>
   <div class="recent-chats-scroll" style="flex:1;overflow-y:auto;padding:0 0.75rem;display:flex;flex-direction:column;gap:0.125rem" id="recent-chats-scroll">
     ${recentChats.map(chat => `
@@ -699,20 +933,19 @@ function renderSidebarContent(isAdmin) {
     </div>`).join('')}
   </div>
   
-  <!-- Bottom: User avatar (clickable) - popover appears ABOVE this, doesn't cover it -->
   <div style="border-top:1px solid var(--border-color);padding:0.75rem;flex-shrink:0;position:relative">
-    <div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem;border-radius:0.5rem;cursor:pointer;background:${state.userMenuOpen ? 'var(--bg-active)' : 'transparent'};transition:background 0.15s" onclick="toggleUserMenu()">
+    <div class="user-section-trigger" style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem;border-radius:0.5rem;cursor:pointer;background:${state.userMenuOpen ? 'var(--bg-active)' : 'transparent'};transition:background 0.15s" onclick="toggleUserMenu()">
       <div style="width:2rem;height:2rem;border-radius:9999px;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;color:white;font-size:0.75rem;font-weight:600;flex-shrink:0">${state.userAvatar || state.userName.charAt(0).toUpperCase()}</div>
-      <div style="flex:1;min-width:0">
+      <div class="user-info-text" style="flex:1;min-width:0">
         <p style="font-size:0.875rem;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-primary);margin:0">${state.userName || 'Guest'}</p>
         <span class="plan-badge plan-${state.currentPlan}">${state.currentPlan}</span>
       </div>
-      <span style="color:var(--text-secondary);transform:${state.userMenuOpen ? 'rotate(180deg)' : ''};transition:transform 0.2s">${I.chevronDown}</span>
+      <span class="user-popover-trigger-text" style="color:var(--text-secondary);transform:${state.userMenuOpen ? 'rotate(180deg)' : ''};transition:transform 0.2s">${I.chevronDown}</span>
     </div>
     ${state.userMenuOpen ? renderUserPopoverSidebar() : ''}
-    <div style="display:flex;gap:0.5rem;margin-top:0.5rem">
-      <button onclick="toggleTheme()" class="btn-secondary" style="flex:1;padding:0.5rem;border-radius:0.5rem;font-size:0.75rem;display:flex;align-items:center;justify-content:center;gap:0.25rem">${state.theme === 'dark' ? I.sun : I.moon}<span> ${state.theme === 'dark' ? 'Light' : 'Dark'}</span></button>
-      <button onclick="signOut()" class="btn-secondary" style="flex:1;padding:0.5rem;border-radius:0.5rem;font-size:0.75rem;display:flex;align-items:center;justify-content:center;gap:0.25rem">${I.logout}<span> Out</span></button>
+    <div class="theme-logout-btns" style="display:flex;gap:0.5rem;margin-top:0.5rem">
+      <button onclick="toggleTheme()" class="btn-secondary" style="flex:1;padding:0.5rem;border-radius:0.5rem;font-size:0.75rem;display:flex;align-items:center;justify-content:center;gap:0.25rem">${state.theme === 'dark' ? I.sun : I.moon}<span class="theme-logout-text"> ${state.theme === 'dark' ? 'Light' : 'Dark'}</span></button>
+      <button onclick="signOut()" class="btn-secondary" style="flex:1;padding:0.5rem;border-radius:0.5rem;font-size:0.75rem;display:flex;align-items:center;justify-content:center;gap:0.25rem">${I.logout}<span class="theme-logout-text"> Out</span></button>
     </div>
   </div>`;
 }
@@ -734,9 +967,10 @@ function renderUserPopoverSidebar() {
 
 function renderSidebar(isAdmin) {
   const isMobile = window.innerWidth < 768;
+  const isDesktopCollapsed = !isMobile && state.sidebarCollapsed;
   const sidebarClass = isMobile 
     ? (state.sidebarOpen ? 'app-sidebar mobile-visible slide-in-left' : 'app-sidebar mobile-hidden')
-    : 'app-sidebar';
+    : (isDesktopCollapsed ? 'app-sidebar desktop-collapsed' : 'app-sidebar');
   const backdrop = (isMobile && state.sidebarOpen) ? `<div class="sidebar-backdrop" onclick="closeSidebar()"></div>` : '';
   return `${backdrop}<aside class="${sidebarClass}">${renderSidebarContent(isAdmin)}</aside>`;
 }
@@ -1007,17 +1241,14 @@ function renderUsageSettings() { const limits = { free: { messages: 50, humanReq
 
 function renderUsageBar(label, used, total, isLimited) { const pct = isLimited ? Math.min((used / total) * 100, 100) : 0; return `<div><div style="display:flex;justify-content:space-between;margin-bottom:0.375rem"><span style="font-size:0.875rem;color:var(--text-primary)">${label}</span><span style="font-size:0.75rem;color:var(--text-secondary)">${isLimited ? `${used}/${total}` : 'Unlimited'}</span></div>${isLimited ? `<div style="height:0.5rem;background:var(--border-color);border-radius:9999px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${pct > 80 ? '#ff006e' : 'linear-gradient(90deg,#7c3aed,#00d4ff)'};border-radius:9999px"></div></div>` : `<div style="height:0.5rem;background:rgba(0,255,136,0.2);border-radius:9999px"></div>`}</div>`; }
 
-// PROJECTS PAGE - FULLY FUNCTIONAL
 function renderProjects() {
   return `<main style="padding-top:4rem;height:100vh;display:flex;overflow:hidden">${renderSidebar(false)}<div class="content-scroll" style="flex:1;min-width:0" id="main-scroll"><div style="padding:1.5rem;max-width:64rem"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem"><div><h2 style="font-size:1.5rem;font-weight:bold;color:var(--text-primary)">Projects</h2><p style="font-size:0.875rem;color:var(--text-secondary)">Organize your chats into projects</p></div><button onclick="createNewProject()" class="btn-primary" style="padding:0.625rem 1rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem">${I.plus} New Project</button></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem">${state.projects.map(p => `<div class="card" style="padding:1.5rem;cursor:pointer" onclick="openProject('${p.id}')"><div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem"><div style="width:2.5rem;height:2.5rem;border-radius:0.5rem;background:${p.color}22;display:flex;align-items:center;justify-content:center;color:${p.color}">${I.folder}</div><div style="flex:1;min-width:0"><h3 style="font-weight:600;color:var(--text-primary);margin:0;font-size:1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</h3><p style="font-size:0.75rem;color:var(--text-secondary);margin:0">${p.chats} chats</p></div></div><p style="font-size:0.75rem;color:var(--text-subtle);margin:0">Last active: ${p.lastActive}</p></div>`).join('')}</div>${state.projects.length === 0 ? `<div class="card" style="padding:3rem;text-align:center;margin-top:1rem;border-style:dashed"><div style="width:3rem;height:3rem;border-radius:0.75rem;background:rgba(124,58,237,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;color:#a78bfa">${I.folder}</div><h3 style="font-weight:600;color:var(--text-primary);margin-bottom:0.5rem">No Projects Yet</h3><p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem">Create your first project to organize your chats</p><button onclick="createNewProject()" class="btn-primary" style="padding:0.625rem 1.25rem;border-radius:0.5rem;font-size:0.875rem">Create Project</button></div>` : ''}</div></div></main>`;
 }
 
-// COMMUNITY PAGE - FULLY FUNCTIONAL
 function renderCommunity() {
   return `<main style="padding-top:4rem;height:100vh;display:flex;overflow:hidden">${renderSidebar(false)}<div class="content-scroll" style="flex:1;min-width:0" id="main-scroll"><div style="padding:1.5rem;max-width:56rem"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem"><div><h2 style="font-size:1.5rem;font-weight:bold;color:var(--text-primary)">Community</h2><p style="font-size:0.875rem;color:var(--text-secondary)">Connect with other Laud users</p></div><button onclick="createNewPost()" class="btn-primary" style="padding:0.625rem 1rem;border-radius:0.5rem;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem">${I.plus} New Post</button></div><div style="display:flex;flex-direction:column;gap:1rem">${state.communityPosts.map(p => `<div class="card" style="padding:1.5rem"><div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem"><div style="width:2.5rem;height:2.5rem;border-radius:9999px;background:linear-gradient(135deg,#7c3aed,#00d4ff);display:flex;align-items:center;justify-content:center;color:white;font-weight:600">${p.avatar}</div><div><p style="font-weight:600;color:var(--text-primary);margin:0;font-size:0.9375rem">${p.author}</p><p style="font-size:0.75rem;color:var(--text-subtle);margin:0">${p.time}</p></div></div><h3 style="font-weight:600;color:var(--text-primary);margin:0 0 0.5rem 0;font-size:1.0625rem">${p.title}</h3><p style="font-size:0.875rem;color:var(--text-secondary);margin:0 0 1rem 0;line-height:1.625">${p.content}</p><div style="display:flex;gap:1rem"><button onclick="likePost(${p.id})" style="background:transparent;border:none;color:var(--text-secondary);cursor:pointer;font-size:0.8125rem;display:flex;align-items:center;gap:0.25rem">❤️ ${p.likes}</button><button onclick="replyPost(${p.id})" style="background:transparent;border:none;color:var(--text-secondary);cursor:pointer;font-size:0.8125rem;display:flex;align-items:center;gap:0.25rem">💬 ${p.replies}</button></div></div>`).join('')}</div></div></div></main>`;
 }
 
-// CREATE PAGE - FULLY FUNCTIONAL
 function renderCreate() {
   const templates = [
     { name: 'Blog Post', desc: 'Generate a blog post on any topic', icon: I.book, color: '#7c3aed' },
@@ -1155,6 +1386,7 @@ function signInWithGoogle() {
   state.memberSince = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   state.currentPlan = 'free'; closeModal(); state.currentView = 'user-chat';
   render();
+  showToast('Signed in successfully with Google!', 'success', 'Welcome back');
 }
 
 function signInWithEmail() {
@@ -1164,12 +1396,13 @@ function signInWithEmail() {
   const email = emailInput ? emailInput.value.trim() : '';
   const name = nameInput ? nameInput.value.trim() : email.split('@')[0];
   const password = passwordInput ? passwordInput.value : '';
-  if (!email || !password) { alert('Please fill in all fields'); return; }
-  if (password.length < 6) { alert('Password must be at least 6 characters'); return; }
+  if (!email || !password) { showToast('Please fill in all fields', 'error', 'Missing information'); return; }
+  if (password.length < 6) { showToast('Password must be at least 6 characters', 'error', 'Invalid password'); return; }
   state.userName = state.authMode === 'signup' ? (name || email.split('@')[0]) : (name || email.split('@')[0]);
   state.userEmail = email; state.userAvatar = state.userName.charAt(0).toUpperCase(); state.userProvider = 'Email';
   state.memberSince = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   closeModal(); state.currentView = 'user-chat'; render();
+  showToast(`Welcome to Laud, ${state.userName}!`, 'success', 'Account created');
 }
 
 function signOut() {
@@ -1178,11 +1411,12 @@ function signOut() {
   state.messagesToday = 0; state.totalChats = 0; state.apiCalls = 0; state.humanRequestsUsed = 0;
   state.userMenuOpen = false;
   render();
+  showToast('You have been signed out', 'info', 'Signed out');
 }
 
-function toggleTheme() { state.theme = state.theme === 'dark' ? 'light' : 'dark'; render(); }
+function toggleTheme() { state.theme = state.theme === 'dark' ? 'light' : 'dark'; render(); showToast(`Switched to ${state.theme} mode`, 'info', 'Theme changed'); }
 function setTheme(t) { state.theme = t; render(); }
-function loginAdmin() { state.currentRole = 'admin'; state.currentView = 'admin-dashboard'; state.adminTab = 'dashboard'; render(); }
+function loginAdmin() { state.currentRole = 'admin'; state.currentView = 'admin-dashboard'; state.adminTab = 'dashboard'; render(); showToast('Admin access granted', 'success', 'Welcome Admin'); }
 function logoutAdmin() { state.currentRole = 'user'; state.currentView = 'landing'; render(); }
 function setAdminTab(tab) { state.adminTab = tab; render(); }
 function setApiTab(tab) { state.apiTab = tab; render(); }
@@ -1190,34 +1424,36 @@ function newChat() { state.humanRequested = false; state.humanJoined = false; mo
 function openChat(id) { navigateTo('user-chat'); }
 function handleCoderClick() { if (state.currentPlan === 'free') { state.showUpgradeModal = 'coder'; render(); } else { navigateTo('user-coder'); } }
 function handleHumanRequest() { if (state.currentPlan === 'free') { state.showUpgradeModal = 'human'; render(); return; } requestHuman(); }
-function requestHuman() { state.humanRequested = true; state.humanRequestsUsed++; mockMessages.push({ id: mockMessages.length + 1, role: 'ai', content: 'Human response requested\n\nI\'ve flagged this conversation for human expert review.', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }); render(); setTimeout(() => { state.humanJoined = true; render(); }, 8000); }
+function requestHuman() { state.humanRequested = true; state.humanRequestsUsed++; mockMessages.push({ id: mockMessages.length + 1, role: 'ai', content: 'Human response requested\n\nI\'ve flagged this conversation for human expert review.', timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }); render(); showToast('Human expert has been requested', 'info', 'Request sent'); setTimeout(() => { state.humanJoined = true; render(); showToast('A human expert has joined your chat', 'success', 'Expert joined'); }, 8000); }
 function sendMessage() { const input = document.getElementById('user-message-input'); if (!input || !input.value.trim()) return; const msg = { id: mockMessages.length + 1, role: 'user', content: input.value.trim(), timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }; mockMessages.push(msg); state.newMessage = ''; state.isTyping = true; state.messagesToday++; render(); setTimeout(() => { state.isTyping = false; mockMessages.push({ id: mockMessages.length + 1, role: 'ai', content: "That's a great question! Here are the key points:\n\n1. Evaluate the current architecture\n2. Identify bottlenecks\n3. Implement incremental improvements", timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }); render(); const el = document.getElementById('chat-messages'); if (el) el.scrollTop = el.scrollHeight; }, 2000); }
-function joinChat(chatId) { state.selectedChat = chatId; state.adminJoinedChats.add(chatId); state.currentView = 'admin-chat'; render(); }
+function joinChat(chatId) { state.selectedChat = chatId; state.adminJoinedChats.add(chatId); state.currentView = 'admin-chat'; render(); showToast('You joined the chat as human expert', 'success', 'Joined chat'); }
 function viewChat(chatId) { state.selectedChat = chatId; state.currentView = 'admin-chat'; render(); }
-function leaveChat(chatId) { state.adminJoinedChats.delete(chatId); if (state.currentView === 'admin-chat' && state.selectedChat === chatId) state.currentView = 'admin-dashboard'; render(); }
+function leaveChat(chatId) { state.adminJoinedChats.delete(chatId); if (state.currentView === 'admin-chat' && state.selectedChat === chatId) state.currentView = 'admin-dashboard'; render(); showToast('You left the chat', 'info', 'Left chat'); }
 function joinAsHuman() { if (state.selectedChat) state.adminJoinedChats.add(state.selectedChat); render(); setTimeout(() => { const input = document.getElementById('admin-message-input'); if (input) input.focus(); }, 100); }
 function sendAdminMessage() { const input = document.getElementById('admin-message-input'); if (!input || !input.value.trim()) return; mockMessages.push({ id: mockMessages.length + 1, role: 'human', content: input.value.trim(), timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }); state.adminMessage = ''; render(); const el = document.getElementById('admin-chat-messages'); if (el) el.scrollTop = el.scrollHeight; }
 function toggleFaq(i) { state.openFaq = state.openFaq === i ? null : i; render(); }
 function setSettingsTab(tab) { state.settingsTab = tab; render(); }
-function setLanguage(lang) { state.language = lang; render(); }
+function setLanguage(lang) { state.language = lang; render(); showToast(`Language set to ${lang}`, 'success', 'Language updated'); }
 function toggleDataControl(key) { state.dataControls[key] = !state.dataControls[key]; render(); }
-function selectPlan(plan) { state.currentPlan = plan; render(); setTimeout(() => alert(`Successfully switched to ${plan} plan!`), 100); }
+function selectPlan(plan) { state.currentPlan = plan; render(); showToast(`Successfully switched to ${plan} plan!`, 'success', 'Plan updated'); }
 function openDeleteModal() { state.showDeleteModal = true; render(); }
-function confirmDelete() { state.deleteRequested = true; closeModal(); }
+function confirmDelete() { state.deleteRequested = true; closeModal(); showToast('Account deletion request submitted. Your account will be removed within 30 days.', 'warning', 'Deletion requested'); }
 function openUserAction(userId, type) { state.showUserActionModal = { userId, type }; render(); }
 function confirmUserAction() {
   const action = state.showUserActionModal; if (!action) return;
   const user = mockUsers.find(u => u.id === action.userId); if (!user) return;
+  let msg = '';
   switch(action.type) {
-    case 'plan': const newPlan = document.getElementById('plan-override-select').value; user.plan = newPlan.charAt(0).toUpperCase() + newPlan.slice(1); break;
-    case 'limit': const limit = parseInt(document.getElementById('limit-input').value); user.customLimits = limit > 0 ? { messagesPerDay: limit } : null; break;
-    case 'ban': user.accountStatus = 'banned'; break;
-    case 'unban': user.accountStatus = 'active'; break;
-    case 'restrict': user.accountStatus = 'restricted'; user.customLimits = { messagesPerDay: 20 }; break;
-    case 'unrestrict': user.accountStatus = 'active'; user.customLimits = null; break;
-    case 'delete': const idx = mockUsers.findIndex(u => u.id === user.id); if (idx > -1) mockUsers.splice(idx, 1); break;
+    case 'plan': const newPlan = document.getElementById('plan-override-select').value; user.plan = newPlan.charAt(0).toUpperCase() + newPlan.slice(1); msg = `Plan changed to ${user.plan}`; break;
+    case 'limit': const limit = parseInt(document.getElementById('limit-input').value); user.customLimits = limit > 0 ? { messagesPerDay: limit } : null; msg = limit > 0 ? `Limit set to ${limit} msgs/day` : 'Custom limit removed'; break;
+    case 'ban': user.accountStatus = 'banned'; msg = `${user.name} has been banned`; break;
+    case 'unban': user.accountStatus = 'active'; msg = `${user.name} has been unbanned`; break;
+    case 'restrict': user.accountStatus = 'restricted'; user.customLimits = { messagesPerDay: 20 }; msg = `${user.name} has been restricted`; break;
+    case 'unrestrict': user.accountStatus = 'active'; user.customLimits = null; msg = `Restrictions removed from ${user.name}`; break;
+    case 'delete': const idx = mockUsers.findIndex(u => u.id === user.id); if (idx > -1) mockUsers.splice(idx, 1); msg = `${user.name}'s account deleted`; break;
   }
   closeModal();
+  if (msg) showToast(msg, action.type === 'ban' || action.type === 'delete' ? 'warning' : 'success', 'User updated');
 }
 
 function openCreateKeyModal() { state.showCreateKeyModal = true; render(); }
@@ -1228,8 +1464,8 @@ function confirmCreateKey() {
   const name = nameInput ? nameInput.value.trim() : '';
   const expiryDays = expiryInput ? parseInt(expiryInput.value) : 30;
   const tokens = tokensInput ? parseInt(tokensInput.value) : 5000;
-  if (!name) { alert('Please enter a key name'); return; }
-  if (tokens > state.totalBalance) { alert('Insufficient balance'); return; }
+  if (!name) { showToast('Please enter a key name', 'error', 'Missing name'); return; }
+  if (tokens > state.totalBalance) { showToast('Insufficient balance', 'error', 'Not enough credits'); return; }
   const now = new Date();
   const expiryDate = expiryDays === 0 ? null : new Date(now.getTime() + expiryDays * 24 * 60 * 60 * 1000);
   const keyId = 'k' + (state.apiKeys.length + 1);
@@ -1242,7 +1478,7 @@ function confirmCreateKey() {
   });
   state.totalBalance -= tokens;
   closeModal();
-  setTimeout(() => alert(`API key created successfully!\n\nKey: ${keyStr}\n\nSave this key — it won't be shown again.`), 100);
+  showToast(`API key "${name}" created successfully!`, 'success', 'Key created');
 }
 
 function openRechargeModal() { state.showRechargeModal = true; render(); }
@@ -1272,44 +1508,49 @@ function updateCustomCreditsDirect(inputEl) {
 
 function processRecharge() {
   const amount = state.selectedCreditPackage || state.customCreditAmount;
-  if (!amount || amount < 100) { alert('Please select at least 100 credits'); return; }
+  if (!amount || amount < 100) { showToast('Please select at least 100 credits', 'error', 'Invalid amount'); return; }
   const price = amount * 0.0015;
   state.totalBalance += amount;
   closeModal();
-  setTimeout(() => alert(`Successfully added ${amount.toLocaleString()} credits!\nNew balance: ${state.totalBalance.toLocaleString()} credits\nCharged: $${price.toFixed(2)}`), 100);
+  showToast(`Successfully added ${amount.toLocaleString()} credits! New balance: ${state.totalBalance.toLocaleString()}`, 'success', 'Recharge complete');
 }
 function processCustomRecharge() {
   const input = document.getElementById('modal-custom-credits');
   const amount = input ? parseInt(input.value) : 0;
-  if (!amount || amount < 100) { alert('Minimum 100 credits'); return; }
+  if (!amount || amount < 100) { showToast('Minimum 100 credits', 'error', 'Invalid amount'); return; }
   state.totalBalance += amount;
   closeModal();
-  setTimeout(() => alert(`Successfully added ${amount.toLocaleString()} credits!`), 100);
+  showToast(`Successfully added ${amount.toLocaleString()} credits!`, 'success', 'Recharge complete');
 }
 
 function openKeyAction(keyId, type) { state.showKeyActionModal = { keyId, type }; render(); }
 function confirmKeyAction() {
   const action = state.showKeyActionModal; if (!action) return;
   const key = state.apiKeys.find(k => k.id === action.keyId); if (!key) return;
+  let msg = '';
   switch(action.type) {
-    case 'pause': key.status = 'paused'; break;
-    case 'resume': key.status = 'active'; break;
-    case 'block': key.status = 'blocked'; break;
-    case 'unblock': key.status = 'active'; break;
-    case 'regenerate': key.key = 'nx_live_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15); key.status = 'active'; break;
-    case 'delete': const idx = state.apiKeys.findIndex(k => k.id === key.id); if (idx > -1) state.apiKeys.splice(idx, 1); break;
+    case 'pause': key.status = 'paused'; msg = `Key "${key.name}" paused`; break;
+    case 'resume': key.status = 'active'; msg = `Key "${key.name}" resumed`; break;
+    case 'block': key.status = 'blocked'; msg = `Key "${key.name}" blocked`; break;
+    case 'unblock': key.status = 'active'; msg = `Key "${key.name}" unblocked`; break;
+    case 'regenerate': key.key = 'nx_live_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15); key.status = 'active'; msg = `Key "${key.name}" regenerated`; break;
+    case 'delete': const idx = state.apiKeys.findIndex(k => k.id === key.id); if (idx > -1) state.apiKeys.splice(idx, 1); msg = `Key "${key.name}" deleted`; break;
   }
   closeModal();
+  showToast(msg, action.type === 'delete' || action.type === 'block' ? 'warning' : 'success', 'Key updated');
 }
 
 function copyKey(keyId) {
   const key = state.apiKeys.find(k => k.id === keyId);
   if (key) {
-    navigator.clipboard.writeText(key.key).then(() => alert('API key copied to clipboard!')).catch(() => alert('Key: ' + key.key));
+    navigator.clipboard.writeText(key.key).then(() => {
+      showToast('API key copied to clipboard!', 'success', 'Copied');
+    }).catch(() => {
+      showToast('Key: ' + key.key, 'info', 'API Key');
+    });
   }
 }
 
-// Notification helpers
 function markNotifRead(id) {
   const n = mockNotifications.find(x => x.id === id);
   if (n) { n.unread = false; state.notifications = mockNotifications.filter(x => x.unread).length; render(); }
@@ -1318,72 +1559,80 @@ function clearNotifications() {
   mockNotifications.forEach(n => n.unread = false);
   state.notifications = 0;
   render();
+  showToast('All notifications marked as read', 'success', 'Notifications cleared');
 }
 
-// Project helpers
 function createNewProject() {
-  const name = prompt('Enter project name:');
-  if (name && name.trim()) {
-    const colors = ['#7c3aed', '#00d4ff', '#ff006e', '#00ff88', '#eab308', '#a78bfa'];
-    state.projects.push({
-      id: 'p' + (state.projects.length + 1),
-      name: name.trim(),
-      chats: 0,
-      lastActive: 'Just now',
-      color: colors[state.projects.length % colors.length]
-    });
-    render();
-  }
+  showPrompt('Create New Project', 'Enter project name', (name) => {
+    if (name && name.trim()) {
+      const colors = ['#7c3aed', '#00d4ff', '#ff006e', '#00ff88', '#eab308', '#a78bfa'];
+      state.projects.push({
+        id: 'p' + (state.projects.length + 1),
+        name: name.trim(),
+        chats: 0,
+        lastActive: 'Just now',
+        color: colors[state.projects.length % colors.length]
+      });
+      render();
+      showToast(`Project "${name.trim()}" created!`, 'success', 'Project created');
+    }
+  });
 }
+
 function openProject(id) {
   const project = state.projects.find(p => p.id === id);
   if (project) {
-    alert(`Opening project: ${project.name}\nChats: ${project.chats}\nLast active: ${project.lastActive}`);
+    showToast(`Opened project: ${project.name} (${project.chats} chats)`, 'info', 'Project opened');
   }
 }
 
-// Community helpers
 function createNewPost() {
-  const title = prompt('Post title:');
-  if (title && title.trim()) {
-    const content = prompt('Post content:');
-    if (content && content.trim()) {
-      state.communityPosts.unshift({
-        id: Date.now(),
-        author: state.userName || 'You',
-        avatar: (state.userName || 'Y').charAt(0).toUpperCase(),
-        title: title.trim(),
-        content: content.trim(),
-        likes: 0,
-        replies: 0,
-        time: 'Just now'
+  showPrompt('Create New Post', 'Enter post title', (title) => {
+    if (title && title.trim()) {
+      showPrompt('Post Content', 'Write your post content', (content) => {
+        if (content && content.trim()) {
+          state.communityPosts.unshift({
+            id: Date.now(),
+            author: state.userName || 'You',
+            avatar: (state.userName || 'Y').charAt(0).toUpperCase(),
+            title: title.trim(),
+            content: content.trim(),
+            likes: 0,
+            replies: 0,
+            time: 'Just now'
+          });
+          render();
+          showToast('Your post has been published!', 'success', 'Post created');
+        }
       });
-      render();
     }
-  }
+  });
 }
+
 function likePost(id) {
   const post = state.communityPosts.find(p => p.id === id);
   if (post) { post.likes++; render(); }
 }
+
 function replyPost(id) {
   const post = state.communityPosts.find(p => p.id === id);
   if (post) {
-    const reply = prompt(`Reply to "${post.title}":`);
-    if (reply && reply.trim()) {
-      post.replies++;
-      alert('Reply posted!');
-      render();
-    }
+    showPrompt('Write a Reply', 'Your reply...', (reply) => {
+      if (reply && reply.trim()) {
+        post.replies++;
+        render();
+        showToast('Reply posted!', 'success', 'Reply added');
+      }
+    });
   }
 }
 
-// Create helpers
 function startTemplate(name) {
-  alert(`Starting ${name} template...\n\nIn production, this would open a new chat with the ${name} AI agent.`);
+  showToast(`Starting ${name} template... Opening new chat with ${name} AI agent.`, 'info', 'Template started');
 }
+
 function startFromScratch() {
-  alert('Starting from scratch...\n\nIn production, this would open a blank custom workflow builder.');
+  showToast('Opening blank custom workflow builder...', 'info', 'Create new');
 }
 
 function attachEventListeners() {
