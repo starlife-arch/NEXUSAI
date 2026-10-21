@@ -45,6 +45,23 @@ service cloud.firestore {
       }
     }
 
+    match /appSettings/{settingId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /users/{userId}/notifications/{notificationId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAdmin() || (isOwner(userId)
+        && request.resource.data.title is string
+        && request.resource.data.desc is string
+        && request.resource.data.unread == true);
+      allow update: if isAdmin() || (isOwner(userId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['unread'])
+        && request.resource.data.unread == false);
+      allow delete: if isAdmin() || isOwner(userId);
+    }
+
     match /creditRequests/{requestId} {
       allow create: if signedIn()
         && request.resource.data.uid == request.auth.uid
