@@ -1172,7 +1172,7 @@ async function rateAssistantMessage(messageId, rating) {
     showToast(rating === 'like' ? 'Thanks for the feedback.' : 'Thanks. We’ll use that feedback to improve.', 'success');
   } catch (error) {
     delete state.messageFeedback[messageId];
-    if (error.code === 'already-rated' || error.code === 'already-exists' || error.code === 6 || /permission-denied/i.test(error.code || '')) showToast('You have already rated this response.', 'info');
+    if (error.code === 'already-rated' || error.code === 'already-exists' || error.code === 6) showToast('You have already rated this response.', 'info');
     else showToast('Could not save your rating. Please try again.', 'error');
     render();
   }
