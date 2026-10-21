@@ -1,0 +1,312 @@
+NEXUSAI — Firebase Authentication + Secure Groq Setup
+=====================================================
+
+IMPORTANT
+---------
+I could read the repository, but GitHub denied write access to the connected integration (403).
+These are ready-to-copy edits. Do not put your Groq API key in index.html or commit it to GitHub.
+
+A. Add the two files from this ZIP to the repository
+----------------------------------------------------
+1. Create folder: netlify/functions
+2. Upload chat.mjs into that folder.
+3. Upload netlify.toml to the repository root, beside index.html.
+4. Commit the files to the branch Netlify deploys.
+
+The function verifies Firebase ID-token signatures before calling Groq. It only accepts
+requests from https://drovix.netlify.app and limits the number/size of messages per call.
+
+B. Add Firebase SDK setup in index.html
+---------------------------------------
+In GitHub, open index.html and click the pencil (Edit). Find the line:
+
+  <script>
+
+It should be the main application script just after:
+  <div id="toast-container" class="toast-container"></div>
+
+Insert this block immediately BEFORE that main <script>:
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDF_Xi2jcX9XLmN4kql1oIzw2YJMoSahHA",
+    authDomain: "drovix.firebaseapp.com",
+    projectId: "drovix",
+    storageBucket: "drovix.firebasestorage.app",
+    messagingSenderId: "1023330945540",
+    appId: "1:1023330945540:web:29da5f29d6c78dd11a0351",
+    measurementId: "G-DV3GX5GVF6"
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  window.firebaseAuth = firebase.auth();
+</script>
+
+C. Replace the existing signInWithGoogle() and signInWithEmail() functions
+----------------------------------------------------------------------------
+Press Ctrl+F in GitHub editor and find:
+  function signInWithGoogle() {
+
+Select from that line through the closing brace of function signInWithEmail(), stopping BEFORE:
+  function signOut() {
+
+Replace those two functions with:
+
+async function signInWithGoogle() {
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await window.firebaseAuth.signInWithPopup(provider);
+    closeModal();
+    state.currentView = 'user-chat';
+    render();
+    showToast('Signed in successfully with Google!', 'success', 'Welcome back');
+  } catch (error) {
+    console.error('Google sign-in failed:', error);
+    showToast(error.message || 'Google sign-in failed. Please try again.', 'error', 'Sign-in failed');
+  }
+}
+
+async function signInWithEmail() {
+  const nameInput = document.getElementById('auth-name');
+  const emailInput = document.getElementById('auth-email');
+  const passwordInput = document.getElementById('auth-password');
+  const email = emailInput ? emailInput.value.trim() : '';
+  const name = nameInput ? nameInput.value.trim() : '';
+  const password = passwordInput ? passwordInput.value : '';
+
+  if (!email || !password) {
+    showToast('Please enter your email and password.', 'error', 'Missing information');
+    return;
+  }
+  if (password.length < 6) {
+    showToast('Password must be at least 6 characters.', 'error', 'Invalid password');
+    return;
+  }
+
+  try {
+    if (state.authMode === 'signup') {
+      if (!name) {
+        showToast('Please enter your name.', 'error', 'Missing name');
+        return;
+      }
+      const credential = await window.firebaseAuth.createUserWithEmailAndPassword(email, password);
+      await credential.user.updateProfile({ displayName: name });
+    } else {
+      await window.firebaseAuth.signInWithEmailAndPassword(email, password);
+    }
+    closeModal();
+    state.currentView = 'user-chat';
+    render();
+    showToast(state.authMode === 'signup' ? 'Account created successfully.' : 'Welcome back!', 'success');
+  } catch (error) {
+    console.error('Email authentication failed:', error);
+    const messages = {
+      'auth/email-already-in-use': 'An account already exists for this email.',
+      'auth/invalid-email': 'Please check the email address.',
+      'auth/invalid-credential': 'Email or password is incorrect.',
+      'auth/weak-password': 'Choose a stronger password (at least 6 characters).',
+      'auth/popup-closed-by-user': 'The Google sign-in window was closed.'
+    };
+    showToast(messages[error.code] || error.message || 'Authentication failed.', 'error', 'Sign-in failed');
+  }
+}
+
+D. Replace signOut()
+-------------------
+Find function signOut() and replace that entire function with:
+
+async function signOut() {
+  try {
+    await window.firebaseAuth.signOut();
+    state.currentRole = 'user';
+    state.userName = '';
+    state.userEmail = '';
+    state.userAvatar = '';
+    state.userProvider = '';
+    state.currentPlan = 'free';
+    state.currentView = 'landing';
+    state.userMenuOpen = false;
+    render();
+    showToast('You have been signed out.', 'info');
+  } catch (error) {
+    console.error('Sign-out failed:', error);
+    showToast('Could not sign out. Please try again.', 'error');
+  }
+}
+
+E. Replace sendMessage()
+------------------------
+Find the one-line function beginning:
+  function sendMessage() {
+
+Replace only that entire function (stop before function joinChat) with:
+
+async function sendMessage() {
+  const input = document.getElementById('user-message-input');
+  if (!input || !input.value.trim()) return;
+
+  const user = window.firebaseAuth.currentUser;
+  if (!user) {
+    showToast('Please sign in before chatting with AI.', 'warning');
+    openAuthModal('signin');
+    return;
+  }
+
+  const content = input.value.trim();
+  mockMessages.push({
+    id: mockMessages.length + 1,
+    role: 'user',
+    content,
+    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  });
+  state.newMessage = '';
+  state.isTyping = true;
+  state.messagesToday++;
+  render();
+
+  try {
+    const token = await user.getIdToken();
+    const response = await fetch('/.netlify/functions/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({
+        messages: mockMessages.slice(-20).map((message) => ({
+          role: message.role === 'ai' ? 'assistant' : message.role,
+          content: message.content
+        }))
+      })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || 'The AI request failed.');
+
+    mockMessages.push({
+      id: mockMessages.length + 1,
+      role: 'ai',
+      content: data.reply,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    });
+    state.apiCalls++;
+  } catch (error) {
+    mockMessages.push({
+      id: mockMessages.length + 1,
+      role: 'ai',
+      content: 'Sorry, I could not get an AI response. ' + (error.message || 'Please try again.'),
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    });
+  } finally {
+    state.isTyping = false;
+    render();
+    const el = document.getElementById('chat-messages');
+    if (el) el.scrollTop = el.scrollHeight;
+  }
+}
+
+F. Add a Firebase auth-state listener at the bottom
+---------------------------------------------------
+At the very bottom of index.html, find the final:
+  render();
+</script>
+</body>
+</html>
+
+Keep the existing render(); line. Immediately AFTER it and BEFORE </script>, insert:
+
+window.firebaseAuth.onAuthStateChanged((user) => {
+  if (user) {
+    state.userName = user.displayName || user.email?.split('@')[0] || 'User';
+    state.userEmail = user.email || '';
+    state.userAvatar = state.userName.charAt(0).toUpperCase();
+    state.userProvider = user.providerData?.[0]?.providerId === 'google.com' ? 'Google' : 'Email';
+    state.memberSince = state.memberSince || new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    if (state.currentView === 'landing') state.currentView = 'user-chat';
+  } else {
+    state.userName = '';
+    state.userEmail = '';
+    state.userAvatar = '';
+    state.userProvider = '';
+    state.currentRole = 'user';
+    if (state.currentView !== 'admin-login') state.currentView = 'landing';
+  }
+  render();
+});
+
+G. Lock the fake admin login
+----------------------------
+The current app's admin login is not secure: it contains hard-coded demo credentials and grants admin access without checking a password.
+Do NOT leave it as-is for a public site.
+
+At minimum, replace the current function:
+  function loginAdmin() { state.currentRole = 'admin'; ... }
+
+with:
+
+async function loginAdmin() {
+  const email = document.getElementById('admin-email')?.value.trim();
+  const password = document.getElementById('admin-password')?.value;
+  if (!email || !password) {
+    showToast('Enter your admin email and password.', 'error');
+    return;
+  }
+  try {
+    const credential = await window.firebaseAuth.signInWithEmailAndPassword(email, password);
+    const token = await credential.user.getIdTokenResult(true);
+    if (token.claims.admin !== true) {
+      state.currentRole = 'user';
+      state.currentView = 'landing';
+      render();
+      showToast('This account does not have administrator access.', 'error', 'Access denied');
+      return;
+    }
+    state.currentRole = 'admin';
+    state.currentView = 'admin-dashboard';
+    state.adminTab = 'dashboard';
+    render();
+    showToast('Admin access verified.', 'success');
+  } catch (error) {
+    showToast('Admin sign-in failed. Check your credentials.', 'error');
+  }
+}
+
+Also, inside function renderAdminLogin(), remove the pre-filled value attributes:
+  value="admin@laud.com"
+  value="admin123"
+
+and add id="admin-email" to the email input and id="admin-password" to the password input.
+This will deny admin access unless a trusted administrator has set the Firebase custom claim `admin: true` using a secure server-side Firebase Admin SDK process. Do not set admin claims from browser code.
+
+H. Configure Netlify secret
+---------------------------
+In Netlify dashboard for https://drovix.netlify.app:
+Project configuration → Environment variables → Add a variable
+Key: GROQ_API_KEY
+Value: your Groq API key (paste it in Netlify only; never in GitHub or this chat)
+Scope: Functions, if Netlify offers scope selection.
+Optionally add GROQ_MODEL = openai/gpt-oss-20b.
+Save, then trigger a fresh deploy. Netlify only applies environment-variable changes to a new deploy.
+
+I. Enable Firebase providers
+----------------------------
+Firebase Console → project `drovix` → Authentication → Get started.
+Sign-in method: enable Email/Password and Google.
+Authentication → Settings → Authorized domains: add `drovix.netlify.app`.
+Do not disable Firebase App Check/security protections if you already use them.
+
+J. Deploy and test
+------------------
+1. Commit the edits to the branch Netlify deploys.
+2. In Netlify, wait for the deploy to finish.
+3. Open https://drovix.netlify.app in a private/incognito window.
+4. Create a test account with email/password, sign out, then sign in again.
+5. Test Google sign-in.
+6. Sign in and send a chat message. If AI fails, open Netlify → Functions → chat → logs.
+7. Confirm GROQ_API_KEY is set in Netlify and redeploy if you added it after the last deploy.
+
+Notes:
+- Firebase's web config is intended to be used by browser apps; it is not a service-account credential. Keep Google Cloud API restrictions appropriate for your site.
+- The Groq secret is never sent to the browser; the Netlify function uses it on the server.
+- The current app still keeps chat messages in browser memory. Firestore has been created but chat/profile persistence and Firestore security rules are a separate follow-up task.
+- Admin login will be denied until you configure a custom admin claim through a trusted server-side process.
