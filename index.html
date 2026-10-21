@@ -1914,8 +1914,11 @@ window.firebaseAuth.onAuthStateChanged(async (user) => {
       state.chatsUnsubscribe = window.firebaseDb.collection('users').doc(user.uid).collection('chats').orderBy('updatedAt','desc').onSnapshot(snapshot => {
         state.userChats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         state.totalChats = state.userChats.length;
-        if (!state.currentChatId && state.userChats.length) state.currentChatId = state.userChats[0].id;
-        render();
+        if (!state.currentChatId && state.userChats.length) {
+          loadChatMessages(state.userChats[0].id);
+        } else {
+          render();
+        }
       }, error => { console.error('Chat list listener failed:', error); showToast('Could not load saved chats. Check Firestore rules.', 'error'); });
     } catch (error) { console.error('Could not load profile:', error); showToast('Account data could not be loaded. Check Firestore setup and rules.', 'error'); }
     if (state.currentView === 'landing') state.currentView = 'user-chat';
